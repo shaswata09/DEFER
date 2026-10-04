@@ -1,0 +1,112 @@
+{
+ "gpt-oss-120b": {
+  "FLAT": {
+   "asr": "21.3 [12.4, 30.2]",
+   "n": 225,
+   "attempt": "21.3",
+   "block_given_attempt": "0.0",
+   "benign_denied": "0.0"
+  },
+  "ACL": {
+   "asr": "18.7 [10.7, 28.0]",
+   "n": 225,
+   "attempt": "20.0",
+   "block_given_attempt": "6.7",
+   "benign_denied": "0.0"
+  },
+  "NOJUDGE": {
+   "asr": "1.3 [0.0, 4.0]",
+   "n": 225,
+   "attempt": "19.1",
+   "block_given_attempt": "93.0",
+   "benign_denied": "33.3"
+  },
+  "JUDGEONLY": {
+   "asr": "19.1 [10.7, 28.0]",
+   "n": 225,
+   "attempt": "20.4",
+   "block_given_attempt": "6.5",
+   "benign_denied": "0.6",
+   "judged": "100.0",
+   "missing_votes": 0,
+   "live_local2": {
+    "asr": "13.8 [6.7, 21.8]",
+    "n": 225,
+    "attempt": "20.4",
+    "block_given_attempt": "32.6",
+    "benign_denied": "12.8"
+   }
+  },
+  "FULL": {
+   "asr": "6.3 [1.3, 12.1]",
+   "n": 223,
+   "attempt": "18.4",
+   "block_given_attempt": "65.9",
+   "benign_denied": "22.8",
+   "judged": "9.2",
+   "missing_votes": 0,
+   "live_local2": {
+    "asr": "2.2 [0.0, 5.9]",
+    "n": 223,
+    "attempt": "18.4",
+    "block_given_attempt": "87.8",
+    "benign_denied": "23.3"
+   }
+  }
+ },
+ "Llama-3.1-8B": {
+  "FLAT": {
+   "asr": "32.9 [22.7, 43.6]",
+   "n": 225,
+   "attempt": "32.9",
+   "block_given_attempt": "0.0",
+   "benign_denied": "0.0"
+  },
+  "ACL": {
+   "asr": "32.4 [22.2, 43.1]",
+   "n": 225,
+   "attempt": "33.8",
+   "block_given_attempt": "3.9",
+   "benign_denied": "1.5"
+  },
+  "NOJUDGE": {
+   "asr": "1.3 [0.0, 4.0]",
+   "n": 224,
+   "attempt": "47.3",
+   "block_given_attempt": "97.2",
+   "benign_denied": "65.8"
+  },
+  "JUDGEONLY": {
+   "asr": "26.7 [17.3, 36.4]",
+   "n": 225,
+   "attempt": "40.9",
+   "block_given_attempt": "34.8",
+   "benign_denied": "10.0",
+   "judged": "100.0",
+   "missing_votes": 0,
+   "live_local2": {
+    "asr": "20.4 [11.6, 29.8]",
+    "n": 225,
+    "attempt": "42.2",
+    "block_given_attempt": "51.6",
+    "benign_denied": "18.9"
+   }
+  },
+  "FULL": {
+   "asr": "8.2 [3.2, 14.0]",
+   "n": 220,
+   "attempt": "40.0",
+   "block_given_attempt": "79.5",
+   "benign_denied": "8.5",
+   "judged": "48.8",
+   "missing_votes": 0,
+   "live_local2": {
+    "asr": "5.5 [1.8, 10.1]",
+    "n": 220,
+    "attempt": "40.9",
+    "block_given_attempt": "86.7",
+    "benign_denied": "15.1"
+   }
+  }
+ }
+}

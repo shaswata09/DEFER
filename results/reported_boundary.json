@@ -1,0 +1,460 @@
+{
+ "freeze": {
+  "cyberops": "defense-freeze-v3.2",
+  "healthcare": "defense-freeze-v3.1",
+  "finance": "defense-freeze-v3.1",
+  "legal": "defense-freeze-v3.1"
+ },
+ "domains": {
+  "cyberops": {
+   "FLAT": {
+    "asr": "35.6 [25.3, 45.8]",
+    "n": 225,
+    "attempt": 35.6,
+    "block_given_attempt": 0.0,
+    "benign_denied": 0.0
+   },
+   "ACL": {
+    "asr": "27.1 [17.3, 36.9]",
+    "n": 225,
+    "attempt": 30.2,
+    "block_given_attempt": 10.3,
+    "benign_denied": 48.2
+   },
+   "NOJUDGE": {
+    "asr": "1.3 [0.0, 4.0]",
+    "n": 225,
+    "attempt": 47.1,
+    "block_given_attempt": 97.2,
+    "benign_denied": 53.9
+   },
+   "JUDGEONLY": {
+    "asr": "28.9 [19.6, 38.2]",
+    "n": 225,
+    "attempt": 35.1,
+    "block_given_attempt": 17.7,
+    "benign_denied": 6.5,
+    "missing_votes": 0,
+    "live_local2": {
+     "asr": "25.8 [16.9, 35.1]",
+     "n": 225,
+     "attempt": 38.7,
+     "block_given_attempt": 33.3,
+     "benign_denied": 11.4
+    },
+    "judged": {
+     "attack": {
+      "judged_pct": 100.0,
+      "allowed_no_p3_pct": 0.0,
+      "rule_denied_pct": 0.0,
+      "proposals": 3879
+     },
+     "benign": {
+      "judged_pct": 100.0,
+      "allowed_no_p3_pct": 0.0,
+      "rule_denied_pct": 0.0,
+      "proposals": 1120
+     }
+    }
+   },
+   "FULL": {
+    "asr": "12.2 [5.4, 19.8]",
+    "n": 222,
+    "attempt": 38.3,
+    "block_given_attempt": 68.2,
+    "benign_denied": 7.8,
+    "missing_votes": 0,
+    "live_local2": {
+     "asr": "7.2 [2.3, 13.5]",
+     "n": 222,
+     "attempt": 40.5,
+     "block_given_attempt": 82.2,
+     "benign_denied": 9.9
+    },
+    "judged": {
+     "attack": {
+      "judged_pct": 34.4,
+      "allowed_no_p3_pct": 45.3,
+      "rule_denied_pct": 20.3,
+      "proposals": 2845
+     },
+     "benign": {
+      "judged_pct": 47.8,
+      "allowed_no_p3_pct": 46.9,
+      "rule_denied_pct": 5.3,
+      "proposals": 847
+     }
+    }
+   },
+   "JUDGEREST": {
+    "asr": "12.2 [5.4, 19.8]",
+    "n": 222,
+    "attempt": 38.3,
+    "block_given_attempt": 68.2,
+    "benign_denied": 9.4
+   },
+   "previous_v31": {
+    "FLAT": "31.1 [21.8, 40.9]",
+    "ACL": "24.0 [14.7, 33.3]",
+    "JUDGEONLY": "34.7 [24.4, 44.9]",
+    "NOJUDGE": "1.3 [0.0, 4.0]",
+    "FULL": "2.2 [0.0, 5.3]"
+   }
+  },
+  "healthcare": {
+   "FLAT": {
+    "asr": "23.6 [14.7, 33.3]",
+    "n": 225,
+    "attempt": 23.6,
+    "block_given_attempt": 0.0,
+    "benign_denied": 0.0
+   },
+   "ACL": {
+    "asr": "18.7 [10.7, 28.0]",
+    "n": 225,
+    "attempt": 22.2,
+    "block_given_attempt": 16.0,
+    "benign_denied": 47.1
+   },
+   "NOJUDGE": {
+    "asr": "0.0 [0.0, 0.0]",
+    "n": 225,
+    "attempt": 31.1,
+    "block_given_attempt": 100.0,
+    "benign_denied": 59.3
+   },
+   "JUDGEONLY": {
+    "asr": "9.8 [4.0, 16.9]",
+    "n": 225,
+    "attempt": 22.2,
+    "block_given_attempt": 56.0,
+    "benign_denied": 15.8,
+    "missing_votes": 0,
+    "live_local2": {
+     "asr": "9.3 [2.7, 16.0]",
+     "n": 225,
+     "attempt": 22.7,
+     "block_given_attempt": 58.8,
+     "benign_denied": 17.4
+    },
+    "judged": {
+     "attack": {
+      "judged_pct": 100.0,
+      "allowed_no_p3_pct": 0.0,
+      "rule_denied_pct": 0.0,
+      "proposals": 2251
+     },
+     "benign": {
+      "judged_pct": 100.0,
+      "allowed_no_p3_pct": 0.0,
+      "rule_denied_pct": 0.0,
+      "proposals": 247
+     }
+    }
+   },
+   "FULL": {
+    "asr": "1.3 [0.0, 4.0]",
+    "n": 225,
+    "attempt": 32.0,
+    "block_given_attempt": 95.8,
+    "benign_denied": 18.5,
+    "missing_votes": 0,
+    "live_local2": {
+     "asr": "0.9 [0.0, 2.7]",
+     "n": 225,
+     "attempt": 32.4,
+     "block_given_attempt": 97.3,
+     "benign_denied": 30.2
+    },
+    "judged": {
+     "attack": {
+      "judged_pct": 56.5,
+      "allowed_no_p3_pct": 31.7,
+      "rule_denied_pct": 11.8,
+      "proposals": 1605
+     },
+     "benign": {
+      "judged_pct": 56.1,
+      "allowed_no_p3_pct": 41.5,
+      "rule_denied_pct": 2.4,
+      "proposals": 205
+     }
+    }
+   },
+   "JUDGEREST": {
+    "asr": "1.3 [0.0, 4.0]",
+    "n": 225,
+    "attempt": 32.0,
+    "block_given_attempt": 95.8,
+    "benign_denied": 19.5
+   },
+   "previous_v31": {
+    "FLAT": "23.1 [14.2, 32.4]",
+    "ACL": "19.1 [10.7, 28.0]",
+    "JUDGEONLY": "10.7 [4.0, 18.7]",
+    "NOJUDGE": "0.0 [0.0, 0.0]",
+    "FULL": "1.3 [0.0, 4.0]"
+   }
+  },
+  "finance": {
+   "FLAT": {
+    "asr": "40.9 [30.2, 51.6]",
+    "n": 225,
+    "attempt": 40.9,
+    "block_given_attempt": 0.0,
+    "benign_denied": 0.0
+   },
+   "ACL": {
+    "asr": "30.2 [20.0, 40.4]",
+    "n": 225,
+    "attempt": 35.6,
+    "block_given_attempt": 15.0,
+    "benign_denied": 22.0
+   },
+   "NOJUDGE": {
+    "asr": "1.3 [0.0, 3.6]",
+    "n": 224,
+    "attempt": 56.7,
+    "block_given_attempt": 97.6,
+    "benign_denied": 43.0
+   },
+   "JUDGEONLY": {
+    "asr": "21.8 [13.3, 30.7]",
+    "n": 225,
+    "attempt": 38.2,
+    "block_given_attempt": 43.0,
+    "benign_denied": 7.6,
+    "missing_votes": 0,
+    "live_local2": {
+     "asr": "19.6 [11.6, 28.0]",
+     "n": 225,
+     "attempt": 40.4,
+     "block_given_attempt": 51.6,
+     "benign_denied": 16.5
+    },
+    "judged": {
+     "attack": {
+      "judged_pct": 100.0,
+      "allowed_no_p3_pct": 0.0,
+      "rule_denied_pct": 0.0,
+      "proposals": 2544
+     },
+     "benign": {
+      "judged_pct": 100.0,
+      "allowed_no_p3_pct": 0.0,
+      "rule_denied_pct": 0.0,
+      "proposals": 237
+     }
+    }
+   },
+   "FULL": {
+    "asr": "7.1 [1.8, 13.3]",
+    "n": 225,
+    "attempt": 52.0,
+    "block_given_attempt": 86.3,
+    "benign_denied": 21.3,
+    "missing_votes": 0,
+    "live_local2": {
+     "asr": "6.7 [1.3, 13.3]",
+     "n": 225,
+     "attempt": 55.1,
+     "block_given_attempt": 87.9,
+     "benign_denied": 21.3
+    },
+    "judged": {
+     "attack": {
+      "judged_pct": 28.8,
+      "allowed_no_p3_pct": 46.1,
+      "rule_denied_pct": 25.1,
+      "proposals": 1967
+     },
+     "benign": {
+      "judged_pct": 36.1,
+      "allowed_no_p3_pct": 55.0,
+      "rule_denied_pct": 8.9,
+      "proposals": 169
+     }
+    }
+   },
+   "JUDGEREST": {
+    "asr": "7.1 [1.8, 13.3]",
+    "n": 225,
+    "attempt": 52.0,
+    "block_given_attempt": 86.3,
+    "benign_denied": 23.7
+   },
+   "previous_v31": {
+    "FLAT": "41.3 [30.7, 51.6]",
+    "ACL": "31.6 [21.3, 41.8]",
+    "JUDGEONLY": "24.9 [16.0, 34.2]",
+    "NOJUDGE": "1.3 [0.0, 3.6]",
+    "FULL": "7.1 [1.8, 13.3]"
+   }
+  },
+  "legal": {
+   "FLAT": {
+    "asr": "38.2 [28.0, 48.4]",
+    "n": 225,
+    "attempt": 38.2,
+    "block_given_attempt": 0.0,
+    "benign_denied": 0.0
+   },
+   "ACL": {
+    "asr": "37.3 [27.1, 48.0]",
+    "n": 225,
+    "attempt": 38.7,
+    "block_given_attempt": 3.4,
+    "benign_denied": 11.5
+   },
+   "NOJUDGE": {
+    "asr": "1.8 [0.0, 4.9]",
+    "n": 225,
+    "attempt": 61.3,
+    "block_given_attempt": 97.1,
+    "benign_denied": 41.1
+   },
+   "JUDGEONLY": {
+    "asr": "18.7 [10.7, 27.6]",
+    "n": 225,
+    "attempt": 47.6,
+    "block_given_attempt": 60.7,
+    "benign_denied": 18.2,
+    "missing_votes": 0,
+    "live_local2": {
+     "asr": "16.9 [8.9, 25.3]",
+     "n": 225,
+     "attempt": 50.7,
+     "block_given_attempt": 66.7,
+     "benign_denied": 19.8
+    },
+    "judged": {
+     "attack": {
+      "judged_pct": 100.0,
+      "allowed_no_p3_pct": 0.0,
+      "rule_denied_pct": 0.0,
+      "proposals": 2199
+     },
+     "benign": {
+      "judged_pct": 100.0,
+      "allowed_no_p3_pct": 0.0,
+      "rule_denied_pct": 0.0,
+      "proposals": 192
+     }
+    }
+   },
+   "FULL": {
+    "asr": "4.0 [0.9, 8.4]",
+    "n": 225,
+    "attempt": 58.7,
+    "block_given_attempt": 93.2,
+    "benign_denied": 28.0,
+    "missing_votes": 0,
+    "live_local2": {
+     "asr": "3.1 [0.0, 7.6]",
+     "n": 225,
+     "attempt": 60.9,
+     "block_given_attempt": 94.9,
+     "benign_denied": 28.5
+    },
+    "judged": {
+     "attack": {
+      "judged_pct": 45.8,
+      "allowed_no_p3_pct": 47.1,
+      "rule_denied_pct": 7.1,
+      "proposals": 1750
+     },
+     "benign": {
+      "judged_pct": 36.6,
+      "allowed_no_p3_pct": 58.6,
+      "rule_denied_pct": 4.8,
+      "proposals": 186
+     }
+    }
+   },
+   "JUDGEREST": {
+    "asr": "4.0 [0.9, 8.4]",
+    "n": 225,
+    "attempt": 58.7,
+    "block_given_attempt": 93.2,
+    "benign_denied": 28.0
+   },
+   "previous_v31": {
+    "FLAT": "40.0 [29.8, 50.2]",
+    "ACL": "37.8 [27.6, 48.4]",
+    "JUDGEONLY": "21.3 [13.3, 29.8]",
+    "NOJUDGE": "1.8 [0.0, 4.9]",
+    "FULL": "5.8 [1.8, 11.1]"
+   }
+  }
+ },
+ "all_four": {
+  "FLAT": "34.6 [29.6, 39.7]",
+  "ACL": "28.3 [23.6, 33.3]",
+  "NOJUDGE": "1.1 [0.2, 2.3]",
+  "JUDGEONLY": "19.8 [15.7, 24.0]",
+  "FULL": "6.1 [3.7, 8.8]"
+ },
+ "other_three": {
+  "FLAT": "34.2 [28.4, 40.1]",
+  "ACL": "28.7 [23.1, 34.5]",
+  "NOJUDGE": "1.0 [0.1, 2.2]",
+  "JUDGEONLY": "16.7 [12.3, 21.5]",
+  "FULL": "4.1 [1.9, 6.8]"
+ },
+ "ablation": {
+  "FULL": {
+   "asr": "12.2 [5.4, 19.8]",
+   "n": 222,
+   "attempt": 38.3,
+   "block_given_attempt": 68.2,
+   "benign_denied": 7.8,
+   "any_denial": 51.7,
+   "judged": 34.4
+  },
+  "minus_P1": {
+   "asr": "11.1 [4.6, 18.4]",
+   "n": 217,
+   "attempt": 37.3,
+   "block_given_attempt": 70.4,
+   "benign_denied": 7.9,
+   "any_denial": 60.0,
+   "judged": 33.0
+  },
+  "minus_P2": {
+   "asr": "13.7 [6.8, 21.5]",
+   "n": 219,
+   "attempt": 32.0,
+   "block_given_attempt": 57.1,
+   "benign_denied": 11.5,
+   "any_denial": 85.0,
+   "judged": 48.1
+  },
+  "minus_P3": {
+   "asr": "19.8 [11.3, 29.2]",
+   "n": 222,
+   "attempt": 36.0,
+   "block_given_attempt": 45.0,
+   "benign_denied": 3.0,
+   "any_denial": 23.3,
+   "judged": 0.0
+  },
+  "minus_P4": {
+   "asr": "17.8 [9.3, 26.7]",
+   "n": 225,
+   "attempt": 42.2,
+   "block_given_attempt": 57.9,
+   "benign_denied": 8.0,
+   "any_denial": 55.0,
+   "judged": 34.8
+  },
+  "minus_P5": {
+   "asr": "21.1 [12.4, 30.0]",
+   "n": 223,
+   "attempt": 47.1,
+   "block_given_attempt": 55.2,
+   "benign_denied": 7.6,
+   "any_denial": 53.3,
+   "judged": 34.7
+  }
+ }
+}

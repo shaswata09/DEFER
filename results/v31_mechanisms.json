@@ -46,8 +46,8 @@
   "llm_judge|parents": "18/72",
   "symbolic_only|siblings": "0/72",
   "symbolic_only|parents": "0/72",
-  "agenticcyops|siblings": "6/72",
-  "agenticcyops|parents": "0/72",
+  "defer|siblings": "6/72",
+  "defer|parents": "0/72",
   "held": 22,
   "held_with_a_panel_interception": 14,
   "executed": [

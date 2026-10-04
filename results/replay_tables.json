@@ -1,40 +1,40 @@
 {
  "development": {
   "FLAT": {
-   "asr": "36.4 [26.2, 46.7]",
+   "asr": "34.2 [24.4, 44.4]",
    "n": 225,
-   "attempt": "36.4",
+   "attempt": "34.2",
    "block_given_attempt": "0.0"
   },
   "ACL": {
-   "asr": "24.0 [15.1, 33.3]",
+   "asr": "24.4 [15.1, 33.8]",
    "n": 225,
-   "attempt": "28.0",
-   "block_given_attempt": "14.3"
+   "attempt": "28.9",
+   "block_given_attempt": "15.4"
   },
   "JUDGEONLY": {
-   "asr": "33.8 [24.0, 44.0]",
+   "asr": "33.8 [23.6, 44.0]",
    "n": 225,
    "attempt": "42.2",
    "block_given_attempt": "20.0",
    "benign_denied": "3.8"
   },
   "NOJUDGE": {
-   "asr": "1.3 [0.0, 4.0]",
-   "n": 225,
-   "attempt": "33.8",
-   "block_given_attempt": "96.1"
+   "asr": "3.8 [0.0, 8.6]",
+   "n": 210,
+   "attempt": "47.6",
+   "block_given_attempt": "92.0"
   },
   "FULL": {
-   "asr": "7.1 [2.2, 13.3]",
+   "asr": "7.1 [2.2, 12.9]",
    "n": 225,
-   "attempt": "40.0",
-   "block_given_attempt": "82.2",
+   "attempt": "41.3",
+   "block_given_attempt": "82.8",
    "benign_denied": "11.2"
   },
   "FULL, judge everything after rules": {
    "benign_denied": "13.3",
-   "asr": "7.1 [2.2, 13.3]"
+   "asr": "7.1 [2.2, 12.9]"
   }
  },
  "ablation": {
@@ -44,13 +44,13 @@
    "n": 204
   },
   "minus P1": {
-   "asr": "8.3 [2.5, 15.7]",
+   "asr": "8.3 [2.5, 15.2]",
    "n": 204,
    "benign_denied": "8.4"
   },
   "minus P2": {
-   "asr": "11.3 [4.9, 19.1]",
-   "n": 204,
+   "asr": "11.3 [4.9, 18.8]",
+   "n": 203,
    "benign_denied": "4.8"
   },
   "minus P4": {
@@ -64,82 +64,82 @@
    "benign_denied": "8.9"
   },
   "minus P3": {
-   "asr": "19.1 [10.8, 27.9]",
+   "asr": "20.6 [11.8, 30.4]",
    "n": 204
   }
  },
  "domains": {
   "cyberops": {
-   "flat": "36.4 [26.2, 46.7]",
-   "acl": "24.0 [15.1, 33.3]",
-   "full": "7.1 [2.2, 13.3]",
+   "flat": "34.2 [24.4, 44.4]",
+   "acl": "24.4 [15.1, 33.8]",
+   "full": "7.1 [2.2, 12.9]",
    "benign_denied": "11.2"
   },
   "healthcare": {
-   "flat": "21.3 [12.4, 30.7]",
+   "flat": "23.1 [14.2, 32.4]",
    "acl": "17.8 [9.8, 26.7]",
-   "full": "0.0 [0.0, 0.0]",
+   "full": "1.3 [0.0, 4.0]",
    "benign_denied": "24.2"
   },
   "finance": {
-   "flat": "32.0 [22.7, 41.8]",
-   "acl": "26.2 [16.9, 36.0]",
-   "full": "4.0 [0.4, 8.4]",
+   "flat": "41.8 [31.6, 52.0]",
+   "acl": "35.1 [24.9, 45.8]",
+   "full": "6.7 [1.8, 12.4]",
    "benign_denied": "22.7"
   },
   "legal": {
-   "flat": "34.2 [24.4, 44.9]",
-   "acl": "32.4 [22.7, 43.1]",
-   "full": "7.6 [2.7, 12.9]",
+   "flat": "39.6 [29.8, 50.2]",
+   "acl": "39.1 [28.9, 49.3]",
+   "full": "8.4 [3.6, 14.2]",
    "benign_denied": "25.4"
   }
  },
- "transfer_full": "3.9 [1.8, 6.2]",
- "all_domains_full": "4.7 [2.7, 7.0]",
+ "transfer_full": "5.5 [3.0, 8.3]",
+ "all_domains_full": "5.9 [3.6, 8.4]",
  "primaries": {
   "scout": {
    "full_cyberops": "4.0 [0.9, 8.4]",
-   "full_finance": "1.8 [0.0, 4.0]",
+   "full_finance": "3.1 [0.4, 6.7]",
    "benign_denied_cyberops": "21.1"
   },
   "mistral": {
-   "full_cyberops": "8.0 [2.7, 14.7]",
-   "full_finance": "0.0 [0.0, 0.0]",
+   "full_cyberops": "8.0 [2.7, 14.2]",
+   "full_finance": "0.4 [0.0, 1.3]",
    "benign_denied_cyberops": "8.1"
   },
   "llama8b": {
-   "full_cyberops": "5.3 [1.3, 10.7]",
-   "full_finance": "7.6 [2.7, 13.8]",
+   "full_cyberops": "5.3 [1.3, 10.2]",
+   "full_finance": "9.3 [3.6, 16.0]",
    "benign_denied_cyberops": "15.6"
   },
-  "pooled_full": "4.7 [2.4, 7.4]"
+  "pooled_full": "5.5 [2.9, 8.4]"
  },
  "tiers": {
   "development": {
-   "n": 74,
-   "content_independent": "31.1",
-   "content_dependent": "52.7",
-   "similarity": "4.1",
-   "panel": "12.2",
-   "principle_P3": "32.4",
-   "principle_P1": "1.4",
-   "principle_P2": "29.7",
-   "principle_P4": "16.2",
-   "principle_panel": "12.2",
-   "principle_P5": "8.1"
+   "n": 77,
+   "content_independent": "29.9",
+   "content_dependent": "42.9",
+   "similarity": "15.6",
+   "panel": "11.7",
+   "principle_P3": "31.2",
+   "principle_P1": "1.3",
+   "principle_P2": "32.5",
+   "principle_P4": "15.6",
+   "principle_panel": "11.7",
+   "principle_P5": "7.8"
   },
   "transfer": {
-   "n": 209,
-   "content_independent": "27.3",
-   "content_dependent": "39.2",
-   "similarity": "0.0",
-   "panel": "33.5",
-   "principle_P2": "31.6",
-   "principle_P1": "1.4",
-   "principle_P4": "21.5",
-   "principle_panel": "33.5",
-   "principle_P3": "3.3",
-   "principle_P5": "8.6"
+   "n": 283,
+   "content_independent": "21.2",
+   "content_dependent": "14.5",
+   "similarity": "18.0",
+   "panel": "46.3",
+   "principle_P2": "25.4",
+   "principle_P1": "1.1",
+   "principle_P4": "15.9",
+   "principle_panel": "46.3",
+   "principle_P3": "4.9",
+   "principle_P5": "6.4"
   }
  },
  "paired": {
@@ -150,10 +150,10 @@
   "judgeonly_only_on_memory_paths": 11
  },
  "channels_full": {
-  "alert_text": "3.7 [1.4, 6.5]",
+  "alert_text": "5.5 [2.5, 8.8]",
   "proposal_justification": "9.4 [1.0, 19.8]",
   "handoff": "15.6 [5.6, 27.8]",
-  "tool_response": "0.0 [0.0, 0.0]",
+  "tool_response": "2.0 [0.0, 5.1]",
   "memory": "0.0 [0.0, 0.0]"
  },
  "attacker_tiers_full_dev": {
@@ -171,13 +171,17 @@
    "cyberops:ap7": 2,
    "cyberops:ap10": 5,
    "cyberops:ap8": 3,
+   "healthcare:ap8": 3,
+   "finance:ap7": 3,
+   "finance:ap8": 3,
    "finance:ap9": 9,
    "legal:ap15": 1,
    "legal:ap7": 2,
    "legal:ap8": 2,
    "legal:ap11": 1,
    "legal:ap9": 5,
-   "legal:ap2": 6
+   "legal:ap2": 6,
+   "legal:ap3": 2
   }
  },
  "judges": {
@@ -248,20 +252,20 @@
  },
  "lineage": {
   "Local4": {
-   "dev": "7.1 [2.2, 13.3]",
-   "transfer": "3.9 [1.8, 6.2]"
+   "dev": "7.1 [2.2, 12.9]",
+   "transfer": "5.5 [3.0, 8.3]"
   },
   "Div3L": {
-   "dev": "7.1 [2.2, 13.3]",
-   "transfer": "4.3 [2.1, 6.8]"
+   "dev": "7.1 [2.2, 12.9]",
+   "transfer": "6.1 [3.4, 9.0]"
   },
   "Lin3": {
-   "dev": "9.8 [4.0, 16.9]",
-   "transfer": "6.8 [3.9, 10.1]"
+   "dev": "9.8 [3.6, 16.9]",
+   "transfer": "9.8 [6.4, 13.5]"
   },
   "Single": {
-   "dev": "9.8 [4.0, 16.9]",
-   "transfer": "6.7 [3.9, 9.8]"
+   "dev": "9.8 [3.6, 16.9]",
+   "transfer": "9.5 [6.2, 13.0]"
   }
  },
  "e2_siblings": {

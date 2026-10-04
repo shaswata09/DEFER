@@ -5,14 +5,14 @@
     "takeaway": "Never judging is the safest and escalates half of the legitimate work; the judges without the rules barely beat no checks; DEFER sits between them, at a cost set mostly by its rules.",
     "data_sources": [
       "results/eval_attacks/all_trials.csv",
-      "logs/cyberops_eval_attacks_q235_local2_v31/*.jsonl"
+      "logs/cyberops_eval_attacks_q235_local2_rep/*.jsonl"
     ],
     "n": {
       "attack_trials": {
         "Flat": 225,
         "ACL": 225,
         "NoJudge": 225,
-        "DEFER": 225,
+        "DEFER": 222,
         "JudgeOnly": 225
       },
       "attack_variants": 75,
@@ -28,22 +28,22 @@
         "Flat": 0.0,
         "ACL": 0.0,
         "NoJudge": 0.0,
-        "DEFER": 26.4,
-        "JudgeOnly": 99.9
+        "DEFER": 34.4,
+        "JudgeOnly": 100.0
       },
       "benign_denied_pct": {
         "Flat": 0.0,
-        "ACL": 51.9,
-        "NoJudge": 54.3,
-        "DEFER": 9.9,
-        "JudgeOnly": 4.5
+        "ACL": 48.2,
+        "NoJudge": 53.9,
+        "DEFER": 7.8,
+        "JudgeOnly": 6.5
       },
       "benign_tasks_completed_pct": {
         "Flat": 98.3,
-        "ACL": 30.0,
+        "ACL": 36.7,
         "NoJudge": 25.0,
-        "DEFER": 96.7,
-        "JudgeOnly": 95.0
+        "DEFER": 93.3,
+        "JudgeOnly": 98.3
       }
     }
   },
@@ -56,25 +56,25 @@
       "results/asb/e2e_validator_group_q235_div4_frozen_full/general/results.csv"
     ],
     "n": {
-      "CyberOps": 90,
-      "Other three domains": 218,
+      "CyberOps": 58,
+      "Other three domains": 293,
       "ASB (live)": 154,
       "CyberOps tier %": {
-        "content_independent": 31.1,
-        "content_dependent": 63.3,
-        "similarity": 3.3,
-        "panel": 2.2
+        "content_independent": 39.7,
+        "content_dependent": 12.1,
+        "similarity": 17.2,
+        "panel": 31.0
       },
       "Other three domains tier %": {
-        "content_independent": 11.0,
-        "content_dependent": 42.2,
-        "similarity": 16.5,
-        "panel": 30.3
+        "content_independent": 9.2,
+        "content_dependent": 22.9,
+        "similarity": 30.0,
+        "panel": 37.9
       },
       "ASB (live) tier %": {
         "content_independent": 0.0,
-        "content_dependent": 40.3,
-        "similarity": 0.0,
+        "content_dependent": 9.1,
+        "similarity": 31.2,
         "panel": 59.7
       }
     }
@@ -112,8 +112,12 @@
       ],
       "defer_nonzero": [
         "ap7",
+        "ap8",
+        "ap12",
         "ap13",
-        "ap10"
+        "ap9",
+        "ap10",
+        "ap15"
       ]
     }
   },
@@ -126,8 +130,9 @@
     ],
     "n": {
       "variants": 75,
-      "JudgeOnly fails, DEFER holds": 26,
-      "both fail": 3
+      "JudgeOnly fails, DEFER holds": 17,
+      "both fail": 9,
+      "DEFER fails, JudgeOnly holds": 1
     }
   },
   {
@@ -138,22 +143,22 @@
       "results/eval_attacks/all_trials.csv"
     ],
     "n": {
-      "shared_variants": 75,
+      "shared_variants": 73,
       "asr_pct": {
-        "DEFER": 2.2,
-        "minus P1": 4.9,
-        "minus P2": 6.7,
-        "minus P3": 16.9,
-        "minus P4": 7.6,
-        "minus P5": 6.7
+        "DEFER": 11.0,
+        "minus P1": 11.1,
+        "minus P2": 13.7,
+        "minus P3": 19.2,
+        "minus P4": 15.5,
+        "minus P5": 20.1
       },
       "benign_any_denial_pct": {
-        "DEFER": 81.7,
-        "minus P1": 68.3,
-        "minus P2": 43.3,
-        "minus P3": 55.0,
-        "minus P4": 78.3,
-        "minus P5": 75.0
+        "DEFER": 51.7,
+        "minus P1": 60.0,
+        "minus P2": 86.7,
+        "minus P3": 26.7,
+        "minus P4": 55.0,
+        "minus P5": 55.0
       }
     }
   },
@@ -167,10 +172,10 @@
     "n": {
       "AP-4": {
         "asr_pct": {
-          "Flat": 57.1,
+          "Flat": 81.0,
           "ACL": 14.3,
-          "JudgeOnly": 85.7,
-          "DEFER minus P5": 28.6,
+          "JudgeOnly": 47.6,
+          "DEFER minus P5": 90.5,
           "DEFER": 0.0
         },
         "exposure_pct": {
@@ -219,12 +224,12 @@
     "file": "validator_behavior.pdf",
     "takeaway": "The four judges agree only moderately with each other, so how many of them must approve changes what gets through by tens of points.",
     "data_sources": [
-      "cache/replay_v31/rounds.jsonl",
+      "cache/replay_rep/rounds.jsonl",
       "cache/validators/*.jsonl"
     ],
     "n": {
-      "rounds": 3880,
-      "rounds_all_voted": 3880,
+      "rounds": 3905,
+      "rounds_all_voted": 3905,
       "panel": [
         "L1_mistral",
         "L2_gemma",
@@ -232,24 +237,24 @@
         "L4_scout"
       ],
       "kappa": {
-        "L1_mistral|L2_gemma": 0.56,
-        "L1_mistral|L3_gptoss": 0.5,
-        "L1_mistral|L4_scout": 0.56,
-        "L2_gemma|L3_gptoss": 0.66,
-        "L2_gemma|L4_scout": 0.42,
-        "L3_gptoss|L4_scout": 0.46
+        "L1_mistral|L2_gemma": 0.51,
+        "L1_mistral|L3_gptoss": 0.46,
+        "L1_mistral|L4_scout": 0.54,
+        "L2_gemma|L3_gptoss": 0.63,
+        "L2_gemma|L4_scout": 0.39,
+        "L3_gptoss|L4_scout": 0.42
       },
       "reject_rate_pct": {
-        "L1_mistral": 38.5,
-        "L2_gemma": 50.2,
-        "L3_gptoss": 46.7,
-        "L4_scout": 27.9
+        "L1_mistral": 35.0,
+        "L2_gemma": 47.4,
+        "L3_gptoss": 44.0,
+        "L4_scout": 25.4
       },
       "approved_pct_by_quorum": {
-        "1": 79.7,
-        "2": 66.7,
-        "3": 52.1,
-        "4": 38.2
+        "1": 82.8,
+        "2": 70.8,
+        "3": 54.4,
+        "4": 40.1
       }
     }
   },
@@ -258,25 +263,25 @@
     "file": "cost.pdf",
     "takeaway": "The judges account for most of the time the cascade adds, while the benign work it blocks is spread across the deterministic checks and the memory checks, and is much heavier outside the development domain.",
     "data_sources": [
-      "logs/*_eval_attacks_q235_local2_v31/*.jsonl",
+      "logs/*_eval_attacks_q235_local2_rep/*.jsonl",
       "results/eval_attacks/all_trials.csv"
     ],
     "n": {
       "denied_pct_of_proposals": {
         "P2 parameter/scope": {
-          "cyberops": 5.39,
+          "cyberops": 2.74,
           "finance": 3.95,
           "healthcare": 0.85,
           "legal": 1.79
         },
         "P3 LLM panel": {
-          "cyberops": 4.26,
+          "cyberops": 1.47,
           "finance": 5.92,
-          "healthcare": 16.06,
-          "legal": 13.1
+          "healthcare": 9.3,
+          "legal": 12.8
         },
         "P3 deterministic": {
-          "cyberops": 0.85,
+          "cyberops": 2.25,
           "finance": 1.97,
           "healthcare": 0.56,
           "legal": 0.89
@@ -294,7 +299,7 @@
           "legal": 0.0
         },
         "redactions": {
-          "cyberops": 7.1,
+          "cyberops": 5.48,
           "finance": 0.99,
           "healthcare": 0.0,
           "legal": 5.95
@@ -302,40 +307,40 @@
       },
       "median_latency_s": {
         "primary model": {
-          "Flat": 37.17,
-          "NoJudge": 33.19,
-          "DEFER": 50.05,
-          "JudgeOnly": 45.45
+          "Flat": 46.42,
+          "NoJudge": 34.64,
+          "DEFER": 37.58,
+          "JudgeOnly": 46.29
         },
         "deterministic checks": {
           "Flat": 0.09,
           "NoJudge": 0.04,
-          "DEFER": 0.09,
-          "JudgeOnly": 0.07
+          "DEFER": 0.08,
+          "JudgeOnly": 0.11
         },
         "LLM panel": {
           "Flat": 0.0,
           "NoJudge": 0.0,
-          "DEFER": 17.89,
-          "JudgeOnly": 33.66
+          "DEFER": 17.54,
+          "JudgeOnly": 47.89
         }
       },
       "tokens_per_incident": {
         "primary": {
-          "Flat": 20726,
-          "NoJudge": 11968,
-          "DEFER": 12233,
-          "JudgeOnly": 12189
+          "Flat": 20636,
+          "NoJudge": 11965,
+          "DEFER": 12201,
+          "JudgeOnly": 20090
         },
         "validator": {
           "Flat": 0,
           "NoJudge": 0,
-          "DEFER": 7694,
-          "JudgeOnly": 14538
+          "DEFER": 7558,
+          "JudgeOnly": 17436
         }
       },
       "benign_proposals": {
-        "cyberops": 1057,
+        "cyberops": 1021,
         "finance": 304,
         "healthcare": 355,
         "legal": 336
@@ -351,7 +356,7 @@
       "results/eval_attacks/all_trials.csv"
     ],
     "n": {
-      "isolated_mean_denials": 1.45,
+      "isolated_mean_denials": 1.85,
       "sequence_len": {
         "cyberops": 20,
         "finance": 5,
@@ -375,52 +380,52 @@
     ],
     "n": {
       "Qwen3-235B / cyberops": {
-        "Flat": 32.0,
-        "ACL": 24.9,
-        "DEFER": 2.2,
-        "benign any-denial": 81.7
+        "Flat": 35.6,
+        "ACL": 27.1,
+        "DEFER": 12.2,
+        "benign any-denial": 51.7
       },
       "Qwen3-235B / finance": {
-        "Flat": 35.1,
-        "ACL": 26.2,
-        "DEFER": 5.3,
+        "Flat": 40.9,
+        "ACL": 30.2,
+        "DEFER": 7.1,
         "benign any-denial": 100.0
       },
       "Qwen3-235B / healthcare": {
-        "Flat": 23.1,
-        "ACL": 19.1,
-        "DEFER": 0.0,
+        "Flat": 23.6,
+        "ACL": 18.7,
+        "DEFER": 1.3,
         "benign any-denial": 100.0
       },
       "Qwen3-235B / legal": {
-        "Flat": 29.8,
-        "ACL": 28.4,
-        "DEFER": 4.4,
+        "Flat": 38.2,
+        "ACL": 37.3,
+        "DEFER": 4.0,
         "benign any-denial": 100.0
       },
       "Llama-4-Scout / cyberops": {
-        "Flat": 35.1,
-        "ACL": 29.8,
+        "Flat": 33.8,
+        "ACL": 29.5,
         "DEFER": 4.0,
-        "benign any-denial": 83.3
+        "benign any-denial": 83.1
       },
       "Mistral-Small / cyberops": {
-        "Flat": 21.8,
+        "Flat": 20.4,
         "ACL": 19.6,
         "DEFER": 8.0,
         "benign any-denial": 40.0
       },
-      "Llama-3.1-8B / cyberops": {
-        "Flat": 34.7,
-        "ACL": 33.8,
-        "DEFER": 8.4,
-        "benign any-denial": 38.3
-      },
       "gpt-oss-120b / cyberops": {
         "Flat": 21.3,
         "ACL": 18.7,
-        "DEFER": 6.2,
-        "benign any-denial": 0.0
+        "DEFER": 6.3,
+        "benign any-denial": 68.3
+      },
+      "Llama-3.1-8B / cyberops": {
+        "Flat": 32.9,
+        "ACL": 32.4,
+        "DEFER": 8.2,
+        "benign any-denial": 30.0
       }
     }
   },
@@ -434,56 +439,58 @@
     "n": {
       "Flat": {
         "C1 task input": {
-          "asr_pct": 26.1,
+          "asr_pct": 29.6,
           "exposure_pct": 100.0
         },
         "C2 tool response": {
-          "asr_pct": 0.0,
-          "exposure_pct": 97.0
+          "asr_pct": 1.0,
+          "exposure_pct": 98.0
         },
         "C3 memory": {
-          "asr_pct": 14.3,
-          "exposure_pct": 100.0
+          "asr_pct": 19.0,
+          "exposure_pct": 99.0
         },
         "C4 handoff": {
-          "asr_pct": 45.6,
+          "asr_pct": 47.8,
           "exposure_pct": 100.0
         },
         "C5 rationale": {
-          "asr_pct": 84.4,
+          "asr_pct": 100.0,
           "exposure_pct": 100.0
         }
       },
       "DEFER": {
         "C1 task input": {
-          "asr_pct": 2.5,
+          "asr_pct": 5.7,
           "exposure_pct": 100.0
         },
         "C2 tool response": {
-          "asr_pct": 0.0,
-          "exposure_pct": 74.7
+          "asr_pct": 1.0,
+          "exposure_pct": 75.8
         },
         "C3 memory": {
           "asr_pct": 0.0,
-          "exposure_pct": 61.9
+          "exposure_pct": 61.0
         },
         "C4 handoff": {
-          "asr_pct": 14.4,
+          "asr_pct": 17.8,
           "exposure_pct": 100.0
         },
         "C5 rationale": {
-          "asr_pct": 1.0,
+          "asr_pct": 9.4,
           "exposure_pct": 87.5
         }
       },
       "channels": {
-        "C1 task input": 2550,
+        "C1 task input": 2546,
         "C2 tool response": 495,
         "C3 memory": 525,
         "C4 handoff": 450,
         "C5 rationale": 480
       },
-      "defer_tool_response_residual": {}
+      "defer_tool_response_residual": {
+        "legal ap3": 1
+      }
     }
   },
   {
