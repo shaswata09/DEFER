@@ -116,7 +116,7 @@ Mechanism strings emitted on each trial: `P1_*`, `P2_*`, `P3_*`,
 python -m benchmarks.injecagent.run_static --groups A
 
 # Live-LLM static -- 50-case representative subset through one validator
-# group; agenticcyops config additionally invokes P3-L6 consensus
+# group; defer config additionally invokes P3-L6 consensus
 ./scripts/run_injecagent_e2e.sh A
 
 # Generate paper-ready PDF + CSVs

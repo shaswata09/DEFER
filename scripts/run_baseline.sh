@@ -20,7 +20,7 @@ set -eE
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR/.."
 
-CONDA_ENV="agenticcyops"
+CONDA_ENV="defer"
 # Tool / MMA ports are no longer global; computed per (GROUP, domain)
 # inside run_domain_baseline() so parallel baseline runs across groups
 # don't collide.  Matches the layout used by run_attack_paths.sh.
@@ -328,7 +328,7 @@ run_domain_baseline() {
 
     mkdir -p "logs/${domain}_baseline_${GROUP}"
 
-    for config in flat acl_hardened agenticcyops; do
+    for config in flat acl_hardened defer; do
         echo "  --- ${domain} / ${config} / Group ${GROUP} ---"
         # Env vars so the inline Python below stays small and quote-safe.
         export BASELINE_GROUP="$GROUP"
@@ -372,7 +372,7 @@ async def run():
     header = build_run_header(
         group=group, config=config, domain=domain, primary_url=llm_url,
         primary_provider=llm_provider, api_key_env=api_key_env,
-        consensus_config=consensus_config if config in ('agenticcyops', 'llm_judge') else None,
+        consensus_config=consensus_config if config in ('defer', 'llm_judge') else None,
         state_mode=state_mode,
     )
     logger = ExperimentLogger(
@@ -416,7 +416,7 @@ async def run():
         agents[phase] = AgentClass(**agent_kwargs)
 
     consensus = None
-    if config == 'agenticcyops':
+    if config == 'defer':
         try:
             from consensus.validator import ConsensusValidator
             consensus = ConsensusValidator(config_name=consensus_config, logger=logger)

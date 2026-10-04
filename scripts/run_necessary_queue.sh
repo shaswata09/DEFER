@@ -4,8 +4,8 @@
 #
 #   E20b  second carry-over pass: benign tail after the reversed-order attack
 #         sequence, same persistent state (W6 wants n=2 with a range)
-#   E9    writes to critical stores routed to the panel, agenticcyops vs
-#         agenticcyops_writejudge, AP-2/AP-4/AP-13 + benign, all four domains
+#   E9    writes to critical stores routed to the panel, defer vs
+#         defer_writejudge, AP-2/AP-4/AP-13 + benign, all four domains
 #         (question 5, the remaining blind spot)
 #
 # E20b's benign tail must follow its attack pass in the same persistent state,
@@ -37,17 +37,17 @@ while pgrep -f "run_attack_paths.sh ${G} cyberops ap15" >/dev/null 2>&1; do slee
 note "E20b attacks done; running the benign tail in the same persistent state"
 gates
 STATE_MODE=persistent RUN_TAG=persistent2 TRIALS=1 SLOT=0 \
-    scripts/run_attack_paths.sh "$G" cyberops benign agenticcyops 1 \
+    scripts/run_attack_paths.sh "$G" cyberops benign defer 1 \
     > logs/e20b_benign.log 2>&1
 note "E20b complete"
 
 # ---- E9: write-judge vs baseline ----
 gates
 date -Iseconds > logs/e9_start.txt
-note "E9 start: ap2,ap4,ap13 + benign, 4 domains, agenticcyops vs writejudge"
+note "E9 start: ap2,ap4,ap13 + benign, 4 domains, defer vs writejudge"
 APS="ap2,ap4,ap13"
 slot=0; pids=()
-for cfg in agenticcyops_writejudge agenticcyops; do
+for cfg in defer_writejudge defer; do
     for dom in cyberops finance healthcare legal; do
         SLOT="$slot" TRIALS=3 scripts/run_attack_paths.sh "$G" "$dom" "$APS" "$cfg" 3 \
             > "logs/e9_${cfg}_${dom}.log" 2>&1 &
@@ -57,7 +57,7 @@ done
 for p in "${pids[@]}"; do wait "$p"; done
 note "E9 attack arms done; benign arms"
 slot=0; pids=()
-for cfg in agenticcyops_writejudge agenticcyops; do
+for cfg in defer_writejudge defer; do
     for dom in cyberops finance healthcare legal; do
         SLOT="$slot" TRIALS=3 scripts/run_attack_paths.sh "$G" "$dom" benign "$cfg" 3 \
             > "logs/e9_benign_${cfg}_${dom}.log" 2>&1 &

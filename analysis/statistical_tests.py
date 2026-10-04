@@ -12,7 +12,7 @@
 CLI: reads ``results/eval_attacks/all_trials.csv`` and writes
 ``results/eval_attacks/stats.csv`` with, per (group, domain, ap) and for
 the whole group, the ASR of each config with Wilson and bootstrap CIs and
-the paired differences flat - agenticcyops and acl_hardened - agenticcyops
+the paired differences flat - defer and acl_hardened - defer
 with Holm-corrected p-values (family = the APs of one group x domain).
 
 Usage::
@@ -35,7 +35,7 @@ import numpy as np
 from config import RESULTS_DIR
 
 MEASURABLE = ("executed", "blocked", "not_attempted")
-SYSTEM_CONFIGS = ("flat", "acl_hardened", "agenticcyops")
+SYSTEM_CONFIGS = ("flat", "acl_hardened", "defer")
 
 
 # --------------------------------------------------------------------- #
@@ -183,8 +183,8 @@ def compute_stats(trials: list[dict], B: int = 10000, seed: int = 0) -> list[dic
                             f"{cfg}_exposure_n": len(known),
                             f"{cfg}_exposure_rate": rate(known, _EXPOSED),
                             f"{cfg}_attempt_given_exposure": rate(exposed, _ATT)})
-            for cmp_name, (x, y) in {"flat_minus_aco": ("flat", "agenticcyops"),
-                                     "acl_minus_aco": ("acl_hardened", "agenticcyops")}.items():
+            for cmp_name, (x, y) in {"flat_minus_aco": ("flat", "defer"),
+                                     "acl_minus_aco": ("acl_hardened", "defer")}.items():
                 d = paired_diff(by_cfg.get(x, []), by_cfg.get(y, []), _EXEC, _CLUSTER, B=B, seed=seed)
                 row.update({f"{cmp_name}_diff": d["diff"], f"{cmp_name}_low": d["low"],
                             f"{cmp_name}_high": d["high"], f"{cmp_name}_p": d["p"],

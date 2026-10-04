@@ -145,10 +145,21 @@ def _full_justification(logged: str, call, domain: str, trial_id: str) -> str:
     return logged
 
 
+def recorded_host_config(config: str, tid: str) -> str:
+    """The host's config string as the judges saw it: ``llm_judge`` under
+    JUDGEONLY, otherwise the stack's name as the run recorded it (in its trial
+    ids): ``agenticcyops`` for every run before the rename, ``defer`` after.
+    The cached votes are keyed on the message, so this must be the recorded
+    string, not the analysis name."""
+    from analysis.runlogs import RECORDED_FULL
+    if config == "llm_judge":
+        return "llm_judge"
+    return RECORDED_FULL if "_".join(tid.split("_")[4:]).startswith(RECORDED_FULL) else "defer"
+
+
 def rounds(group: str, config: str, domains=DOMAINS, suffix: str = "",
            include_unjudged: bool = False) -> list[Round]:
     from analysis.reported import hoists_live
-    host_config = "llm_judge" if config == "llm_judge" else "agenticcyops"
     sanitize = config != "llm_judge"
     live = hoists_live(group)
     out: list[Round] = []
@@ -170,7 +181,7 @@ def rounds(group: str, config: str, domains=DOMAINS, suffix: str = "",
                 if not (judged or (include_unjudged and path == "allowed_no_p3")):
                     continue
                 c.justification = _full_justification(just.get(c.call_id, ""), c, d, tid)
-                msg = message(_proposal(c, live), incident, host_config, sanitize, tid)
+                msg = message(_proposal(c, live), incident, recorded_host_config(config, tid), sanitize, tid)
                 votes, toks = {}, {}
                 if judged:
                     end = c.decision_seq if c.decision_seq >= 0 else len(events)

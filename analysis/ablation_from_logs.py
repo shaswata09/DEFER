@@ -68,7 +68,7 @@ def _principle_of(mechanism: str) -> str:
 
 def _summary_for_csv(df: pd.DataFrame, group: str, domain: str) -> pd.DataFrame:
     """Per-group, per-domain ablation summary frame."""
-    acy = df[df.Config == "agenticcyops"].copy()
+    acy = df[df.Config == "defer"].copy()
     if acy.empty:
         return pd.DataFrame()
     # Scoring v2: trials whose criterion cannot be decided from the logs are
@@ -90,7 +90,7 @@ def _summary_for_csv(df: pd.DataFrame, group: str, domain: str) -> pd.DataFrame:
     rows.append({
         "group": group, "domain": domain,
         "kind": "baseline",
-        "principle": "agenticcyops_full",
+        "principle": "defer_full",
         "trials": total,
         "successes": current_succ,
         "asr_pct": current_asr,
@@ -132,7 +132,7 @@ def _summary_for_csv(df: pd.DataFrame, group: str, domain: str) -> pd.DataFrame:
 
 def _md_section(df: pd.DataFrame, group: str, domain: str) -> str:
     if df.empty:
-        return f"### Group {group} / {domain}\n\nNo agenticcyops trials in results.csv.\n"
+        return f"### Group {group} / {domain}\n\nNo defer trials in results.csv.\n"
     base = df[df.kind == "baseline"].iloc[0]
     out = [f"### Group {group} / {domain}", "",
             f"- Trials evaluated: **{int(base.trials):,}**",
@@ -174,7 +174,7 @@ def generate(groups: list[str], domains: list[str]) -> None:
             df = pd.read_csv(csv_path)
             summary = _summary_for_csv(df, group=g, domain=d)
             if summary.empty:
-                print(f"[skip] {g}/{d}: no agenticcyops trials")
+                print(f"[skip] {g}/{d}: no defer trials")
                 continue
             out_dir = csv_path.parent
             summary.to_csv(out_dir / "ablation_from_logs.csv", index=False)

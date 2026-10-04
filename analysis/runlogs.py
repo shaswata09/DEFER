@@ -5,11 +5,13 @@ A log file belongs to (group, domain, config) when
 * its group is its log directory's group, unless ``run_groups.yaml`` routes
   the file elsewhere (a later experiment that reused a main group's directory),
   and
-* its config is exactly ``config`` as written in the file's ``run_header``.
+* its config is exactly ``config`` as written in the file's ``run_header``
+  (read through :func:`canonical_config`: recorded ``agenticcyops`` is ``defer``).
 
 Selecting on the file name instead is what went wrong before: the pattern
-``agenticcyops_*.jsonl`` also matches ``agenticcyops_writejudge_*``,
-``agenticcyops_gate_permissive_*`` and ``agenticcyops_noautoapprove_*``, and a
+``agenticcyops_*.jsonl`` (the recorded file names) also matches
+``agenticcyops_writejudge_*``, ``agenticcyops_gate_permissive_*`` and
+``agenticcyops_noautoapprove_*``, and a
 directory glob ``*_eval_attacks_<group>*`` also matches ``<group>_e9`` and
 ``<group>_persistent``. Every analysis that reads logs should go through
 :func:`run_logs` or :func:`config_files`.
@@ -21,7 +23,7 @@ import json
 import re
 from pathlib import Path
 
-from config import LOGS_DIR
+from config import LOGS_DIR, RECORDED_FULL, canonical_config  # noqa: F401 (re-exported)
 
 DOMAINS = ("cyberops", "healthcare", "finance", "legal")
 DIR_RE = re.compile(r"^(cyberops|healthcare|finance|legal)_eval_attacks_(.+?)(_disabled_[A-Z0-9]+)?$")
@@ -54,11 +56,11 @@ def header_config(path: Path) -> str:
                 except json.JSONDecodeError:
                     continue
                 if e.get("action") == "run_header" and e.get("config"):
-                    return str(e["config"])
+                    return canonical_config(str(e["config"]))
     except OSError:
         pass
     m = _NAME_RE.match(path.name)
-    return m.group("config") if m else ""
+    return canonical_config(m.group("config")) if m else ""
 
 
 def file_group(path: Path) -> tuple[str, str, str] | None:

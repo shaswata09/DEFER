@@ -4,7 +4,7 @@
 #
 # INSTALL (H200 GPUs with CUDA 12.4+):
 #
-#   conda activate agenticcyops
+#   conda activate defer
 #   pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu124
 #   pip install -r requirements.txt
 #   pip install -U vllm --pre --index-url https://pypi.org/simple --extra-index-url https://wheels.vllm.ai/nightly

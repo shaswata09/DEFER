@@ -19,7 +19,7 @@ CLI::
 
     python -m benchmarks.asb.run_e2e --group A --attacks DPI --case-limit 30
     python -m benchmarks.asb.run_e2e --group A --attacks DPI \\
-        --configs agenticcyops --trials 1
+        --configs defer --trials 1
 """
 
 from __future__ import annotations
@@ -57,7 +57,7 @@ ATTACK_FILES = {
     "POT":  "pot.json",
 }
 DEFAULT_ATTACKS = list(ATTACK_FILES)
-DEFAULT_CONFIGS = ["flat", "acl_hardened", "agenticcyops"]
+DEFAULT_CONFIGS = ["flat", "acl_hardened", "defer"]
 DOMAIN = "general"                         # ASB scenarios -> neutral domain
 
 

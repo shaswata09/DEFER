@@ -34,10 +34,10 @@ plt.rcParams.update({
 })
 
 CONFIG_COLOR = {"flat": "#e74c3c", "acl_hardened": "#f39c12",
-                "agenticcyops": "#2ecc71"}
+                "defer": "#2ecc71"}
 CONFIG_LABEL = {"flat": "Flat MAS", "acl_hardened": "ACL-Hardened",
-                "agenticcyops": "DEFER (P1-P5)"}
-CONFIG_ORDER = ["flat", "acl_hardened", "agenticcyops"]
+                "defer": "DEFER (P1-P5)"}
+CONFIG_ORDER = ["flat", "acl_hardened", "defer"]
 DOMAIN_ORDER = ["cyberops", "healthcare", "finance", "legal"]
 GROUP_ORDER = ["A", "B", "C", "D", "E", "F"]
 ACCENT = "#2980b9"
@@ -250,7 +250,7 @@ def page_per_group_bars(pdf, live):
 
 def page_principle_attribution(pdf, live):
     """Stacked bar: which P-layer blocked live-LLM attacks (DEFER)."""
-    df = live[(live.config == "agenticcyops") &
+    df = live[(live.config == "defer") &
                (live.defense_evaluated) & (live.defense_blocked)]
     if df.empty:
         return
@@ -343,7 +343,7 @@ def page_per_toolkit(pdf, live, lookup):
     if not lookup:
         return
     df = _attach_toolkit(live, lookup)
-    df = df[df.config == "agenticcyops"]
+    df = df[df.config == "defer"]
     if df.empty:
         return
     agg = (df.groupby("user_toolkit")
@@ -370,7 +370,7 @@ def page_per_toolkit(pdf, live, lookup):
     ax.barh(y, agg["llm_asr"].values, height=0.4,
              color="#bdc3c7", edgecolor="black", label="LLM compliance ASR")
     ax.barh(y + 0.4, agg["def_asr"].values, height=0.4,
-             color=CONFIG_COLOR["agenticcyops"], edgecolor="black",
+             color=CONFIG_COLOR["defer"], edgecolor="black",
              label="Defended ASR (DEFER)")
     ax.set_yticks(y + 0.2); ax.set_yticklabels(agg.index, fontsize=9)
     ax.invert_yaxis()

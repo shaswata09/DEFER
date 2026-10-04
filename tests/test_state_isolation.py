@@ -1,6 +1,6 @@
 """H3: per-trial state isolation.
 
-The same incident is run five times through the full agenticcyops host
+The same incident is run five times through the full defer host
 (offline: no LLM, no tool servers, no MMA).  In ``isolated`` mode every
 trial must produce the identical decision sequence and every
 cross-incident store must be empty when the trial starts.  In
@@ -38,7 +38,7 @@ class StubAdmin:
         return r
 
 
-def _host(state_mode, tmp_path, config="agenticcyops"):
+def _host(state_mode, tmp_path, config="defer"):
     logger = ExperimentLogger(eval_name="t_state", domain="cyberops", config=config,
                               model="stub", logs_dir=str(tmp_path))
     host = SOARHost(domain="cyberops", config=config, llm_url="http://127.0.0.1:1/v1",
@@ -128,7 +128,7 @@ def test_symbolic_only_runs_the_stack_without_llm_consensus(tmp_path):
     host = SOARHost(domain="cyberops", config="symbolic_only", tool_registry=None,
                     consensus=ConsensusValidator(config_name="div4"),
                     agents={"admin": StubAdmin()}, logger=logger)
-    assert host.config == "agenticcyops" and host.config_label == "symbolic_only"
+    assert host.config == "defer" and host.config_label == "symbolic_only"
     assert host.consensus is None and host.verified_execution.llm_consensus is None
     assert host.verified_execution.symbolic_only is True
     logger.set_trial("ap1", 1, 1)

@@ -20,8 +20,10 @@ def test_round_state(votes, quorum, state):
 
 def test_dev_headline_is_determinate():
     """No development-domain FULL attack was stopped by a panel rejection that
-    a missing vote decided, so the 4.0% needs no outage bound."""
+    a missing vote decided, so the as-run 6.7% (15 of 225, scored by the
+    repaired oracle; 4.0% before the defense-freeze-v3.1.4 effect-spec repairs)
+    needs no outage bound."""
     from analysis.outage import arm
-    a = arm("q235_div4", "agenticcyops", ("cyberops",))
-    assert a.executed == 9 and a.n == 225
+    a = arm("q235_div4", "defer", ("cyberops",))
+    assert a.executed == 15 and a.n == 225
     assert a.panel_blocked_open == 0

@@ -8,10 +8,10 @@
 
 q235_div4_e9:
   reason: >-
-    E9 (judged writes to critical stores). Both arms, agenticcyops and
+    E9 (judged writes to critical stores). Both arms, defer and
     agenticcyops_writejudge, ran at defense-freeze-v2.8 in the main
     q235_div4 log directories on the same AP-2/AP-4/AP-13 and benign cells
-    as the reported FULL runs, so the agenticcyops arm replaced those rows.
+    as the reported FULL runs, so the defer arm replaced those rows.
     E9 compares its two arms with each other, not with the reported FULL.
   logs:
     - cyberops_eval_attacks_q235_div4/agenticcyops_20260923_220625.jsonl
@@ -52,7 +52,7 @@ q235_div4_e2:
   reason: >-
     E2 (paired siblings). 18 runs at defense-freeze-v2.4 and v2.5 re-ran whole
     attack paths -- the parents at their original variant indices and the
-    siblings appended after them -- as agenticcyops and flat in the main
+    siblings appended after them -- as defer and flat in the main
     q235_div4 log directories, so the parent re-runs replaced the reported
     rows and the siblings grew the development split from 75 to 80 variants.
     With these runs routed here the main group is identical, row for row and

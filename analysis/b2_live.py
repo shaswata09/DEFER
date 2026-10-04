@@ -50,7 +50,7 @@ def _ci(ts: list[dict]) -> dict:
 
 
 def original_variants() -> set[tuple[str, str]]:
-    return {tuple(tid.split("_")[1:3]) for tid in trials(MAIN, DOM, "agenticcyops")
+    return {tuple(tid.split("_")[1:3]) for tid in trials(MAIN, DOM, "defer")
             if "_benign_" not in tid}
 
 
@@ -60,7 +60,7 @@ def live() -> dict:
     prop = den = inc = anyd = 0
     decided = Counter()
     scores = {"attack": [], "benign": []}
-    for tid, ev in trials(LIVE, DOM, "agenticcyops").items():
+    for tid, ev in trials(LIVE, DOM, "defer").items():
         benign = "_benign_" in tid
         if not benign and tuple(tid.split("_")[1:3]) not in keep:
             continue                                  # E2 siblings in the payload files
@@ -86,7 +86,7 @@ def live() -> dict:
         p = _payload(DOM, tid)
         if not p:
             continue
-        v = evaluate_effects(p[1], ev, config="agenticcyops")
+        v = evaluate_effects(p[1], ev, config="defer")
         if v.outcome in ("executed", "blocked", "not_attempted"):
             attack.append({"ap": ap, "variant": var, "outcome": v.outcome})
     att = [t for t in attack if t["outcome"] != "not_attempted"]
@@ -107,7 +107,7 @@ def live() -> dict:
 
 def replay() -> dict:
     V, R = load_all_votes(), load_rounds()
-    res = outcomes("full", MAIN, "agenticcyops", (DOM,), "", "Local2", V, R["full"])
+    res = outcomes("full", MAIN, "defer", (DOM,), "", "Local2", V, R["full"])
     d = res["domains"][DOM]
     b = d["benign"]
     return {"missing_votes": res["missing_votes"], "attack": _ci(d["attack"]),

@@ -72,7 +72,7 @@ class BaseAgent:
         self,
         phase: str,
         domain: str,
-        config: str = "agenticcyops",
+        config: str = "defer",
         llm_url: str = "http://localhost:8000/v1",
         llm_provider: str = "openai",
         llm_model: Optional[str] = None,
@@ -205,7 +205,7 @@ class BaseAgent:
 
         CRITICAL: This controls what the agent can even TRY to call.
         - flat/acl_hardened: Agent sees ALL tools (can attempt out-of-scope calls)
-        - agenticcyops: Agent sees ONLY manifest tools (doesn't know others exist)
+        - defer: Agent sees ONLY manifest tools (doesn't know others exist)
         """
         # v3.1.4: also JUDGEONLY and any run with P2 disabled (the orchestrator
         # sets ``show_all_tools``): tool hiding is part of capability scoping

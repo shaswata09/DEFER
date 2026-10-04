@@ -34,7 +34,7 @@ LOGS = BASE_DIR / "logs"
 DOMAINS = ("cyberops", "finance", "healthcare", "legal")
 
 
-def proposal_denials(group: str, domain: str, config: str = "agenticcyops",
+def proposal_denials(group: str, domain: str, config: str = "defer",
                      ap: str = "benign") -> tuple[int, int]:
     """``(denied, proposed)`` tool proposals for one (group, domain, config)."""
     per: dict[tuple[str, str], dict[str, set]] = defaultdict(
@@ -73,7 +73,7 @@ def proposal_denials(group: str, domain: str, config: str = "agenticcyops",
     return denied, proposed
 
 
-def proposal_denials_by_variant(group: str, domain: str, config: str = "agenticcyops",
+def proposal_denials_by_variant(group: str, domain: str, config: str = "defer",
                                 ap: str = "benign") -> dict[str, tuple[int, int]]:
     """``{cluster_key: (denied, proposed)}`` for the cluster bootstrap.
 
@@ -124,7 +124,7 @@ def proposal_denials_by_variant(group: str, domain: str, config: str = "agenticc
     return {k: (d, p) for k, (d, p) in out.items()}
 
 
-def benign_denials_by_check(group: str, domain: str, config: str = "agenticcyops",
+def benign_denials_by_check(group: str, domain: str, config: str = "defer",
                             ap: str = "benign") -> dict[str, dict]:
     """E14: benign denials broken out by the check that made them.
 
@@ -192,7 +192,7 @@ def principle_of(mechanism: str) -> str:
     return "other"
 
 
-def denial_rate_ci(group: str, domain: str, config: str = "agenticcyops",
+def denial_rate_ci(group: str, domain: str, config: str = "defer",
                    B: int = 10000, seed: int = 0, alpha: float = 0.05):
     """E20: cluster-bootstrap interval for the benign denial rate.
 

@@ -10,7 +10,7 @@ Default sweep size
   attack_families: dh, ds                   (2)
   variants:        base, enhanced           (2)
   domains:         cyberops / healthcare / finance / legal  (4)
-  configs:         flat / acl_hardened / agenticcyops       (3)
+  configs:         flat / acl_hardened / defer              (3)
   cases:           2,108                    (510 + 544 + 510 + 544)
 
 Total attack-tool evaluations: ~2,108 × (avg 1.5 attacker tools) × 4 × 3
@@ -42,7 +42,7 @@ from benchmarks.injecagent.harness.trial_driver import (
 
 RESULTS_DIR = BASE_DIR / "results" / "injecagent" / "static"
 DEFAULT_DOMAINS = ["cyberops", "healthcare", "finance", "legal"]
-DEFAULT_CONFIGS = ["flat", "acl_hardened", "agenticcyops"]
+DEFAULT_CONFIGS = ["flat", "acl_hardened", "defer"]
 DEFAULT_FAMILIES = ["dh", "ds"]
 DEFAULT_VARIANTS = ["base", "enhanced"]
 
@@ -242,7 +242,7 @@ def main() -> None:
     print(f"wrote  {summ_md}")
 
     # Headline printout
-    print("\n=== Aggregate ASR  (flat / acl_hardened / agenticcyops) ===")
+    print("\n=== Aggregate ASR  (flat / acl_hardened / defer) ===")
     from collections import defaultdict
     agg = defaultdict(lambda: {"n": 0, "s": 0})
     for r in summary:

@@ -29,7 +29,7 @@ from collections import Counter, defaultdict
 from pathlib import Path
 
 from analysis.p3_eligibility import JUDGED_PATHS, _payload, call_path, trial_commits, trials
-from analysis.replay import _SANITIZER, _full_justification, _proposal, incident_at
+from analysis.replay import _SANITIZER, _full_justification, _proposal, incident_at, recorded_host_config
 from analysis.replay_run import ARMS
 from attacks.effects import build_calls, evaluate_effects
 from config import BASE_DIR
@@ -40,7 +40,6 @@ P3_PATHS = JUDGED_PATHS + ("p3_denied_rule",)
 
 
 def rounds(group: str, config: str, domains, suffix: str = ""):
-    host_config = "llm_judge" if config == "llm_judge" else "agenticcyops"
     sanitize = config != "llm_judge"
     for d in domains:
         commits = trial_commits(group, d, config, suffix)
@@ -65,7 +64,7 @@ def rounds(group: str, config: str, domains, suffix: str = ""):
                 if path in JUDGED_PATHS:
                     shown = _SANITIZER._sanitize_proposal(proposal) if sanitize else proposal
                     msg = build_panel_message(shown, {
-                        "incident": incident, "incident_id": iid, "domain": d, "config": host_config,
+                        "incident": incident, "incident_id": iid, "domain": d, "config": recorded_host_config(config, tid),
                         "current_phase": c.phase, "prior_actions": list(prior)})
                     role = "benign" if benign else ("attack_effect" if c.call_id in attack_ids else "attack_other")
                     yield {"key": hashlib.sha256(msg.encode()).hexdigest(), "message": msg,
@@ -92,11 +91,11 @@ def build() -> None:
     print(f"distinct messages: {len(known)}")
 
 
-LIVE = [("v30_full", "q235_local2_v30", "agenticcyops", ("cyberops", "healthcare", "finance", "legal")),
+LIVE = [("v30_full", "q235_local2_v30", "defer", ("cyberops", "healthcare", "finance", "legal")),
         ("v30_judgeonly", "q235_local2_v30", "llm_judge", ("cyberops",)),
-        ("v30_llama8b_full", "llama8b_local2_v30", "agenticcyops", ("cyberops",)),
+        ("v30_llama8b_full", "llama8b_local2_v30", "defer", ("cyberops",)),
         ("v30_llama8b_judgeonly", "llama8b_local2_v30", "llm_judge", ("cyberops",)),
-        ("v30_oss120_full", "oss120_local2_v30", "agenticcyops", ("cyberops",)),
+        ("v30_oss120_full", "oss120_local2_v30", "defer", ("cyberops",)),
         ("v30_oss120_judgeonly", "oss120_local2_v30", "llm_judge", ("cyberops",))]
 
 
@@ -158,7 +157,7 @@ def live_tables() -> dict:
         res = outcomes(label.replace("v30_", ""), group, config, domains, "", "Local4", V, R[label])
         row: dict = {"missing_votes": res["missing_votes"]}
         for d in domains:
-            keep = {tuple(t.split("_")[1:3]) for t in trials("q235_div4", d, "agenticcyops") if "_benign_" not in t}
+            keep = {tuple(t.split("_")[1:3]) for t in trials("q235_div4", d, "defer") if "_benign_" not in t}
             a = [t for t in res["domains"][d]["attack"] if (t["ap"], t["variant"]) in keep]
             b = res["domains"][d]["benign"]
             ben_run = sum(v[1] for v in res["domains"][d]["benign_trials"].values())
@@ -182,7 +181,7 @@ def tables() -> dict:
         r = json.loads(ln)
         new[r["arm"]].append(r)
     D4 = ("cyberops", "healthcare", "finance", "legal")
-    keep = {tuple(t.split("_")[1:3]) for t in trials("q235_div4", "cyberops", "agenticcyops") if "_benign_" not in t}
+    keep = {tuple(t.split("_")[1:3]) for t in trials("q235_div4", "cyberops", "defer") if "_benign_" not in t}
     pct = lambda x: round(100 * x, 1)
 
     def summary(arm, group, cfg, doms, suffix="", R=None):
@@ -197,10 +196,10 @@ def tables() -> dict:
                       "benign_denied": pct(b["denied"] / b["proposed"]) if b.get("proposed") else None}
         return out
 
-    arms = [("full", "q235_div4", "agenticcyops", D4), ("judgeonly", "q235_div4", "llm_judge", ("cyberops",)),
-            ("oss120_full", "oss120_local2_v29", "agenticcyops", ("cyberops",)),
+    arms = [("full", "q235_div4", "defer", D4), ("judgeonly", "q235_div4", "llm_judge", ("cyberops",)),
+            ("oss120_full", "oss120_local2_v29", "defer", ("cyberops",)),
             ("oss120_judgeonly", "oss120_local2_v29", "llm_judge", ("cyberops",)),
-            ("llama8b_full", "llama8b_local2_v29", "agenticcyops", ("cyberops",)),
+            ("llama8b_full", "llama8b_local2_v29", "defer", ("cyberops",)),
             ("llama8b_judgeonly", "llama8b_local2_v29", "llm_judge", ("cyberops",))]
     out = {}
     for arm, g, cfg, doms in arms:

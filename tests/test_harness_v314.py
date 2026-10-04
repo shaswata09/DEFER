@@ -21,7 +21,7 @@ class _Stub(BaseAgent):
 def test_tool_visibility_follows_p2():
     assert len(_Stub("flat").get_tools_for_llm()) == 2
     assert len(_Stub("llm_judge").get_tools_for_llm()) == 2     # JUDGEONLY: no P2
-    assert len(_Stub("agenticcyops").get_tools_for_llm()) == 1
-    a = _Stub("agenticcyops")
+    assert len(_Stub("defer").get_tools_for_llm()) == 1
+    a = _Stub("defer")
     a.show_all_tools = True                                      # set by the host under -P2
     assert len(a.get_tools_for_llm()) == 2

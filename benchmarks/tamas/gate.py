@@ -91,9 +91,9 @@ class Gate:
             out = {"allow": False, "mechanism": reason, "tier": "content_dependent"}
             self.log({**base, **out}); return out
         incident = {"incident_id": req["trial_id"], "description": evidence}
-        msg = message(proposal, incident, "agenticcyops", True, req["trial_id"])
+        msg = message(proposal, incident, "defer", True, req["trial_id"])
         sanitized = json.loads(msg)["proposal"]
-        ctx = {"incident_id": req["trial_id"], "incident": {"description": evidence}, "config": "agenticcyops"}
+        ctx = {"incident_id": req["trial_id"], "incident": {"description": evidence}, "config": "defer"}
         res = asyncio.run(self.panel.validate_with_details(sanitized, ctx))
         votes = {v.validator_id: v.decision for v in res.votes}
         out = {"allow": bool(res.approved),

@@ -2,10 +2,10 @@
 Domain-agnostic attack execution harness.
 
 Usage:
-    python -m attacks.harness --domain cyberops --ap ap1 --config agenticcyops --trials 6
+    python -m attacks.harness --domain cyberops --ap ap1 --config defer --trials 6
     python -m attacks.harness --domain cyberops --eval A --config all --trials 6
     python -m attacks.harness --domain cyberops --benign --config all --trials 5
-    python -m attacks.harness --domain cyberops --ap ap1 --config agenticcyops --trials 1 --verbose
+    python -m attacks.harness --domain cyberops --ap ap1 --config defer --trials 1 --verbose
 """
 
 import argparse
@@ -16,7 +16,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Optional
 
-from config import BASE_DIR, MODELS_DIR, RESULTS_DIR
+from config import BASE_DIR, MODELS_DIR, RESULTS_DIR, canonical_config
 from logging_utils import ExperimentLogger
 from logging_utils.run_metadata import build_run_header
 from host.orchestrator import SOARHost
@@ -67,17 +67,17 @@ RESULT_COLUMNS = ["domain", "ap", "variant", "trial", "config", "group",
                   "outcome", "blocked_by", "collateral_denials", "task_completed",
                   "latency_s", "primary_tokens", "validator_tokens", "seed",
                   "exposed", "channel"]
-# Variants that run the agenticcyops stack with one setting changed (E1, E9,
+# Variants that run the defer stack with one setting changed (E1, E9,
 # E16, E17). The orchestrator maps each label to the stack plus a flag, so the
 # deployed configuration's behaviour is untouched.
-_STACK_VARIANTS = ("agenticcyops_noautoapprove", "agenticcyops_gate_permissive",
-                   "p2_judge", "agenticcyops_writejudge")
-CONFIGS = ["flat", "acl_hardened", "agenticcyops", "llm_judge", "symbolic_only",
+_STACK_VARIANTS = ("defer_noautoapprove", "defer_gate_permissive",
+                   "p2_judge", "defer_writejudge")
+CONFIGS = ["flat", "acl_hardened", "defer", "llm_judge", "symbolic_only",
            *_STACK_VARIANTS]
-# configs that share the agenticcyops enforcement stack
-_STACK_CONFIGS = ("agenticcyops", "symbolic_only", *_STACK_VARIANTS)
+# configs that share the defer enforcement stack
+_STACK_CONFIGS = ("defer", "symbolic_only", *_STACK_VARIANTS)
 # configs that need the validator panel wired up
-_PANEL_CONFIGS = ("agenticcyops", "llm_judge", *_STACK_VARIANTS)
+_PANEL_CONFIGS = ("defer", "llm_judge", *_STACK_VARIANTS)
 AGENT_CLASSES = {
     "monitor": MonitorAgent,
     "analyze": AnalyzeAgent,
@@ -288,7 +288,7 @@ class AttackHarness:
             self.agents[phase] = AgentCls(**agent_kwargs)
             self.agents[phase].set_temperature(self.temperature)
 
-        # Build consensus (agenticcyops + llm_judge ablation + stack variants)
+        # Build consensus (defer + llm_judge ablation + stack variants)
         consensus = None
         if config in _PANEL_CONFIGS:
             try:
@@ -297,7 +297,7 @@ class AttackHarness:
                 if verbose:
                     print(f"  Consensus init failed: {e}")
 
-        # Load shared embedding model for P2-L2/P2-L3 (agenticcyops only;
+        # Load shared embedding model for P2-L2/P2-L3 (defer only;
         # llm_judge ablation skips P2 so doesn't need embeddings)
         embedding_model = None
         if config in _STACK_CONFIGS:
@@ -446,7 +446,7 @@ class AttackHarness:
         channel = "" if ap == "benign" else str(meta.get("channel") or "alert_text")
         start = time.perf_counter()
 
-        # Isolated mode resets defense state (and, for agenticcyops, deletes
+        # Isolated mode resets defense state (and, for defer, deletes
         # trial-tagged memory docs) at the start of each incident.  That reset
         # must run BEFORE the harness seeds the memory injection, or it deletes
         # the just-planted record; so reset here, then seed, then run the
@@ -808,9 +808,10 @@ async def main():
     parser.add_argument("--domain", required=True, choices=["cyberops", "healthcare", "finance", "legal"])
     parser.add_argument("--ap", help="Specific attack path (ap1-ap6)")
     parser.add_argument("--eval", help="Evaluation suite (A=all CyberOps APs, F=domain-specific)")
-    parser.add_argument("--config", default="agenticcyops",
-                        help="flat, acl_hardened, agenticcyops, llm_judge, symbolic_only, "
-                              "or all (= flat, acl_hardened, agenticcyops)")
+    parser.add_argument("--config", default="defer", type=canonical_config,
+                        help="flat, acl_hardened, defer, llm_judge, symbolic_only, "
+                              "or all (= flat, acl_hardened, defer); the recorded "
+                              "agenticcyops[_<variant>] is read as defer[_<variant>]")
     parser.add_argument("--trials", type=int, default=3, help="Trials per variant (default 3)")
     parser.add_argument("--benign", action="store_true", help="Run benign scenarios only")
     parser.add_argument("--verbose", action="store_true")
@@ -823,7 +824,7 @@ async def main():
     parser.add_argument("--disable-principles", default="",
                         help="Comma-separated list of principles (P1-P5) "
                               "to disable for ablation studies. Only "
-                              "affects the agenticcyops config. "
+                              "affects the defer config. "
                               "Example: --disable-principles P3,P5")
     parser.add_argument("--api-key-env", default="",
                         help="Env-var name to read the primary LLM's API key "

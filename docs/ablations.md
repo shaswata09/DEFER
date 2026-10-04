@@ -14,13 +14,13 @@ Two paths, both driven by [scripts/run_ablations.sh](../scripts/run_ablations.sh
 | **`postonly`** (recommended first) | ~30s, no LLM | **Upper-bound** −Pn ASR per principle, derived from the existing `results.csv` of the full-stack run. Defensible paper claim: "removing Pn would increase ASR by AT MOST X pp." |
 | **`rerun`** | hours, $$ | **Exact** counterfactual via `attacks.harness --disable-principles`. Required for tight (lower-bound) numbers and for single-principle isolation. |
 
-The production attack-runner [scripts/run_attack_paths.sh](../scripts/run_attack_paths.sh) only runs the canonical trio (`flat / acl_hardened / agenticcyops`); ablations live exclusively here.
+The production attack-runner [scripts/run_attack_paths.sh](../scripts/run_attack_paths.sh) only runs the canonical trio (`flat / acl_hardened / defer`); ablations live exclusively here.
 
 ---
 
 ## A. Post-hoc upper bound (`postonly`)
 
-After any production agenticcyops run finishes, derive the upper-bound −Pn ASR per principle without re-running:
+After any production defer run finishes, derive the upper-bound −Pn ASR per principle without re-running:
 
 ```bash
 ./scripts/run_ablations.sh postonly A cyberops
@@ -32,7 +32,7 @@ After any production agenticcyops run finishes, derive the upper-bound −Pn ASR
 - `results/eval_attacks/group_A/cyberops/ablation_from_logs.csv`
 - `results/eval_attacks/group_A/ablation_from_logs.md`
 
-**Output for the Group A cyberops run (scoring v2, 305 measurable agenticcyops trials of 375):**
+**Output for the Group A cyberops run (scoring v2, 305 measurable defer trials of 375):**
 
 | ablation | Pn caught | upper-bound ASR | Δ vs full |
 |---|---:|---:|---:|
@@ -85,8 +85,8 @@ Invokes `attacks.harness` with the appropriate `--disable-principles` and/or `--
 
 | token | What it does |
 |---|---|
-| `P1` ... `P5` | leave-one-out: full agenticcyops minus that principle |
-| `single_P1` ... `single_P5` | single-principle isolation: agenticcyops with only that principle active |
+| `P1` ... `P5` | leave-one-out: full defer minus that principle |
+| `single_P1` ... `single_P5` | single-principle isolation: defer with only that principle active |
 | `llm_judge` | P1 identity + P3-L6 consensus only (skips P2/P3-L0..L5/P4/P5) |
 
 **Outputs (per ablation):**
@@ -107,7 +107,7 @@ Invokes `attacks.harness` with the appropriate `--disable-principles` and/or `--
 
 ## C. Recommended order
 
-1. **Production run** of `agenticcyops` via `./scripts/run_attack_paths.sh`
+1. **Production run** of `defer` via `./scripts/run_attack_paths.sh`
 2. **Postonly ablation** to get upper-bound numbers immediately
 3. **Selective rerun** only for the ablations that matter most for the paper (typically `−P3`, `−P5`, `single_P3`, `llm_judge`) — skip the others if upper bounds already make the point
 
@@ -117,7 +117,7 @@ Invokes `attacks.harness` with the appropriate `--disable-principles` and/or `--
 
 The `Mechanism` column emitted into `results.csv` carries the layer that fired. The post-hoc analyzer prefix-matches on `P1_*`, `P2_*`, `P3_*`, `P4_*`, `P5_*` to attribute each catch:
 
-| Prefix | Layer (within agenticcyops) |
+| Prefix | Layer (within defer) |
 |---|---|
 | `P1_*` | Authenticated interface — identity, response integrity, config integrity |
 | `P2_*` | Capability scoping — manifest, parameter validator, output classifier |

@@ -4,7 +4,7 @@
 #
 # Measured per-stream throughput on this box (trials/hour/stream):
 #   flat 92.5 | acl_hardened 94.0 | symbolic_only 67.2
-#   agenticcyops 44.5 | llm_judge 20.1
+#   defer 44.5 | llm_judge 20.1
 # llm_judge is the long pole, so it starts first and everything else is
 # scheduled around it.
 #
@@ -45,7 +45,7 @@ stream() { # stream <slot> <group> <domain> <config> <trials> [tagsuffix]
 ablation() { # ablation <slot> <principle>
     local slot="$1" p="$2"
     SLOT="$slot" DISABLE_PRINCIPLES="$p" TRIALS=3 \
-        scripts/run_attack_paths.sh "$GROUP" cyberops "$APS" agenticcyops 3 \
+        scripts/run_attack_paths.sh "$GROUP" cyberops "$APS" defer 3 \
         > "logs/prog_ablation_${p}.log" 2>&1
 }
 
@@ -62,7 +62,7 @@ a0_llama8b() {
     note "A0 start: llama8b_div4 cyberops+finance x 3 configs (T=2) on A51"
     local slot=0 pids=()
     for dom in cyberops finance; do
-        for cfg in flat acl_hardened agenticcyops; do
+        for cfg in flat acl_hardened defer; do
             stream "$slot" llama8b_div4 "$dom" "$cfg" 2 & pids+=($!)
             slot=$((slot+1)); sleep 25
         done
@@ -92,7 +92,7 @@ a1_fast() {
 a2_slow() {
     note "A2 start: q235 judge+aco x 4 domains, 5 ablation arms, ASB full run"
     local slot=0 pids=()
-    for cfg in llm_judge agenticcyops; do
+    for cfg in llm_judge defer; do
         for dom in "${DOMAINS[@]}"; do
             stream "$slot" "$GROUP" "$dom" "$cfg" 3 & pids+=($!)
             slot=$((slot+1)); sleep 25
@@ -125,7 +125,7 @@ b_transfer() {
     local slot=0 pids=()
     for g in scout_div4 mistral_div3p; do
         for dom in cyberops finance; do
-            for cfg in flat acl_hardened agenticcyops; do
+            for cfg in flat acl_hardened defer; do
                 stream "$slot" "$g" "$dom" "$cfg" 2 & pids+=($!)
                 slot=$((slot+1)); sleep 25
             done

@@ -70,7 +70,7 @@ def _benign_rounds(domain: str) -> list[tuple[dict[str, str], bool]]:
     the deployed panel's actual ``auth_decision`` for that round (used to prove
     the recomposition is faithful).
     """
-    files = [str(f) for f in run_logs(BENIGN_GROUP, domain, "agenticcyops")]
+    files = [str(f) for f in run_logs(BENIGN_GROUP, domain, "defer")]
     rounds_by_tf: dict[tuple[str, str], list[tuple[dict, bool]]] = defaultdict(list)
     newest_file: dict[str, str] = {}
     for f in files:
@@ -122,7 +122,7 @@ def benign_rejection(panels) -> tuple[dict, dict, int]:
 
 
 def security_letthrough() -> dict[str, tuple[int, int]]:
-    """Per-panel ASB injected-action let-through under agenticcyops (n_success, n)."""
+    """Per-panel ASB injected-action let-through under defer (n_success, n)."""
     out = {}
     for panel in PANEL_ORDER:
         p = BASE_DIR / f"results/asb/e2e_validator_group_{BENIGN_GROUP}_{panel}/general/results.csv"
@@ -132,7 +132,7 @@ def security_letthrough() -> dict[str, tuple[int, int]]:
         n = s = 0
         with open(p) as fh:
             for row in csv.DictReader(fh):
-                if row.get("config") != "agenticcyops":
+                if row.get("config") != "defer":
                     continue
                 n += 1
                 if str(row.get("attack_succeeded_end_to_end", "")).lower() == "true":

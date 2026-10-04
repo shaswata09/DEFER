@@ -79,7 +79,7 @@ def _run(config, tmp_path, monkeypatch):
     return mma, agent, events
 
 
-@pytest.mark.parametrize("config", ["flat", "acl_hardened", "agenticcyops"])
+@pytest.mark.parametrize("config", ["flat", "acl_hardened", "defer"])
 def test_reads_run_before_the_llm_call_and_reach_the_agent(config, tmp_path, monkeypatch):
     mma, agent, events = _run(config, tmp_path, monkeypatch)
     read_calls = [c for c in mma.calls if c[0] == "/memory/read"]
@@ -91,16 +91,16 @@ def test_reads_run_before_the_llm_call_and_reach_the_agent(config, tmp_path, mon
     read = next(e for e in events if e["action"] == "memory_read")
     assert read["auth_decision"] == "allow"
     assert read["mechanism"] == {"flat": "none", "acl_hardened": "acl_network_layer",
-                                 "agenticcyops": "P5_access_control"}[config]
+                                 "defer": "P5_access_control"}[config]
     assert read["call_id"] == next(e for e in events if e["action"] == "memory_read_proposed")["call_id"]
 
 
-@pytest.mark.parametrize("config", ["flat", "acl_hardened", "agenticcyops"])
+@pytest.mark.parametrize("config", ["flat", "acl_hardened", "defer"])
 def test_scripted_writes_reach_the_store_with_config_appropriate_bypass(config, tmp_path, monkeypatch):
     mma, agent, events = _run(config, tmp_path, monkeypatch)
     writes = [p for path, p in mma.calls if path == "/memory/write"]
     stores = sorted(w["store_id"] for w in writes)
-    bypass = config != "agenticcyops"
+    bypass = config != "defer"
     assert all(w["skip_p4"] is bypass and w["skip_p5"] is bypass for w in writes)
     assert all(w["metadata"]["trial_id"] == "cyberops_ap14_v1_t1_" + config for w in writes)
     if config == "acl_hardened":
@@ -112,7 +112,7 @@ def test_scripted_writes_reach_the_store_with_config_appropriate_bypass(config, 
         assert stores == ["M1_threat_repository", "M4_audit_log"]
     ok = [e for e in events if e["action"] == "memory_write" and e["auth_decision"] == "allow"]
     assert ok and ok[0]["mechanism"] == {"flat": "none", "acl_hardened": "acl_network_layer",
-                                         "agenticcyops": "P4_memory_integrity"}[config]
+                                         "defer": "P4_memory_integrity"}[config]
     proposed = [e for e in events if e["action"] == "memory_write_proposed"]
     assert len(proposed) == 2 and all(p["scripted"] for p in proposed)
 

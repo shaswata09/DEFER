@@ -55,7 +55,7 @@ def _skeleton(p: dict, identity: bool) -> str:
     return hashlib.sha256(json.dumps(sk, sort_keys=True).encode()).hexdigest()
 
 
-def sequence(group: str, domain: str, config: str = "agenticcyops") -> list[tuple]:
+def sequence(group: str, domain: str, config: str = "defer") -> list[tuple]:
     """(trial_id, log file, incident_id, [item, ...]) in run order, one item per
     proposal that reached the stateful checks: the proposal as the host built
     it, its logged L4/L5 outcome, and whether P3 approved it.

@@ -44,9 +44,9 @@ plt.rcParams.update({
     "axes.titlesize": 13,
 })
 
-CONFIGS = ["flat", "acl_hardened", "agenticcyops"]
-CONFIG_LABELS = {"flat": "Flat MAS", "acl_hardened": "ACL-Hardened", "agenticcyops": "DEFER"}
-CONFIG_COLORS = {"flat": "#e74c3c", "acl_hardened": "#f39c12", "agenticcyops": "#2ecc71"}
+CONFIGS = ["flat", "acl_hardened", "defer"]
+CONFIG_LABELS = {"flat": "Flat MAS", "acl_hardened": "ACL-Hardened", "defer": "DEFER"}
+CONFIG_COLORS = {"flat": "#e74c3c", "acl_hardened": "#f39c12", "defer": "#2ecc71"}
 PHASES = ["monitor", "analyze", "admin", "report"]
 DOMAINS = ["cyberops", "healthcare", "finance", "legal"]
 
@@ -55,7 +55,7 @@ ACCENT = "#2980b9"
 
 # ---------------------------------------------------------------------------
 # Tool-count manifests per domain (from component_registry.json structure)
-# In agenticcyops mode each agent sees only its phase tools; in flat/acl all
+# In defer mode each agent sees only its phase tools; in flat/acl all
 # tools are visible.  These are loaded dynamically from the registry.
 # ---------------------------------------------------------------------------
 
@@ -85,7 +85,7 @@ def _total_tools(domain: str) -> int:
 
 
 def _manifest_tools_per_phase(domain: str) -> dict[str, int]:
-    """Tools visible per phase (agenticcyops manifest)."""
+    """Tools visible per phase (defer manifest)."""
     return {phase: len(tools) for phase, tools in TOOL_REGISTRY.get(domain, {}).items()}
 
 
@@ -230,10 +230,10 @@ def compute_enhanced_row(domain: str, config: str, group: str) -> dict[str, Any]
     # Tools visible per agent — from llm_call events or manifest
     tools_visible_vals = [e.get("tools_visible") for e in events if e.get("tools_visible") is not None]
     if tools_visible_vals:
-        # Average across LLM calls (may differ per phase in agenticcyops)
+        # Average across LLM calls (may differ per phase in defer)
         tools_visible_avg = round(sum(tools_visible_vals) / len(tools_visible_vals), 1)
     else:
-        tools_visible_avg = _total_tools(domain) if config != "agenticcyops" else 0
+        tools_visible_avg = _total_tools(domain) if config != "defer" else 0
 
     # ----- P1 metrics -----
     p1_identity_checks = _count_mechanism(events, "P1_identity", "P1_authenticated")
@@ -451,7 +451,7 @@ def chart_attack_surface(domain: str, output_dir: Path):
     for i, config in enumerate(CONFIGS):
         vals = []
         for phase in PHASES:
-            if config == "agenticcyops":
+            if config == "defer":
                 vals.append(manifest.get(phase, 0))
             else:
                 vals.append(total)
@@ -475,8 +475,8 @@ def chart_attack_surface(domain: str, output_dir: Path):
         reduction = round((1 - avg_manifest / total) * 100) if total else 0
         ax.text(0.98, 0.95, f"{reduction}% avg reduction",
                 transform=ax.transAxes, ha="right", va="top",
-                fontsize=11, color=CONFIG_COLORS["agenticcyops"], fontweight="bold",
-                bbox=dict(boxstyle="round,pad=0.3", facecolor="#eafaf1", edgecolor=CONFIG_COLORS["agenticcyops"]))
+                fontsize=11, color=CONFIG_COLORS["defer"], fontweight="bold",
+                bbox=dict(boxstyle="round,pad=0.3", facecolor="#eafaf1", edgecolor=CONFIG_COLORS["defer"]))
 
     plt.tight_layout()
     path = output_dir / "attack_surface.png"
@@ -548,7 +548,7 @@ def chart_principle_heatmap(domain: str, group: str, output_dir: Path):
 # ---------------------------------------------------------------------------
 
 def chart_fp_rates(row: dict, output_dir: Path):
-    """Bar chart showing per-principle FP rates for agenticcyops."""
+    """Bar chart showing per-principle FP rates for defer."""
     domain = row.get("domain", "unknown")
     principles = ["P1", "P2", "P3", "P4", "P5"]
     rates = [row.get(f"p{i}_fp_rate", 0) * 100 for i in range(1, 6)]
@@ -666,8 +666,8 @@ def chart_config_radar(rows: list[dict], output_dir: Path):
 # ---------------------------------------------------------------------------
 
 def chart_consensus_breakdown(domain: str, group: str, output_dir: Path):
-    """Stacked bar for consensus decisions in agenticcyops."""
-    events = load_logs(domain, "agenticcyops", group)
+    """Stacked bar for consensus decisions in defer."""
+    events = load_logs(domain, "defer", group)
     if not events:
         return None
 
@@ -749,7 +749,7 @@ def generate_summary_pdf(charts: list[Optional[Path]], rows: list[dict], domain:
         ax.plot([0.25, 0.75], [0.53, 0.53], transform=ax.transAxes, color=ACCENT, linewidth=2)
 
         # Key stats
-        aco = next((r for r in rows if r.get("config") == "agenticcyops"), None)
+        aco = next((r for r in rows if r.get("config") == "defer"), None)
         if aco:
             stats = [
                 f"Total Events: {aco.get('total_events', 0)}",
@@ -786,10 +786,10 @@ def generate_summary_pdf(charts: list[Optional[Path]], rows: list[dict], domain:
 # ---------------------------------------------------------------------------
 
 def cross_domain_analysis(group: str, output_dir: Path):
-    """Produce cross-domain CSV and comparison chart for agenticcyops."""
+    """Produce cross-domain CSV and comparison chart for defer."""
     rows = []
     for domain in DOMAINS:
-        row = compute_enhanced_row(domain, "agenticcyops", group)
+        row = compute_enhanced_row(domain, "defer", group)
         if row:
             rows.append(row)
 
@@ -898,7 +898,7 @@ def run_analytics(domain: str, group: str, output_dir: Path):
     charts.append(chart_attack_surface(domain, output_dir))
     charts.append(chart_principle_heatmap(domain, group, output_dir))
 
-    aco_row = next((r for r in rows if r["config"] == "agenticcyops"), None)
+    aco_row = next((r for r in rows if r["config"] == "defer"), None)
     if aco_row:
         charts.append(chart_fp_rates(aco_row, output_dir))
     else:

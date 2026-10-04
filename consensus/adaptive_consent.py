@@ -375,7 +375,7 @@ class AdaptiveConsentModel:
     def _get_hmac_key() -> str:
         """Load HMAC key from environment or file."""
         import os
-        key = os.environ.get("AGENTICCYOPS_HMAC_KEY", "")
+        key = os.environ.get("DEFER_HMAC_KEY", "") or os.environ.get("AGENTICCYOPS_HMAC_KEY", "")
         if not key:
             key_path = BASE_DIR / "configs" / "hmac_key.txt"
             if key_path.exists():

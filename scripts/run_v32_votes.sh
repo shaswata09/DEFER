@@ -60,10 +60,11 @@ query() {  # query <validator> <port> [extra args]
     done
     note "votes: $v done"
 }
-query L1_mistral 8101 &
-query L2_gemma 8102 &
-query L3_gptoss 8103 --reasoning-effort low &
-query L4_scout 8104 &
-wait
+pids=()
+query L1_mistral 8101 & pids+=($!)
+query L2_gemma 8102 & pids+=($!)
+query L3_gptoss 8103 --reasoning-effort low & pids+=($!)
+query L4_scout 8104 & pids+=($!)
+wait "${pids[@]}"   # the queries only: a bare wait also waits on the judge servers
 for p in 8101 8102 8103 8104; do stop_port $p; done
 note "votes: COMPLETE"

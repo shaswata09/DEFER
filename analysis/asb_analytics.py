@@ -7,7 +7,7 @@ requested groups, then produces:
   * ``asb_headline_asr.csv``        -- ASR by (config, attack_type)
   * ``asb_by_subtype.csv``          -- ASR by (config, attack_type, subtype)
   * ``asb_by_scenario.csv``         -- ASR by (config, scenario)
-  * ``asb_mechanisms.csv``          -- mechanism distribution under agenticcyops
+  * ``asb_mechanisms.csv``          -- mechanism distribution under defer
 
 ASB has a single neutral domain ("general"). The script supports one or
 several groups; when given a list, the headline tables are averaged.
@@ -40,10 +40,10 @@ plt.rcParams.update({
 })
 
 CONFIG_LABEL = {"flat": "Flat MAS", "acl_hardened": "ACL-Hardened",
-                "agenticcyops": "DEFER (P1-P5)"}
+                "defer": "DEFER (P1-P5)"}
 CONFIG_COLOR = {"flat": "#e74c3c", "acl_hardened": "#f39c12",
-                "agenticcyops": "#2ecc71"}
-CONFIG_ORDER = ["flat", "acl_hardened", "agenticcyops"]
+                "defer": "#2ecc71"}
+CONFIG_ORDER = ["flat", "acl_hardened", "defer"]
 ATTACK_ORDER = ["DPI", "IPI", "MP", "PoT"]
 ATTACK_LABEL = {"DPI": "Direct Prompt Injection",
                 "IPI": "Indirect Prompt Injection",
@@ -65,7 +65,7 @@ def load_group_csv(group: str) -> pd.DataFrame:
     if "flat" not in set(df.config):
         # paired panel replays only re-run the defense; the flat arm is the
         # primary output itself (attack_succeeded_llm), as in the live runs
-        flat = df[df.config == "agenticcyops"].copy()
+        flat = df[df.config == "defer"].copy()
         flat["config"] = "flat"
         flat["attack_succeeded_end_to_end"] = flat["attack_succeeded_llm"]
         flat[["defense_evaluated", "defense_blocked"]] = False
@@ -102,7 +102,7 @@ def by_scenario(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def mech_table(df: pd.DataFrame) -> pd.DataFrame:
-    acy = df[df.config == "agenticcyops"].copy()
+    acy = df[df.config == "defer"].copy()
     acy["bucket"] = "not blocked (no mechanism)"
     blocked = acy.defense_blocked.fillna(False).astype(bool)
     acy.loc[blocked, "bucket"] = acy.loc[blocked, "defense_mechanism"].fillna("blocked_unknown")
@@ -171,7 +171,7 @@ def _draw_subtype_table(pdf, df):
     ax.axis("off")
     ax.set_title("ASR by attack subtype", loc="left", fontsize=13)
     rows = [["Attack", "Subtype", "n",
-              CONFIG_LABEL["flat"], CONFIG_LABEL["acl_hardened"], CONFIG_LABEL["agenticcyops"]]]
+              CONFIG_LABEL["flat"], CONFIG_LABEL["acl_hardened"], CONFIG_LABEL["defer"]]]
     for (a, s), grp in sub.groupby(["attack_type","attack_subtype"]):
         n = int(grp.n.iloc[0])
         cells = [a, s, f"{n}"]

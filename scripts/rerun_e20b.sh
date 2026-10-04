@@ -59,7 +59,7 @@ done
 
 note "E20b rerun: reversed AP sequence, 2 variants each, one persistent state"
 STATE_MODE=persistent RUN_TAG="$TAG" MAX_VARIANTS=2 SEED=4242 TRIALS=1 SLOT=0 \
-    SKIP_REPORT=1 scripts/run_attack_paths.sh "$G" cyberops "$APS" agenticcyops 1 \
+    SKIP_REPORT=1 scripts/run_attack_paths.sh "$G" cyberops "$APS" defer 1 \
     > logs/e20b_rerun_attacks.log 2>&1
 
 got=$(rows attack)
@@ -76,7 +76,7 @@ fi
 
 note "attack pass complete; benign tail in the same persistent state"
 STATE_MODE=persistent RUN_TAG="$TAG" TRIALS=1 SLOT=0 SKIP_REPORT=1 \
-    scripts/run_attack_paths.sh "$G" cyberops benign agenticcyops 1 \
+    scripts/run_attack_paths.sh "$G" cyberops benign defer 1 \
     > logs/e20b_rerun_benign.log 2>&1
 
 gotb=$(rows benign)

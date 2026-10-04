@@ -37,7 +37,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from analysis.runlogs import run_logs
-from config import BASE_DIR
+from config import BASE_DIR, canonical_trial_id
 
 DOMAINS = ("cyberops", "healthcare", "finance", "legal")
 MEASURABLE = ("executed", "blocked", "not_attempted")
@@ -80,7 +80,7 @@ def trial_rounds(group: str, domain: str, config: str,
                     e = json.loads(ln)
                 except json.JSONDecodeError:
                     continue
-                tid = e.get("trial_id")
+                tid = canonical_trial_id(e.get("trial_id"))   # matched to _trial_id(t)
                 if not tid:
                     continue
                 if tid not in seen_trials:

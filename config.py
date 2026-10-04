@@ -86,6 +86,33 @@ def env_url(name: str, default: str | None = None) -> str:
     raise KeyError(f"environment variable {name} is not set (see .env.example)")
 
 
+# The runs recorded the full stack (and its variants) under the project's
+# earlier name. Logs, cached judge inputs and log file names keep it as
+# recorded (the judges saw it, so the cached votes are keyed on it); code reads
+# it as ``defer`` and accepts it on the command line.
+RECORDED_FULL = "agenticcyops"
+
+
+def canonical_config(config):
+    """``defer`` for the full stack as recorded (``agenticcyops``, and
+    ``agenticcyops_<variant>`` -> ``defer_<variant>``); any other value as is."""
+    if isinstance(config, str) and (config == RECORDED_FULL or config.startswith(RECORDED_FULL + "_")):
+        return "defer" + config[len(RECORDED_FULL):]
+    return config
+
+
+def canonical_trial_id(tid):
+    """A logged ``<domain>_<ap>_v<n>_t<k>_<config>`` trial id with its config
+    read as :func:`canonical_config` (the logs keep the recorded id), so it
+    matches an id rebuilt from a results row."""
+    if not isinstance(tid, str):
+        return tid
+    parts = tid.split("_")
+    if len(parts) < 5:
+        return tid
+    return "_".join(parts[:4] + [canonical_config("_".join(parts[4:]))])
+
+
 def model_display_name(model: str | None) -> str:
     """Strip host paths from a model identifier for logs and headers.
 

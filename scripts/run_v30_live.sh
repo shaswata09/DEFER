@@ -35,19 +35,19 @@ run() {  # run <group> <domain> <slot> <aps> <config> [benign]
 note "start (RUN_TAG=$RUN_TAG)"
 pids=()
 G=q235_local2
-run $G cyberops 0 "$C1" agenticcyops benign & pids+=($!); sleep 12
-run $G cyberops 1 "$C2" agenticcyops &        pids+=($!); sleep 12
-run $G cyberops 2 "$C3" agenticcyops &        pids+=($!); sleep 12
+run $G cyberops 0 "$C1" defer benign & pids+=($!); sleep 12
+run $G cyberops 1 "$C2" defer &        pids+=($!); sleep 12
+run $G cyberops 2 "$C3" defer &        pids+=($!); sleep 12
 run $G cyberops 3 "$C1" llm_judge benign &    pids+=($!); sleep 12
 run $G cyberops 4 "$C2" llm_judge &           pids+=($!); sleep 12
 run $G cyberops 5 "$C3" llm_judge &           pids+=($!); sleep 12
 for d in finance healthcare legal; do
-    run $G "$d" 0 "$H1" agenticcyops benign & pids+=($!); sleep 12
-    run $G "$d" 1 "$H2" agenticcyops &        pids+=($!); sleep 12
+    run $G "$d" 0 "$H1" defer benign & pids+=($!); sleep 12
+    run $G "$d" 1 "$H2" defer &        pids+=($!); sleep 12
 done
 G=llama8b_local2
-run $G cyberops 0 "$H1" agenticcyops benign & pids+=($!); sleep 12
-run $G cyberops 1 "$H2" agenticcyops &        pids+=($!); sleep 12
+run $G cyberops 0 "$H1" defer benign & pids+=($!); sleep 12
+run $G cyberops 1 "$H2" defer &        pids+=($!); sleep 12
 run $G cyberops 2 "$H1" llm_judge benign &    pids+=($!); sleep 12
 run $G cyberops 3 "$H2" llm_judge &           pids+=($!); sleep 12
 for p in "${pids[@]}"; do wait "$p"; done

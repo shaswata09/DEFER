@@ -43,7 +43,7 @@ def shipped_embedding_model():
     return SentenceTransformer(str(MODELS_DIR / "Qwen" / "Qwen3-Embedding-0.6B"), device="cpu")
 
 
-def evaluate(group: str = "q235_div4", config: str = "agenticcyops", domains=DOMAINS,
+def evaluate(group: str = "q235_div4", config: str = "defer", domains=DOMAINS,
              embedding_model="shipped", skip=None) -> dict:
     """``embedding_model``: the shipped model by default. Without one, P2.2 is
     substring-only and does not reproduce the logged decisions (every logged

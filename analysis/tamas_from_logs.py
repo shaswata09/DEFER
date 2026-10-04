@@ -116,13 +116,13 @@ TAMAS_ATTACK_LABELS = {
 CONFIG_LABELS = {
     "flat":         "Flat MAS",
     "acl_hardened": "ACL-Hardened",
-    "agenticcyops": "DEFER (P1-P5)",
+    "defer": "DEFER (P1-P5)",
 }
 
 CONFIG_COLORS = {
     "flat":         "#e74c3c",
     "acl_hardened": "#f39c12",
-    "agenticcyops": "#2ecc71",
+    "defer": "#2ecc71",
 }
 
 
@@ -326,7 +326,7 @@ def _page_title(
         headers = ["Group", "Config", "ASR", "TSR", "ERS", "FP blocks"]
         rows = []
         for g in groups:
-            for cfg in ("flat", "acl_hardened", "agenticcyops"):
+            for cfg in ("flat", "acl_hardened", "defer"):
                 sub = per_config_all[(per_config_all["group"] == g)
                                      & (per_config_all["config"] == cfg)]
                 if sub.empty:
@@ -424,7 +424,7 @@ def _page_per_category_bars(
     pivot = pivot.reindex(
         [c for c in TAMAS_ATTACK_ORDER if c in pivot.index]
     )
-    pivot = pivot[[c for c in ("flat", "acl_hardened", "agenticcyops") if c in pivot.columns]]
+    pivot = pivot[[c for c in ("flat", "acl_hardened", "defer") if c in pivot.columns]]
 
     fig, ax = plt.subplots(figsize=(11, 5.5))
     x = np.arange(len(pivot))
@@ -549,7 +549,7 @@ def _page_methodology(
         f"Groups covered: {', '.join(groups)}  (n={len(groups)})",
         f"Domains pooled: {', '.join(domains)}  (n={len(domains)})",
         f"Total cells:    {n_cells}  (group x domain)",
-        "Configs:        flat, acl_hardened, agenticcyops",
+        "Configs:        flat, acl_hardened, defer",
         "",
         "Attack paths -> TAMAS categories (see mapping page):",
         "  15 APs covering 35 attack vectors mapped to TAMAS' 6",
@@ -651,7 +651,7 @@ def generate(
     ).reset_index()
 
     # Preserve config ordering for plots/tables.
-    cfg_order = {"flat": 0, "acl_hardened": 1, "agenticcyops": 2}
+    cfg_order = {"flat": 0, "acl_hardened": 1, "defer": 2}
     agg_per_config["_ord"] = agg_per_config["config"].map(cfg_order).fillna(99)
     agg_per_config = agg_per_config.sort_values("_ord").drop(columns="_ord").reset_index(drop=True)
 
@@ -692,7 +692,7 @@ def generate(
         _page_per_category_bars(pdf, per_cat_all)
         _page_per_category_heatmap(pdf, per_cat_all, "flat")
         _page_per_category_heatmap(pdf, per_cat_all, "acl_hardened")
-        _page_per_category_heatmap(pdf, per_cat_all, "agenticcyops")
+        _page_per_category_heatmap(pdf, per_cat_all, "defer")
         _page_ap_mapping(pdf)
         _page_coverage(pdf, per_cat_all)
         _page_methodology(pdf, per_cfg_all, meta_by_group)
@@ -745,7 +745,7 @@ def _build_markdown(
     lines.append("| Group | Domain | Config | ASR | TSR | ERS | FP blocks |")
     lines.append("|---|---|---|---|---|---|---|")
     # Stable sort by (group, domain, config-order)
-    cfg_ord = {"flat": 0, "acl_hardened": 1, "agenticcyops": 2}
+    cfg_ord = {"flat": 0, "acl_hardened": 1, "defer": 2}
     sorted_rows = per_cfg.assign(
         _o=per_cfg["config"].map(cfg_ord).fillna(99)
     ).sort_values(["group", "domain", "_o"]).drop(columns="_o")
@@ -763,7 +763,7 @@ def _build_markdown(
                           values="mean_asr").reindex(
         [c for c in TAMAS_ATTACK_ORDER if c in cat_table["tamas_category"].unique()]
     )
-    cols = [c for c in ("flat", "acl_hardened", "agenticcyops") if c in pivot.columns]
+    cols = [c for c in ("flat", "acl_hardened", "defer") if c in pivot.columns]
     pivot = pivot[cols]
     lines.append("| TAMAS category | " + " | ".join(CONFIG_LABELS.get(c, c) for c in pivot.columns) + " |")
     lines.append("|---|" + "|".join(["---"] * len(pivot.columns)) + "|")

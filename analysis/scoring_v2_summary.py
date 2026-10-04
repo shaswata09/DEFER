@@ -31,8 +31,8 @@ from pathlib import Path
 from config import BASE_DIR
 
 ROOT = BASE_DIR / "results" / "eval_attacks"
-CONFIGS = ["flat", "acl_hardened", "agenticcyops"]
-CONFIG_LABELS = {"flat": "Flat MAS", "acl_hardened": "ACL-Hardened", "agenticcyops": "DEFER"}
+CONFIGS = ["flat", "acl_hardened", "defer"]
+CONFIG_LABELS = {"flat": "Flat MAS", "acl_hardened": "ACL-Hardened", "defer": "DEFER"}
 DOMAINS = ["cyberops", "healthcare", "finance", "legal"]
 MAIN_GROUPS = ["A", "B", "C", "D", "E"]          # large primaries
 SMALL_GROUPS = ["G", "H", "I", "J"]         # small / mid primaries
@@ -159,7 +159,7 @@ def main() -> None:
         per_g = []
         for g in MAIN_GROUPS:
             t = tally([r for r in valid if r["group"] == g and r["domain"] == d
-                       and r["Config"] == "agenticcyops"])
+                       and r["Config"] == "defer"])
             if t["asr"] is not None:
                 per_g.append(t["asr"])
         rng = f"{min(per_g):.1f}% to {max(per_g):.1f}% (n={len(per_g)} groups)" if per_g else "n/a"
@@ -172,7 +172,7 @@ def main() -> None:
     for g in sorted({r["group"] for r in rows}):
         cells = []
         for d in DOMAINS:
-            rs = [r for r in rows if r["group"] == g and r["domain"] == d and r["Config"] == "agenticcyops"]
+            rs = [r for r in rows if r["group"] == g and r["domain"] == d and r["Config"] == "defer"]
             if not rs:
                 cells.append("--")
             elif (g, d) in bad:
@@ -196,7 +196,7 @@ def main() -> None:
                                  and r["AP"] == ap and r["Config"] == cfg]) for cfg in CONFIGS}
             if not any(s["n"] for s in stats.values()):
                 continue
-            a = stats["agenticcyops"]
+            a = stats["defer"]
             if a["measurable"] == 0:
                 note = "not measurable"
             elif stats["flat"]["asr"] == 0:
@@ -236,7 +236,7 @@ def main() -> None:
 
     # ---- mechanisms ---------------------------------------------------------
     md.append("## 6. What stops attacks under DEFER (valid runs, all groups)\n")
-    aco = [r for r in valid if r["Config"] == "agenticcyops"]
+    aco = [r for r in valid if r["Config"] == "defer"]
     blocked = [r for r in aco if r["Outcome"] == "blocked"]
     mech = Counter(r["Mechanism"] for r in blocked)
     princ = Counter((m[:2] if m[:2] in ("P1", "P2", "P3", "P4", "P5") else "other") for m in mech.elements())
@@ -290,7 +290,7 @@ def main() -> None:
         per_cfg = {cfg: tally([r for r in valid if r["Config"] == cfg and pred(_pos(r))])
                    for cfg in CONFIGS}
         rs = [r for r in aco if pred(_pos(r))]
-        t2 = per_cfg["agenticcyops"]
+        t2 = per_cfg["defer"]
         cross_n = sum(1 for r in rs if r["Outcome"] == "blocked" and r["Mechanism"] in CROSS_TRIAL_MECHANISMS)
         md.append(f"| {label} | {fmt(per_cfg['flat']['asr'])} | {fmt(per_cfg['acl_hardened']['asr'])} | "
                   f"**{fmt(t2['asr'])}** | {t2['measurable']:,} | {t2['succeeded']:,} | {t2['blocked']:,} | "

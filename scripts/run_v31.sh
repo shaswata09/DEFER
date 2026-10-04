@@ -32,8 +32,8 @@ run() {  # run <domain> <slot> <aps> <config> [benign]
 note "start (RUN_TAG=$RUN_TAG)"
 pids=()
 for d in cyberops healthcare finance legal; do
-    run "$d" 0 "$H1" agenticcyops benign & pids+=($!); sleep 8
-    run "$d" 1 "$H2" agenticcyops &        pids+=($!); sleep 8
+    run "$d" 0 "$H1" defer benign & pids+=($!); sleep 8
+    run "$d" 1 "$H2" defer &        pids+=($!); sleep 8
     run "$d" 2 "$H1" llm_judge benign &    pids+=($!); sleep 8
     run "$d" 3 "$H2" llm_judge &           pids+=($!); sleep 8
     run "$d" 4 "$ALL" flat benign &        pids+=($!); sleep 8

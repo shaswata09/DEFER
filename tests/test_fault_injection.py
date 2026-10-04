@@ -85,7 +85,7 @@ def _run(config, tmp_path, monkeypatch, injection, registry=None, approve=True):
 def test_toctou_is_denied_by_l7_before_execution(tmp_path, monkeypatch):
     reg = SignedRegistry(KEY)
     inj = {"fault": {"kind": "toctou", "tool": "T9_firewall", "phase": "admin", "mutate": {"target": "10.0.8.200"}}}
-    ctx, ev = _run("agenticcyops", tmp_path, monkeypatch, inj, registry=reg)
+    ctx, ev = _run("defer", tmp_path, monkeypatch, inj, registry=reg)
     denies = [e for e in ev if e["action"] == "tool_call" and e["auth_decision"] == "deny"]
     assert denies and denies[0]["mechanism"] == "P3_execution_verification"
     assert denies[0]["l7_reason"] == "P3_toctou_mismatch"
@@ -111,7 +111,7 @@ def test_toctou_tool_swap(tmp_path, monkeypatch):
     reg = SignedRegistry(KEY)
     inj = {"fault": {"kind": "toctou", "tool": "T9_firewall", "swap_tool": "T8_iam_pam",
                      "mutate": {"action": "revoke", "target_user": "svc"}}}
-    ctx, ev = _run("agenticcyops", tmp_path, monkeypatch, inj, registry=reg)
+    ctx, ev = _run("defer", tmp_path, monkeypatch, inj, registry=reg)
     denies = [e for e in ev if e["action"] == "tool_call" and e["auth_decision"] == "deny"]
     assert denies and denies[0]["destination"] == "T8_iam_pam" and denies[0]["l7_reason"] == "P3_toctou_mismatch"
     assert reg.calls == []
@@ -121,12 +121,12 @@ def test_forged_response_is_rejected_by_p1_l2_signature(tmp_path, monkeypatch):
     reg = SignedRegistry(KEY)
     inj = {"fault": {"kind": "forged_response", "tool": "T9_firewall",
                      "response": {"status": "success", "result": {"applied": True, "reference": "CANARY-x"}}}}
-    ctx, ev = _run("agenticcyops", tmp_path, monkeypatch, inj, registry=reg)
+    ctx, ev = _run("defer", tmp_path, monkeypatch, inj, registry=reg)
     assert len(reg.calls) == 1                                    # the tool did run
     denies = [e for e in ev if e["action"] == "tool_call" and e["auth_decision"] == "deny"]
     assert denies and denies[0]["p1l2_reason"] == "P1_response_unsigned"
     # without the fault the signed response passes
-    ctx, ev = _run("agenticcyops", tmp_path, monkeypatch, {}, registry=SignedRegistry(KEY))
+    ctx, ev = _run("defer", tmp_path, monkeypatch, {}, registry=SignedRegistry(KEY))
     assert [e for e in ev if e["action"] == "tool_call" and e["auth_decision"] == "allow"]
     assert not [e for e in ev if e["action"] == "tool_call" and e["auth_decision"] == "deny"]
 
@@ -145,7 +145,7 @@ def test_config_tamper_aborts_the_incident_without_touching_disk(tmp_path, monke
     before = path.read_bytes()
     inj = {"fault": {"kind": "config_tamper", "file": "asset_criticality.json",
                      "patch": [{"path": ["assets", "domain_controllers", "10.0.8.200", "criticality"], "value": "low"}]}}
-    ctx, ev = _run("agenticcyops", tmp_path, monkeypatch, inj, registry=SignedRegistry(KEY))
+    ctx, ev = _run("defer", tmp_path, monkeypatch, inj, registry=SignedRegistry(KEY))
     assert ctx["status"] == "config_integrity_failure"
     assert path.read_bytes() == before
     cv = [e for e in ev if e["action"] == "config_verification"]
@@ -153,7 +153,7 @@ def test_config_tamper_aborts_the_incident_without_touching_disk(tmp_path, monke
     # the oracle scores the aborted incident as blocked by P1-L3
     payload = {"success_criteria": {"attacker_phase": "admin", "effects": [
         {"kind": "tool_exec", "tool": "T9_firewall", "phases": ["admin"], "args": {"target": "10.0.8.200"}}]}}
-    v = evaluate_effects(payload, ev, "agenticcyops")
+    v = evaluate_effects(payload, ev, "defer")
     assert v.outcome == OUTCOME_BLOCKED and v.blocked_by == "P1_config_integrity_violation"
     # under flat there is no integrity check: the incident runs
     ctx, ev = _run("flat", tmp_path, monkeypatch, inj, registry=SignedRegistry(KEY), approve=False)

@@ -31,16 +31,16 @@ from config import BASE_DIR
 OUT = BASE_DIR / "cache" / "replay_rep"
 D4 = DOMAINS
 PANEL_FREE = {"FLAT": "flat", "ACL": "acl_hardened", "NOJUDGE": "symbolic_only"}
-JUDGED = {"JUDGEONLY": ("llm_judge", "rep_judgeonly"), "FULL": ("agenticcyops", "rep_full")}
+JUDGED = {"JUDGEONLY": ("llm_judge", "rep_judgeonly"), "FULL": ("defer", "rep_full")}
 _PRIM_ARM = {"gpt-oss-120b": "rep_oss120", "Llama-3.1-8B": "rep_llama8b"}
 # (label, group, config, domains, suffix, include_unjudged)
-ARMS = [("rep_full", REPORTED, "agenticcyops", D4, "", True),
+ARMS = [("rep_full", REPORTED, "defer", D4, "", True),
         ("rep_judgeonly", REPORTED, "llm_judge", D4, "", False),
         # leave-one-out (CyberOps, v3.2); -P3 has no panel
-        *[(f"rep_full_minus_p{i}", ABLATION[i], "agenticcyops", ("cyberops",), "", False)
+        *[(f"rep_full_minus_p{i}", ABLATION[i], "defer", ("cyberops",), "", False)
           for i in (1, 2, 4, 5)],
         *[(f"{_PRIM_ARM[m]}_{a}", g, cfg, ("cyberops",), "", a == "full")
-          for m, g in PRIMARIES.items() for a, cfg in (("full", "agenticcyops"), ("judgeonly", "llm_judge"))]]
+          for m, g in PRIMARIES.items() for a, cfg in (("full", "defer"), ("judgeonly", "llm_judge"))]]
 
 
 def build() -> None:
@@ -74,7 +74,7 @@ def load_rounds() -> dict[str, list[dict]]:
 
 def keep(domain: str) -> set[tuple[str, str]]:
     """The 75 reported variants of a domain, as (ap, 'v<n>')."""
-    return {tuple(t.split("_")[1:3]) for t in trials("q235_div4", domain, "agenticcyops")
+    return {tuple(t.split("_")[1:3]) for t in trials("q235_div4", domain, "defer")
             if "_benign_" not in t}
 
 
@@ -163,11 +163,11 @@ def tables() -> dict:
             a4 = [t for t in o["domains"][d]["attack"] if (t["ap"], t["variant"]) in kv[d]]
             r[label] = {**row(a4, Counter(o["domains"][d]["benign"])),
                         "missing_votes": o["missing_votes"], "live_local2": live}
-        je = outcomes("rep_full", REPORTED, "agenticcyops", (d,), "", "Local4", V, R.get("rep_full", []),
+        je = outcomes("rep_full", REPORTED, "defer", (d,), "", "Local4", V, R.get("rep_full", []),
                       judge_everything=True)
         a4 = [t for t in je["domains"][d]["attack"] if (t["ap"], t["variant"]) in kv[d]]
         r["JUDGEREST"] = row(a4, Counter(je["domains"][d]["benign"]))
-        for label, cfg in (("FULL", "agenticcyops"), ("JUDGEONLY", "llm_judge")):
+        for label, cfg in (("FULL", "defer"), ("JUDGEONLY", "llm_judge")):
             r[label]["judged"] = judged_fraction(REPORTED, cfg, (d,), kv)
         r["previous_v31"] = {k: (prev.get(d, {}).get(k) or {}).get("asr")
                              for k in ("FLAT", "ACL", "JUDGEONLY", "NOJUDGE", "FULL")}
@@ -192,20 +192,20 @@ def tables() -> dict:
 def ablation(V, R, kv) -> dict:
     """Leave-one-out, CyberOps, v3.2: each arm beside FULL on the same variants."""
     out = {}
-    o = outcomes("rep_full", REPORTED, "agenticcyops", ("cyberops",), "", "Local4", V, R.get("rep_full", []))
+    o = outcomes("rep_full", REPORTED, "defer", ("cyberops",), "", "Local4", V, R.get("rep_full", []))
     full_att = [t for t in o["domains"]["cyberops"]["attack"] if (t["ap"], t["variant"]) in kv]
     out["FULL"] = {**row(full_att, Counter(o["domains"]["cyberops"]["benign"])),
-                   **_any_denial(REPORTED, o), "judged": judged_fraction(REPORTED, "agenticcyops", ("cyberops",), {"cyberops": kv})["attack"]["judged_pct"]}
+                   **_any_denial(REPORTED, o), "judged": judged_fraction(REPORTED, "defer", ("cyberops",), {"cyberops": kv})["attack"]["judged_pct"]}
     for i, g in ABLATION.items():
         arm = f"rep_full_minus_p{i}"
         if i == 3:                                    # no panel without P3
-            att, ben = as_run(g, "cyberops", "agenticcyops", kv)
+            att, ben = as_run(g, "cyberops", "defer", kv)
             rec = {**row(att, ben), "any_denial": pct(ben["incidents_with_denial"], ben["incidents"])}
         else:
-            oi = outcomes(arm, g, "agenticcyops", ("cyberops",), "", "Local4", V, R.get(arm, []))
+            oi = outcomes(arm, g, "defer", ("cyberops",), "", "Local4", V, R.get(arm, []))
             att = [t for t in oi["domains"]["cyberops"]["attack"] if (t["ap"], t["variant"]) in kv]
             rec = {**row(att, Counter(oi["domains"]["cyberops"]["benign"])), **_any_denial(g, oi)}
-        rec["judged"] = judged_fraction(g, "agenticcyops", ("cyberops",), {"cyberops": kv})["attack"]["judged_pct"]
+        rec["judged"] = judged_fraction(g, "defer", ("cyberops",), {"cyberops": kv})["attack"]["judged_pct"]
         out[f"minus_P{i}"] = rec
     return out
 

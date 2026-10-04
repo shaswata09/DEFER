@@ -86,7 +86,7 @@ def _load_payloads(domain: str) -> dict[tuple[str, str], dict]:
 def _parse_trial_id(tid: str) -> tuple[str, str, int, str] | None:
     """Return (ap, variant_id_full, trial_num, config) or None.
 
-    Examples: ``cyberops_ap11_v3_t1_agenticcyops``, ``cyberops_ap8_v2_t5_flat``.
+    Examples: ``cyberops_ap11_v3_t1_agenticcyops`` (config ``defer``), ``cyberops_ap8_v2_t5_flat``.
     """
     parts = tid.split("_")
     if len(parts) < 5:
@@ -102,7 +102,8 @@ def _parse_trial_id(tid: str) -> tuple[str, str, int, str] | None:
         int(variant_tok.lstrip("v"))
     except ValueError:
         return None
-    config = "_".join(parts[4:])
+    from analysis.runlogs import canonical_config
+    config = canonical_config("_".join(parts[4:]))   # recorded agenticcyops -> defer
     return ap, vid_full, trial_num, config
 
 
@@ -261,10 +262,10 @@ def reevaluate(group: str, domain: str, suffix: str = "",
         w.writerows(rows)
     print(f"  wrote {out_csv} ({len(rows)} rows)")
 
-    # Per-AP summary (agenticcyops only, measurable trials only)
+    # Per-AP summary (defer only, measurable trials only)
     print("  Per-AP DEFER (measurable trials):")
     for ap in [f"ap{i}" for i in range(1, 16)]:
-        sub = [t for t in results if t.config == "agenticcyops" and t.ap == ap]
+        sub = [t for t in results if t.config == "defer" and t.ap == ap]
         if not sub:
             continue
         m = summarize(sub)

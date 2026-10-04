@@ -52,6 +52,7 @@ worktree() {  # worktree <dir> <tag>
 
 ALL="ap1,ap2,ap3,ap4,ap5,ap6,ap7,ap8,ap9,ap10,ap11,ap12,ap13,ap14,ap15"
 H1="ap1,ap2,ap3,ap4,ap5,ap6,ap7,ap8"; H2="ap9,ap10,ap11,ap12,ap13,ap14,ap15"
+STREAMS=()
 stream() {  # stream <worktree> <name> <slot> <group> <domain> <aps> <config> <benign 0|1> [ENV=..]
     local wt="$1" name="$2" slot="$3" g="$4" d="$5" aps="$6" cfg="$7" ben="$8"; shift 8
     (
@@ -63,12 +64,13 @@ stream() {  # stream <worktree> <name> <slot> <group> <domain> <aps> <config> <b
         fi
         note "stream $name done (rc=$rc)"
     ) > "$MAIN/logs/v32_${name}.log" 2>&1 &
+    STREAMS+=($!)
     sleep 8
 }
 boundary() {  # boundary <worktree> <group> <prefix> <tag>: the seven streams of run_v31.sh, CyberOps
     local wt="$1" g="$2" p="$3" tag="$4"
-    stream "$wt" "${p}_s0" 0 "$g" cyberops "$H1" agenticcyops 1 RUN_TAG="$tag"
-    stream "$wt" "${p}_s1" 1 "$g" cyberops "$H2" agenticcyops 0 RUN_TAG="$tag"
+    stream "$wt" "${p}_s0" 0 "$g" cyberops "$H1" defer 1 RUN_TAG="$tag"
+    stream "$wt" "${p}_s1" 1 "$g" cyberops "$H2" defer 0 RUN_TAG="$tag"
     stream "$wt" "${p}_s2" 2 "$g" cyberops "$H1" llm_judge 1 RUN_TAG="$tag"
     stream "$wt" "${p}_s3" 3 "$g" cyberops "$H2" llm_judge 0 RUN_TAG="$tag"
     stream "$wt" "${p}_s4" 4 "$g" cyberops "$ALL" flat 1 RUN_TAG="$tag"
@@ -114,7 +116,7 @@ ablation() {  # each arm as four streams (one stream per arm took ~12 h); the
     local extra=(-1000 -800 -600 -400) j
     for i in 1 2 3 4 5; do
         for j in 0 1 2 3; do
-            stream "$W32" "abl_P${i}_$j" $((i - 1)) q235_local2 cyberops "${parts[$j]}" agenticcyops \
+            stream "$W32" "abl_P${i}_$j" $((i - 1)) q235_local2 cyberops "${parts[$j]}" defer \
                 $([ $j = 3 ] && echo 1 || echo 0) RUN_TAG=v32 DISABLE_PRINCIPLES="P$i" \
                 PORT_EXTRA="${extra[$j]}" CHROMA_TAG="abl$j"
         done
@@ -126,12 +128,12 @@ want other && for d in healthcare finance legal; do
     stream "$W314" "${d}_judge_h1" 0 q235_local2 "$d" "$H1" llm_judge 1 RUN_TAG=v314 PORT_EXTRA=-1400
     stream "$W314" "${d}_judge_h2" 1 q235_local2 "$d" "$H2" llm_judge 0 RUN_TAG=v314 PORT_EXTRA=-1400
     s=2
-    for cfg in flat acl_hardened symbolic_only agenticcyops; do
+    for cfg in flat acl_hardened symbolic_only defer; do
         stream "$W314" "${d}_ap9_${cfg}" $s q235_local2 "$d" ap9 "$cfg" 0 RUN_TAG=v314 PORT_EXTRA=-1400
         s=$((s + 1))
     done
 done
-wait
+[ ${#STREAMS[@]} -eq 0 ] || wait "${STREAMS[@]}"   # the streams only: a bare wait also waits on the vLLM servers this script started
 while streams_running; do sleep 60; done
 note "phase A: finished"
 want B || { note "pipeline: stopping before phase B"; exit 0; }
@@ -144,7 +146,7 @@ CUDA_VISIBLE_DEVICES=0 setsid nohup "$V" serve "$MAIN/models/openai/gpt-oss-120b
 wait_up 8200 || { note "ABORT: gpt-oss :8200 not up"; exit 1; }
 note "phase B: gpt-oss-120b up"
 boundary "$W32" oss120_local2 oss v32
-wait
+[ ${#STREAMS[@]} -eq 0 ] || wait "${STREAMS[@]}"   # the streams only: a bare wait also waits on the vLLM servers this script started
 while streams_running; do sleep 60; done
 note "phase B: finished"
 

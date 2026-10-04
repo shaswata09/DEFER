@@ -35,7 +35,7 @@ from config import BASE_DIR, RESULTS_DIR
 from analysis.runlogs import run_logs
 from analysis import tiers
 
-CONFIG_LABEL = {"flat": "Flat", "acl_hardened": "ACL-Hardened", "agenticcyops": "DEFER",
+CONFIG_LABEL = {"flat": "Flat", "acl_hardened": "ACL-Hardened", "defer": "DEFER",
                 "llm_judge": "LLM-judge only", "symbolic_only": "Symbolic only (no L6)"}
 AP_LABEL = {"ap1": "AP-1 Tool redirection", "ap2": "AP-2 Memory poisoning", "ap3": "AP-3 Confused deputy",
             "ap4": "AP-4 Cross-phase leak", "ap5": "AP-5 Irreversible action", "ap6": "AP-6 Replay",
@@ -171,7 +171,7 @@ def t3b_persistent(trials: list[dict], group: str) -> str:
             ("persistent (pass 2, reversed)", f"{group}_persistent3", False))
     for dom in ("cyberops", "healthcare", "finance", "legal"):
         for label, g, first_trial_only in arms:
-            ts = [t for t in trials if t["group"] == g and t["domain"] == dom and t["config"] == "agenticcyops"
+            ts = [t for t in trials if t["group"] == g and t["domain"] == dom and t["config"] == "defer"
                   and t["ap"] == "benign" and t["outcome"] == "benign" and not t.get("suffix")
                   and (not first_trial_only or str(t["trial"]) == "1")]
             if not ts:
@@ -203,9 +203,9 @@ def t4_ablations(trials: list[dict], group: str) -> str:
     for t in trials:
         if t["group"] != group or (abl_domains and t["domain"] not in abl_domains):
             continue
-        label = (f"agenticcyops {t['suffix'].replace('_disabled_', '-')}" if t.get("suffix")
+        label = (f"defer {t['suffix'].replace('_disabled_', '-')}" if t.get("suffix")
                  else t["config"])
-        if t.get("suffix") or t["config"] in ("llm_judge", "symbolic_only", "agenticcyops"):
+        if t.get("suffix") or t["config"] in ("llm_judge", "symbolic_only", "defer"):
             by[label].append(t)
     for label, ts in sorted(by.items()):
         att = [t for t in ts if t["ap"] != "benign" and t["outcome"] in MEASURABLE]
@@ -220,7 +220,7 @@ def t4_ablations(trials: list[dict], group: str) -> str:
 
 def t5_blocked_by(trials: list[dict], group: str) -> str:
     c = Counter(t["blocked_by"] for t in trials
-                if t["group"] == group and t["config"] == "agenticcyops" and t["outcome"] == "blocked" and not t.get("suffix"))
+                if t["group"] == group and t["config"] == "defer" and t["outcome"] == "blocked" and not t.get("suffix"))
     total = sum(c.values()) or 1
     return _md(["Layer", "Blocked trials", "Share %"],
                [[m, n, f"{100 * n / total:.1f}"] for m, n in c.most_common()])
@@ -343,7 +343,7 @@ def t9b_p5(trials: list[dict], results_dir: Path, group: str) -> str:
            and ((t["group"] == group and not t.get("suffix"))
                 or (t["group"] == group and t.get("suffix") == "_disabled_P5"))]
     arms = [("Flat", "flat", ""), ("ACL-Hardened", "acl_hardened", ""),
-            ("Full (DEFER)", "agenticcyops", ""), ("Full minus P5", "agenticcyops", "_disabled_P5")]
+            ("Full (DEFER)", "defer", ""), ("Full minus P5", "defer", "_disabled_P5")]
     rows = []
     for label, cfg, suf in arms:
         ts = [t for t in sel if t["config"] == cfg and (t.get("suffix") or "") == suf]
@@ -357,7 +357,7 @@ def t9b_p5(trials: list[dict], results_dir: Path, group: str) -> str:
                      _f(bl / len(att)) if att else "–"])
     out = [_md(["Arm (AP-4 + AP-14, CyberOps)", "N", "ASR % [95%]", "Block given attempt %"], rows)]
     # first interception by P5 check, under Full
-    full_blocked = [t for t in sel if t["config"] == "agenticcyops" and not t.get("suffix")
+    full_blocked = [t for t in sel if t["config"] == "defer" and not t.get("suffix")
                     and t["outcome"] == "blocked"]
     c = Counter(t["blocked_by"] for t in full_blocked if str(t["blocked_by"]).startswith("P5"))
     other = sum(1 for t in full_blocked if not str(t["blocked_by"]).startswith("P5"))
@@ -393,7 +393,7 @@ def _p5_benign_cost(results_dir: Path, group: str) -> dict:
                     d = json.loads(line)
                 except json.JSONDecodeError:
                     continue
-                if d.get("ap") != "benign" or d.get("config") != "agenticcyops":
+                if d.get("ap") != "benign" or d.get("config") != "defer":
                     continue
                 n += 1
                 den += 1 if (d.get("p5_denied") or {}) else 0
@@ -479,7 +479,7 @@ def t11_benign_denials(group: str) -> str:
 
     from analysis.benign_cost import denial_rate_ci
 
-    configs = ("flat", "acl_hardened", "agenticcyops")
+    configs = ("flat", "acl_hardened", "defer")
     rates = benign_denial_rates(group, configs)
     rows = []
     for dom in (*BC_DOMAINS, "all"):
@@ -500,7 +500,7 @@ def t11_benign_denials(group: str) -> str:
 
     # Every added arm is its own row, keyed on its exact config string and
     # read from the group its runs belong to (run_groups.yaml). Pooling them
-    # into agenticcyops is what made CyberOps FULL read 27.7 % instead of 10.1 %.
+    # into defer is what made CyberOps FULL read 27.7 % instead of 10.1 %.
     arm_rows = []
     for label, g, cfg in added_arms(group):
         for dom in BC_DOMAINS:
@@ -523,8 +523,8 @@ def added_arms(group: str) -> list[tuple[str, str, str]]:
     # no auto-approve and of P2 + panel, took place while the API validators
     # were out of credit and the panel could not approve (T16); their benign
     # cost is not reported. Judged writes ran after credit was restored.
-    return [("judged writes", f"{group}_e9", "agenticcyops_writejudge"),
-            ("FULL, E9 re-run (baseline for judged writes)", f"{group}_e9", "agenticcyops")]
+    return [("judged writes", f"{group}_e9", "defer_writejudge"),
+            ("FULL, E9 re-run (baseline for judged writes)", f"{group}_e9", "defer")]
 
 
 def t12_benign_denials_by_check(group: str) -> str:
@@ -555,7 +555,7 @@ def t13_tier_breakdown(trials: list[dict], group: str) -> str:
 
     intercept: dict[str, int] = defaultdict(int)
     for t in trials:
-        if (t["group"] == group and t["config"] == "agenticcyops" and not t.get("suffix")
+        if (t["group"] == group and t["config"] == "defer" and not t.get("suffix")
                 and t["ap"] != "benign" and t["outcome"] == "blocked" and t.get("blocked_by")):
             intercept[t["blocked_by"]] += 1
     denials: dict[str, int] = defaultdict(int)
@@ -593,22 +593,22 @@ def t16_validator_availability(group: str) -> str:
 
     trials = list(_csv.DictReader(open(outage.ALL_TRIALS)))
     tr = ("finance", "healthcare", "legal")
-    arms = [("FULL, development", group, "agenticcyops", ("cyberops",), ""),
-            ("FULL, transfer", group, "agenticcyops", tr, ""),
+    arms = [("FULL, development", group, "defer", ("cyberops",), ""),
+            ("FULL, transfer", group, "defer", tr, ""),
             ("JudgeOnly", group, "llm_judge", ("cyberops",), ""),
-            *[(f"FULL minus P{i}", group, "agenticcyops", ("cyberops",), f"_disabled_P{i}") for i in (1, 2, 4, 5)],
-            ("Llama-4-Scout, CyberOps", "scout_div4", "agenticcyops", ("cyberops",), ""),
-            ("Llama-4-Scout, finance", "scout_div4", "agenticcyops", ("finance",), ""),
-            ("Mistral-Small, CyberOps", "mistral_div3p", "agenticcyops", ("cyberops",), ""),
-            ("Mistral-Small, finance", "mistral_div3p", "agenticcyops", ("finance",), ""),
-            ("Llama-3.1-8B, CyberOps", "llama8b_div4", "agenticcyops", ("cyberops",), ""),
-            ("Llama-3.1-8B, finance", "llama8b_div4", "agenticcyops", ("finance",), ""),
-            ("permissive gate", group, "agenticcyops_gate_permissive", ("cyberops",), ""),
-            ("no auto-approve (not reported)", f"{group}_outage", "agenticcyops_noautoapprove", ("cyberops",), ""),
+            *[(f"FULL minus P{i}", group, "defer", ("cyberops",), f"_disabled_P{i}") for i in (1, 2, 4, 5)],
+            ("Llama-4-Scout, CyberOps", "scout_div4", "defer", ("cyberops",), ""),
+            ("Llama-4-Scout, finance", "scout_div4", "defer", ("finance",), ""),
+            ("Mistral-Small, CyberOps", "mistral_div3p", "defer", ("cyberops",), ""),
+            ("Mistral-Small, finance", "mistral_div3p", "defer", ("finance",), ""),
+            ("Llama-3.1-8B, CyberOps", "llama8b_div4", "defer", ("cyberops",), ""),
+            ("Llama-3.1-8B, finance", "llama8b_div4", "defer", ("finance",), ""),
+            ("permissive gate", group, "defer_gate_permissive", ("cyberops",), ""),
+            ("no auto-approve (not reported)", f"{group}_outage", "defer_noautoapprove", ("cyberops",), ""),
             ("P2 + panel (not reported)", f"{group}_outage", "p2_judge", ("cyberops",), ""),
-            ("E2 siblings and parents, FULL", f"{group}_e2", "agenticcyops", outage.DOMAINS, ""),
-            ("judged writes (E9), FULL", f"{group}_e9", "agenticcyops", outage.DOMAINS, ""),
-            ("judged writes (E9), writejudge", f"{group}_e9", "agenticcyops_writejudge", outage.DOMAINS, "")]
+            ("E2 siblings and parents, FULL", f"{group}_e2", "defer", outage.DOMAINS, ""),
+            ("judged writes (E9), FULL", f"{group}_e9", "defer", outage.DOMAINS, ""),
+            ("judged writes (E9), writejudge", f"{group}_e9", "defer_writejudge", outage.DOMAINS, "")]
     rows = []
     for label, g, cfg, doms, suf in arms:
         a = outage.arm(g, cfg, doms, suf, trials=trials)
@@ -634,7 +634,7 @@ def t14_p3_decisions(group: str) -> str:
     # exactly this group (after run_groups.yaml routing) and exactly each
     # config from the run header -- not every directory whose name starts
     # with the group, nor every file whose name starts with the config
-    files = [(cfg, f) for cfg in ("flat", "acl_hardened", "symbolic_only", "agenticcyops", "llm_judge")
+    files = [(cfg, f) for cfg in ("flat", "acl_hardened", "symbolic_only", "defer", "llm_judge")
              for d in ("cyberops", "finance", "healthcare", "legal")
              for f in run_logs(group, d, cfg)]
     for cfg, f in files:
@@ -653,7 +653,7 @@ def t14_p3_decisions(group: str) -> str:
                 if lay in LAYER:
                     by[cfg][(LAYER[lay], m, str(e.get("auth_decision")))] += 1
     rows = []
-    for cfg in ("flat", "acl_hardened", "symbolic_only", "agenticcyops", "llm_judge"):
+    for cfg in ("flat", "acl_hardened", "symbolic_only", "defer", "llm_judge"):
         c = by.get(cfg)
         if not c:
             continue
@@ -672,7 +672,7 @@ def _drop_siblings(trials: list[dict]) -> list[dict]:
     from analysis.reported import carries_siblings
     orig = {(t["domain"], t["ap"], str(t["variant"])) for t in trials
             if t["group"] == "q235_div4" and t["ap"] != "benign" and not t.get("suffix")
-            and t["config"] == "agenticcyops"}
+            and t["config"] == "defer"}
     return [t for t in trials if not carries_siblings(t["group"]) or t["ap"] == "benign"
             or (t["domain"], t["ap"], str(t["variant"])) in orig]
 

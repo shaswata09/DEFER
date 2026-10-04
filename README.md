@@ -423,7 +423,7 @@ API validators; to re-run one of them, work from its tag in a separate worktree
 ```bash
 bash scripts/check_freeze.sh                     # decision code must equal the freeze tag
 RUN_TAG=mytag REQUIRE_FREEZE=1 \
-  scripts/run_attack_paths.sh q235_local2 cyberops all agenticcyops 3   # GROUP DOMAIN APS CONFIGS TRIALS
+  scripts/run_attack_paths.sh q235_local2 cyberops all defer 3   # GROUP DOMAIN APS CONFIGS TRIALS
 ```
 
 - `GROUP` selects the primary and panel (`scripts/run_attack_paths.sh` lists them;
@@ -469,11 +469,11 @@ later one will refuse to start.
 | ACL | `acl_hardened` | phase-to-tool and phase-to-store restrictions only |
 | JUDGEONLY | `llm_judge` | registry plus the LLM panel on every tool proposal |
 | NOJUDGE | `symbolic_only` | FULL without the panel; undecided proposals are escalated |
-| FULL (DEFER) | `agenticcyops` | all 28 checks in cascade order |
-| FULL \ P*i* | `agenticcyops` + suffix `_disabled_Pi` | leave-one-out ablation |
+| FULL (DEFER) | `defer` | all 28 checks in cascade order |
+| FULL \ P*i* | `defer` + suffix `_disabled_Pi` | leave-one-out ablation |
 | JUDGEREST | (offline) | FULL with every rule-surviving call judged, from `replay_panels.py` |
-| permissive gate | `agenticcyops_gate_permissive` | deterministic approve gate; evaluated offline in the paper |
-| judged writes | `agenticcyops_writejudge` | every write to a critical store goes to the panel |
+| permissive gate | `defer_gate_permissive` | deterministic approve gate; evaluated offline in the paper |
+| judged writes | `defer_writejudge` | every write to a critical store goes to the panel |
 
 | Run group | Primary | Panel as run | Role |
 |---|---|---|---|
@@ -612,10 +612,14 @@ docs/              review response, figures for this README
   the v3.0 result above.
 - **Implementation lessons.** [`docs/engineering_challenges.md`](docs/engineering_challenges.md)
   records the engineering problems of the build and the lessons of the code audit.
-- **Log names.** The project was renamed DEFER after the runs. Configuration names
-  beginning with `agenticcyops` denote FULL; they are kept as recorded in every log, run
-  header, results table, and config file name, and in the `AGENTICCYOPS_HMAC_KEY`
-  environment variable, so that the logs and the code stay in step.
+- **Log names.** The project was renamed DEFER after the runs. The logs record the
+  full stack as `agenticcyops` (and its variants as `agenticcyops_<variant>`) in every
+  run header, trial id, and log file name, and in the incident context the judges
+  saw, so the cached votes are keyed on it. Logs and cached judge inputs keep it as
+  recorded; the code, the harness, and every results table call it `defer`
+  (`config.canonical_config` maps the recorded name, and the harness accepts either).
+  The message-signing key is read from `DEFER_HMAC_KEY` (`AGENTICCYOPS_HMAC_KEY` is
+  still accepted).
 
 ---
 

@@ -37,7 +37,7 @@ REV="ap15,ap14,ap13,ap12,ap11,ap10,ap9,ap8,ap7,ap6,ap5,ap4,ap3,ap2,ap1"
 H1="ap1,ap2,ap3,ap4,ap5,ap6,ap7,ap8"; H2="ap9,ap10,ap11,ap12,ap13,ap14,ap15"
 
 boundary() {  # boundary <group> <slot offset> <name>: the seven streams of run_v31.sh, CyberOps
-    local g="$1" o="$2" n="$3" i=0 cfgs=(agenticcyops agenticcyops llm_judge llm_judge flat acl_hardened symbolic_only)
+    local g="$1" o="$2" n="$3" i=0 cfgs=(defer defer llm_judge llm_judge flat acl_hardened symbolic_only)
     local aps=("$H1" "$H2" "$H1" "$H2" "$ALL" "$ALL" "$ALL") ben=(1 0 1 0 1 1 1)
     for i in 0 1 2 3 4 5 6; do
         (
@@ -56,9 +56,9 @@ persist() {  # persist <domain> <tag> <paths>: one persistent state, attacks the
     local d="$1" tag="$2" aps="$3" slot="$4" rc=0
     {
         STATE_MODE=persistent RUN_TAG="$tag" MAX_VARIANTS=2 TRIALS=1 SLOT="$slot" \
-            scripts/run_attack_paths.sh q235_local2 "$d" "$aps" agenticcyops 1 || rc=$?
+            scripts/run_attack_paths.sh q235_local2 "$d" "$aps" defer 1 || rc=$?
         STATE_MODE=persistent RUN_TAG="$tag" TRIALS=1 SLOT="$slot" \
-            scripts/run_attack_paths.sh q235_local2 "$d" benign agenticcyops 1 || rc=$?
+            scripts/run_attack_paths.sh q235_local2 "$d" benign defer 1 || rc=$?
     } > "logs/v31b_${tag#v31}_${d}.log" 2>&1
     note "stream ${tag#v31}_$d done (rc=$rc)"
 }
@@ -72,9 +72,9 @@ if [ "$PHASE" = A ]; then
         (
             rc=0
             SLOT=$((i - 1)) RUN_TAG=v31 DISABLE_PRINCIPLES="P$i" \
-                scripts/run_attack_paths.sh q235_local2 cyberops "$ALL" agenticcyops 3 || rc=$?
+                scripts/run_attack_paths.sh q235_local2 cyberops "$ALL" defer 3 || rc=$?
             SLOT=$((i - 1)) RUN_TAG=v31 DISABLE_PRINCIPLES="P$i" \
-                scripts/run_attack_paths.sh q235_local2 cyberops benign agenticcyops 3 || rc=$?
+                scripts/run_attack_paths.sh q235_local2 cyberops benign defer 3 || rc=$?
             note "stream abl_P$i done (rc=$rc)"
         ) > "logs/v31b_abl_P$i.log" 2>&1 &
         sleep 8

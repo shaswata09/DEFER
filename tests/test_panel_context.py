@@ -8,7 +8,7 @@ def _msg(**ctx):
     proposal = {"tool_id": "T9_firewall", "arguments": {"action": "block_ip", "target": "10.0.8.200"},
                 "justification": "contain the beacon", "phase": "admin", "action": "block_ip",
                 "target": "10.0.8.200"}
-    base = {"incident_id": "INC-1", "domain": "cyberops", "config": "agenticcyops",
+    base = {"incident_id": "INC-1", "domain": "cyberops", "config": "defer",
             "incident": {"incident_id": "INC-1", "description": "free text", "severity": "high",
                          "indicators": ["10.0.8.200"], "notes": "attacker text",
                          "proposed_action": {"tool": "T9_firewall"}}}
@@ -20,7 +20,7 @@ def test_keeps_v29_fields():
     m = _msg()
     assert m["incident_context"]["incident_id"] == "INC-1"
     assert m["incident_context"]["description"] == "free text"
-    assert m["incident_context"]["config"] == "agenticcyops"
+    assert m["incident_context"]["config"] == "defer"
     assert m["proposal"]["tool_id"] == "T9_firewall"
 
 
@@ -50,5 +50,5 @@ def test_prior_actions_are_capped():
 
 def test_third_party_contexts_still_build():
     m = json.loads(build_panel_message({"tool_id": "x", "arguments": {}},
-                                       {"incident": {"description": "task"}, "incident_id": "t", "config": "agenticcyops"}))
+                                       {"incident": {"description": "task"}, "incident_id": "t", "config": "defer"}))
     assert m["incident_context"]["description"] == "task" and m["agent"]["phase"] == ""

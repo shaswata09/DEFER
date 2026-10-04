@@ -46,8 +46,8 @@ for g in oss120_local2 llama8b_local2; do
     run "$g" 2 all symbolic_only benign &  pids+=($!); sleep 15
     run "$g" 3 "$A1" llm_judge benign &    pids+=($!); sleep 15
     run "$g" 4 "$A2" llm_judge &           pids+=($!); sleep 15
-    run "$g" 5 "$A1" agenticcyops benign & pids+=($!); sleep 15
-    run "$g" 6 "$A2" agenticcyops &        pids+=($!); sleep 15
+    run "$g" 5 "$A1" defer benign & pids+=($!); sleep 15
+    run "$g" 6 "$A2" defer &        pids+=($!); sleep 15
 done
 for p in "${pids[@]}"; do wait "$p"; done
 note "complete"

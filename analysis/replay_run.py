@@ -26,25 +26,26 @@ from dataclasses import asdict
 from pathlib import Path
 
 from config import BASE_DIR
+from analysis.runlogs import RECORDED_FULL, canonical_config
 
 REPLAY_DIR = BASE_DIR / "cache" / "replay"
 VOTE_DIR = BASE_DIR / "cache" / "validators"
 
 # (label, group, config, domains, suffix, include_unjudged)
 ARMS = [
-    ("full", "q235_div4", "agenticcyops", ("cyberops", "healthcare", "finance", "legal"), "", True),
+    ("full", "q235_div4", "defer", ("cyberops", "healthcare", "finance", "legal"), "", True),
     ("judgeonly", "q235_div4", "llm_judge", ("cyberops",), "", False),
-    *[(f"full_minus_p{i}", "q235_div4", "agenticcyops", ("cyberops",), f"_disabled_P{i}", False)
+    *[(f"full_minus_p{i}", "q235_div4", "defer", ("cyberops",), f"_disabled_P{i}", False)
       for i in (1, 2, 4, 5)],
-    ("scout", "scout_div4", "agenticcyops", ("cyberops", "finance"), "", False),
-    ("mistral", "mistral_div3p", "agenticcyops", ("cyberops", "finance"), "", False),
-    ("llama8b", "llama8b_div4", "agenticcyops", ("cyberops", "finance"), "", False),
-    ("permissive_gate", "q235_div4", "agenticcyops_gate_permissive", ("cyberops",), "", False),
-    ("e2", "q235_div4_e2", "agenticcyops", ("cyberops", "healthcare", "finance", "legal"), "", False),
+    ("scout", "scout_div4", "defer", ("cyberops", "finance"), "", False),
+    ("mistral", "mistral_div3p", "defer", ("cyberops", "finance"), "", False),
+    ("llama8b", "llama8b_div4", "defer", ("cyberops", "finance"), "", False),
+    ("permissive_gate", "q235_div4", "defer_gate_permissive", ("cyberops",), "", False),
+    ("e2", "q235_div4_e2", "defer", ("cyberops", "healthcare", "finance", "legal"), "", False),
     # live boundary runs of two more primaries at defense-freeze-v2.9 (local2 panel)
-    ("oss120_full", "oss120_local2_v29", "agenticcyops", ("cyberops",), "", True),
+    ("oss120_full", "oss120_local2_v29", "defer", ("cyberops",), "", True),
     ("oss120_judgeonly", "oss120_local2_v29", "llm_judge", ("cyberops",), "", False),
-    ("llama8b_full", "llama8b_local2_v29", "agenticcyops", ("cyberops",), "", True),
+    ("llama8b_full", "llama8b_local2_v29", "defer", ("cyberops",), "", True),
     ("llama8b_judgeonly", "llama8b_local2_v29", "llm_judge", ("cyberops",), "", False),
 ]
 
@@ -95,7 +96,7 @@ def build_asb() -> None:
         path = glob.glob(str(BASE_DIR / "results" / "asb" / f"e2e_validator_group_q235_div4_{run}" / "*" / "results.csv"))[0]
         n = 0
         for r in csv.DictReader(open(path)):
-            if r["config"] != "agenticcyops" or r["defense_mechanism"] not in PANEL_MECHS:
+            if canonical_config(r["config"]) != "defer" or r["defense_mechanism"] not in PANEL_MECHS:
                 continue
             case = cases[r["asb_case_id"]]
             target = _resolve_attacker_target(case, r["emitted_action"])
@@ -103,13 +104,13 @@ def build_asb() -> None:
             msg = json.dumps({"proposal": proposal, "incident_context": {
                 "incident_id": f"IA_{case.get('ia_case_id', case.get('User Tool', 'unknown'))}",
                 "description": case.get("User Instruction", ""),
-                "config": "agenticcyops"}}, default=str)
+                "config": RECORDED_FULL}}, default=str)   # as the ASB pipeline sent it
             key = hashlib.sha256(msg.encode()).hexdigest()
             if key not in known:
                 fm.write(json.dumps({"key": key, "message": msg}) + "\n")
                 known.add(key)
             fr.write(json.dumps({"key": key, "arm": arm, "group": "asb", "domain": "general",
-                                 "config": "agenticcyops", "trial_id": f"{r['asb_case_id']}_t{r['trial_id']}",
+                                 "config": RECORDED_FULL, "trial_id": f"{r['asb_case_id']}_t{r['trial_id']}",
                                  "call_id": "", "tool": target, "role": "attack_effect",
                                  "path": "p3_panel", "attack_type": r["attack_type"],
                                  "logged_mechanism": r["defense_mechanism"]}) + "\n")

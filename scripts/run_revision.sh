@@ -46,7 +46,7 @@ export TEMPERATURE="${TEMPERATURE:-0.7}"
 export RESUME="${RESUME:-1}"
 export REQUIRE_FREEZE="${REQUIRE_FREEZE:-1}"
 export STATE_MODE="${STATE_MODE:-isolated}"
-CONDA_ENV="${CONDA_ENV:-agenticcyops}"
+CONDA_ENV="${CONDA_ENV:-defer}"
 ALL_DOMAINS="cyberops healthcare finance legal"
 MAIN_GROUP="q235_div4"
 LEGACY_ASB="results_legacy_v1/asb/e2e_validator_group_A/general/results.csv"
@@ -68,7 +68,7 @@ attack() { # attack <group> <domain> <ap|all|benign> <config|all> [trials]
 # (measured on q235: 17 tok/s at 1 stream, 68 at 4, 140 at 12, 400 at 24).
 # So every (domain, config) pair runs as its own stream in its own service
 # slot: 4 domains x 3 configs = 12 concurrent incident streams per group.
-SYSTEM_CONFIGS="flat acl_hardened agenticcyops"
+SYSTEM_CONFIGS="flat acl_hardened defer"
 SMALL_EMB="${MODELS_DIR:-$REPO/models}/Qwen/Qwen3-Embedding-0.6B"
 export OMP_NUM_THREADS="${OMP_NUM_THREADS:-8}"      # 12+ torch processes share the CPU
 export SKIP_REPORT=1                               # results.csv is rebuilt from the logs
@@ -140,8 +140,8 @@ e0() {
 
 # ASB drift check on its own (also: scripts/run_revision.sh drift)
 drift() {
-    stamp "E0 ASB drift check (50 cases, flat + agenticcyops, 1 trial, live)"
-    run_py -m benchmarks.asb.run_e2e --group "$MAIN_GROUP" --configs flat,agenticcyops --trials 1 \
+    stamp "E0 ASB drift check (50 cases, flat + defer, 1 trial, live)"
+    run_py -m benchmarks.asb.run_e2e --group "$MAIN_GROUP" --configs flat,defer --trials 1 \
         --cases-file benchmarks/asb/representative_cases.json --tag drift --concurrency 4
     run_py - <<EOF
 import csv, json
@@ -169,8 +169,8 @@ e3() {
     stamp "E3 ablations ${g} cyberops (7 concurrent streams, one slot each)"
     local pids=() slot=0
     for p in P1 P2 P3 P4 P5; do
-        ( SLOT="$slot" DISABLE_PRINCIPLES="$p" attack "$g" cyberops all agenticcyops
-          SLOT="$slot" DISABLE_PRINCIPLES="$p" attack "$g" cyberops benign agenticcyops
+        ( SLOT="$slot" DISABLE_PRINCIPLES="$p" attack "$g" cyberops all defer
+          SLOT="$slot" DISABLE_PRINCIPLES="$p" attack "$g" cyberops benign defer
         ) > "logs/stage_${g}_cyberops_ablation_minus${p}.log" 2>&1 &
         pids+=($!); slot=$((slot + 1)); sleep 20
     done
@@ -192,8 +192,8 @@ e1b() {
     local doms="${*:-$ALL_DOMAINS}"
     stamp "E1b persistent sequence ${g}: ${doms}"
     for dom in $doms; do
-        STATE_MODE=persistent RUN_TAG=persistent MAX_VARIANTS=2 attack "$g" "$dom" all agenticcyops 1
-        STATE_MODE=persistent RUN_TAG=persistent attack "$g" "$dom" benign agenticcyops 1
+        STATE_MODE=persistent RUN_TAG=persistent MAX_VARIANTS=2 attack "$g" "$dom" all defer 1
+        STATE_MODE=persistent RUN_TAG=persistent attack "$g" "$dom" benign defer 1
     done
     stamp "E1b done"
 }
@@ -226,7 +226,7 @@ e3b() {
     stamp "E3b ablations ${g} cyberops [${REWORKED_APS}]: -P5 -P4 llm_judge symbolic_only"
     local pids=() slot=0
     for p in P5 P4; do
-        ( SLOT="$slot" DISABLE_PRINCIPLES="$p" attack "$g" cyberops "$REWORKED_APS" agenticcyops
+        ( SLOT="$slot" DISABLE_PRINCIPLES="$p" attack "$g" cyberops "$REWORKED_APS" defer
         ) > "logs/stage_${g}_cyberops_e3b_minus${p}.log" 2>&1 &
         pids+=($!); slot=$((slot + 1)); sleep 20
     done
@@ -244,13 +244,13 @@ e3b() {
 asb_replay() {
     local panel="$1"
     stamp "E6 ASB replay panel=${panel} from legacy Group A primary outputs"
-    run_py -m benchmarks.asb.run_e2e --group "$MAIN_GROUP" --configs agenticcyops --trials 5 \
+    run_py -m benchmarks.asb.run_e2e --group "$MAIN_GROUP" --configs defer --trials 5 \
         --replay-from "$LEGACY_ASB" --consensus-config "$panel" --tag "$panel" --concurrency 6
     stamp "E6 ${panel} done"
 }
 asb_live() {
     stamp "ASB live rerun for ${MAIN_GROUP} (drift check failed)"
-    run_py -m benchmarks.asb.run_e2e --group "$MAIN_GROUP" --configs flat,agenticcyops --trials 5 --concurrency 4
+    run_py -m benchmarks.asb.run_e2e --group "$MAIN_GROUP" --configs flat,defer --trials 5 --concurrency 4
 }
 
 # Payload gate (T5): validate-all + measurability + hygiene, before any run.
@@ -275,7 +275,7 @@ case "$cmd" in
     serve)     serve "${1:?profile}" ;;
     e0)        e0 ;;
     drift)     drift ;;
-    smoke-aco) RUN_TAG=smoke2 MAX_VARIANTS=1 TRIALS=1 parallel_domains "$MAIN_GROUP" all agenticcyops cyberops ;;
+    smoke-aco) RUN_TAG=smoke2 MAX_VARIANTS=1 TRIALS=1 parallel_domains "$MAIN_GROUP" all defer cyberops ;;
     e1|e2)     g="${1:?group}"; shift || true; "$cmd" "$g" ${*:-${DOMAINS:-$ALL_DOMAINS}} ;;
     e3)        e3 "${1:-$MAIN_GROUP}" ;;
     e1b)       e1b "${1:-$MAIN_GROUP}" ${DOMAINS:-} ;;
@@ -300,7 +300,7 @@ case "$cmd" in
         # can run next to the group's normal E2 (slots 0-2, forward order).
         # The two meet in the middle; RESUME skips whatever the other side
         # has already finished.   scripts/run_revision.sh e2-rev <group> [domains]
-        #   CFGS="agenticcyops"            only these configs (default: all three)
+        #   CFGS="defer"            only these configs (default: all three)
         #   REV_CPUSETS="72-77 78-83 ..."  core blocks for the extra streams, in
         #                                  launch order (default: the normal mapping)
         g="${1:?group}"; shift || true
@@ -346,7 +346,7 @@ case "$cmd" in
             (
                 export SLOT="$slot" PORT_EXTRA=1500 CHROMA_TAG=rev CPUSET_OVERRIDE="$cpu"
                 case "$tok" in
-                    P*) export DISABLE_PRINCIPLES="$tok"; cfg=agenticcyops ;;
+                    P*) export DISABLE_PRINCIPLES="$tok"; cfg=defer ;;
                     *)  cfg="$tok" ;;
                 esac
                 attack "$g" cyberops benign "$cfg"

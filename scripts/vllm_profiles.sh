@@ -41,7 +41,7 @@ MODELS_DIR="${MODELS_DIR:-$REPO/models}"
 LOG_DIR="${LOGS_DIR:-$REPO/logs}/vllm"
 PID_DIR="$LOG_DIR/pids"
 mkdir -p "$LOG_DIR" "$PID_DIR"
-CONDA_ENV="${CONDA_ENV:-agenticcyops}"
+CONDA_ENV="${CONDA_ENV:-defer}"
 VLLM_BIN="${VLLM_BIN:-vllm}"
 # --enable-auto-tool-choice is added per server, only where a --tool-call-parser
 # is given (vLLM refuses the flag without a parser; DeepSeek-R1 is validator-only).

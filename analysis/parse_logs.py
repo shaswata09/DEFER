@@ -33,7 +33,7 @@ from pathlib import Path
 from attacks.harness import RESULT_COLUMNS
 from config import LOGS_DIR, RESULTS_DIR
 from logging_utils.run_metadata import HEADER_FIELDS
-from analysis.runlogs import load_run_groups
+from analysis.runlogs import canonical_config, load_run_groups
 
 DOMAINS = ("cyberops", "healthcare", "finance", "legal")
 _DIR_RE = re.compile(r"^(cyberops|healthcare|finance|legal)_eval_attacks_(.+?)(_disabled_[A-Z0-9]+)?$")
@@ -73,9 +73,12 @@ def read_events(path: Path):
             line = line.strip()
             if line:
                 try:
-                    yield json.loads(line)
+                    e = json.loads(line)
                 except json.JSONDecodeError:
                     continue
+                if "config" in e:                 # recorded agenticcyops -> defer
+                    e["config"] = canonical_config(e["config"])
+                yield e
 
 
 @functools.lru_cache(maxsize=None)
@@ -156,12 +159,13 @@ def parse_run_dir(domain: str, group: str, suffix: str, log_dir: Path | None,
                     continue
                 # <domain>_benign_v<scenario>_t<trial>_<config>
                 parts = tid.split("_")
-                ap, vid, config = "benign", parts[2], "_".join(parts[4:])
+                ap, vid, config = "benign", parts[2], canonical_config("_".join(parts[4:]))
                 trial_num = int(parts[3].lstrip("t"))
                 variant_num = int(vid.lstrip("v"))
                 payload = benign[variant_num - 1] if 0 < variant_num <= len(benign) else {}
             else:
                 ap, vid, trial_num, config = parsed
+                config = canonical_config(config)
                 variant_num = int(vid.split("_v")[-1])
                 payload = payloads.get((ap, vid)) or {}
             h = harnesses.setdefault(config, OfflineHarness(config=config, group=group, domain=domain))

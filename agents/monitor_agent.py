@@ -4,5 +4,5 @@ from agents.base_agent import BaseAgent
 
 
 class MonitorAgent(BaseAgent):
-    def __init__(self, domain: str, config: str = "agenticcyops", **kwargs):
+    def __init__(self, domain: str, config: str = "defer", **kwargs):
         super().__init__(phase="monitor", domain=domain, config=config, **kwargs)

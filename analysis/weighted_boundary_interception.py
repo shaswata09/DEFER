@@ -77,8 +77,8 @@ def collect():
         # Group letter is the suffix after the last underscore.
         group = log_dir.name.split("_")[-1]
         for fp in sorted(log_dir.glob("*.jsonl")):
-            config = fp.name.split("_")[0]  # flat / acl / agenticcyops
-            if config not in ("flat", "acl", "agenticcyops"):
+            config = fp.name.split("_")[0]  # flat / acl / defer
+            if config not in ("flat", "acl", "defer"):
                 continue
             cfg = "acl_hardened" if config == "acl" else config
             with fp.open() as fh:
@@ -194,7 +194,7 @@ def main():
 
     print("\n=== Aggregate (mean across groups) ===")
     print(f"{'config':16s} {'unweighted':>14s} {'weighted':>14s}  delta(pp)")
-    for cfg in ("flat", "acl_hardened", "agenticcyops"):
+    for cfg in ("flat", "acl_hardened", "defer"):
         if cfg not in agg:
             continue
         m = agg[cfg]

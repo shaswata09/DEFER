@@ -79,11 +79,11 @@ def gate(sib) -> dict:
             sub = go.simulate("permissive", False, g, domains=domains)
             for d in domains:
                 c = Counter()
-                for tid, events in go.trials(g, d, "agenticcyops").items():
+                for tid, events in go.trials(g, d, "defer").items():
                     benign = "_benign_" in tid
                     ids = set()
                     if not benign and (p := _payload(d, tid)):
-                        ids = set(evaluate_effects(p[1], events, config="agenticcyops").attempted_call_ids or [])
+                        ids = set(evaluate_effects(p[1], events, config="defer").attempted_call_ids or [])
                     for call in build_calls(events):
                         if call_path(call, events) not in JUDGED_PATHS:
                             continue
@@ -108,7 +108,7 @@ def gate(sib) -> dict:
     live = Counter()
     from analysis.runlogs import run_logs
     for d in D4:
-        for f in run_logs(GROUP, d, "agenticcyops"):
+        for f in run_logs(GROUP, d, "defer"):
             for ln in open(f, errors="ignore"):
                 if '"P3_L2_scores"' in ln or '"P3_auto_' in ln:
                     e = json.loads(ln)
@@ -122,13 +122,13 @@ def siblings(sib) -> dict:
     rows = [r for r in csv.DictReader(open(TRIALS)) if r["group"] == GROUP]
     parents = set(sib.values())
     out = {}
-    for cfg in ("flat", "acl_hardened", "llm_judge", "symbolic_only", "agenticcyops"):
+    for cfg in ("flat", "acl_hardened", "llm_judge", "symbolic_only", "defer"):
         for lbl, keys in (("siblings", set(sib)), ("parents", parents)):
             rs = [r for r in rows if r["config"] == cfg and (r["domain"], r["ap"], r["variant"]) in keys]
             out[f"{cfg}|{lbl}"] = f"{sum(r['outcome'] == 'executed' for r in rs)}/{len(rs)}"
     by = defaultdict(list)
     for r in rows:
-        if r["config"] == "agenticcyops" and (r["domain"], r["ap"], r["variant"]) in sib:
+        if r["config"] == "defer" and (r["domain"], r["ap"], r["variant"]) in sib:
             by[(r["domain"], r["ap"], r["variant"])].append((r["outcome"], r["blocked_by"]))
     held = [k for k, v in by.items() if all(o != "executed" for o, _ in v)]
     out["siblings_n"] = len(by)
@@ -177,7 +177,7 @@ def expiry() -> dict:
     # incident a structural replay cannot occur, so expiry cannot touch these
     kinds = Counter()
     from analysis.runlogs import run_logs
-    for f in run_logs(GROUP, "cyberops", "agenticcyops"):
+    for f in run_logs(GROUP, "cyberops", "defer"):
         for ln in open(f, errors="ignore"):
             if '"P3_L4_check"' in ln or '"P3_L5_check"' in ln:
                 e = json.loads(ln)

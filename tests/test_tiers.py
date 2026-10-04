@@ -15,7 +15,7 @@ def _populations() -> dict[str, list[str]]:
     def blocked(domains):
         return [t["blocked_by"] for t in rows
                 if t["group"] == DEV_GROUP and t["domain"] in domains and t["ap"] != "benign"
-                and not t.get("suffix") and t["config"] == "agenticcyops" and t["outcome"] == "blocked"]
+                and not t.get("suffix") and t["config"] == "defer" and t["outcome"] == "blocked"]
 
     live = []
     for g in ("A", "C", "D", "E"):
@@ -97,7 +97,7 @@ def test_cascade_annotation_is_everything_but_the_panel():
             and t["domain"] == DEV_DOMAIN and t["ap"] != "benign"}
     blocked = [t["blocked_by"] for t in rows
                if t["group"] == REPORTED_GROUP and t["domain"] == DEV_DOMAIN
-               and t["ap"] != "benign" and not t.get("suffix") and t["config"] == "agenticcyops"
+               and t["ap"] != "benign" and not t.get("suffix") and t["config"] == "defer"
                and t["outcome"] == "blocked" and (t["ap"], t["variant"]) in keep]
     shares, _n, _u = tiers.shares(blocked)
     assert det == round(100 * (1 - shares["panel"]))

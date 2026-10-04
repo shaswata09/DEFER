@@ -45,7 +45,7 @@ def test_model_field_never_contains_a_host_path(tmp_path):
 
 
 def test_build_run_header_fills_panel_and_quantization():
-    h = build_run_header(group="A", config="agenticcyops", domain="cyberops",
+    h = build_run_header(group="A", config="defer", domain="cyberops",
                          primary_model="/x/models/zai-org/GLM-4.7-FP8",
                          consensus_config="default_consensus", probe=False)
     assert h["primary_model"] == "zai-org/GLM-4.7-FP8"
@@ -57,7 +57,7 @@ def test_build_run_header_fills_panel_and_quantization():
 
 
 def test_update_header_records_late_fields(tmp_path):
-    lg = ExperimentLogger(eval_name="t_eval", domain="legal", config="agenticcyops",
+    lg = ExperimentLogger(eval_name="t_eval", domain="legal", config="defer",
                           model="Group_A", logs_dir=str(tmp_path))
     lg.update_header(primary_model="/a/models/Qwen/Qwen3-32B", seed=7)
     lg.close()
@@ -71,7 +71,7 @@ def test_no_event_field_carries_the_checkout_path(tmp_path):
     """Paths inside the checkout (e.g. a config-integrity event's changed_files)
     are written repo-relative, so no log carries the machine's absolute path."""
     from config import BASE_DIR
-    lg = ExperimentLogger(eval_name="t_eval", domain="cyberops", config="agenticcyops",
+    lg = ExperimentLogger(eval_name="t_eval", domain="cyberops", config="defer",
                           model="Qwen/Qwen3-32B", logs_dir=str(tmp_path))
     lg.set_trial("ap15", 3, 1)
     changed = str(BASE_DIR / "domains" / "cyberops" / "configs" / "asset_criticality.json")

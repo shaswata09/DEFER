@@ -135,17 +135,17 @@ def test_harness_memory_seeding_is_tagged_with_the_trial(tmp_path, monkeypatch):
 
     monkeypatch.setattr(SOARHost, "_mma_post", fake_post)
     h = AttackHarness.__new__(AttackHarness)
-    h.logger = ExperimentLogger(eval_name="t_ch", domain="cyberops", config="agenticcyops",
+    h.logger = ExperimentLogger(eval_name="t_ch", domain="cyberops", config="defer",
                                 model="stub", logs_dir=str(tmp_path))
     h.logger.set_trial("ap14", 1, 1)
     h.logger.set_canaries(["C-1"])
-    h.host = SOARHost(domain="cyberops", config="agenticcyops", tool_registry=None, agents={},
+    h.host = SOARHost(domain="cyberops", config="defer", tool_registry=None, agents={},
                       logger=h.logger)
     asyncio.run(h.deliver_injection("memory", {"entries": [{"store": "M2", "content": "x C-1 y"}]}))
     h.logger.close()
     assert posts[0][0] == "/memory/write"
     body = posts[0][1]
-    assert body["harness_seed"] is True and body["metadata"]["trial_id"] == "cyberops_ap14_v1_t1_agenticcyops"
+    assert body["harness_seed"] is True and body["metadata"]["trial_id"] == "cyberops_ap14_v1_t1_defer"
     ev = [e for e in _events(h.logger) if e["action"] == "harness_injection"]
     assert ev and ev[0]["seeded"] is True and ev[0]["canary_hits"] == ["C-1"]
 
@@ -415,7 +415,7 @@ def test_dirty_tree_refuses_main_runs_but_allows_smoke():
         refuse_if_dirty({"git_dirty": True}, "persistent")
 
 
-# ---- reset-before-seed (isolated agenticcyops memory) --------------------
+# ---- reset-before-seed (isolated defer memory) --------------------
 
 def test_isolated_reset_runs_before_seed_and_not_during_incident(tmp_path, monkeypatch):
     """The per-trial reset must happen before the memory seed (else it deletes
@@ -428,7 +428,7 @@ def test_isolated_reset_runs_before_seed_and_not_during_incident(tmp_path, monke
         return 200, {"accepted": True}
 
     monkeypatch.setattr(SOARHost, "_mma_post", fake_post)
-    h = _bare_harness(tmp_path, config="agenticcyops")
+    h = _bare_harness(tmp_path, config="defer")
     h.state_mode = "isolated"
 
     class Host:

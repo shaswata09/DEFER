@@ -31,18 +31,18 @@ OUT = BASE_DIR / "cache" / "replay_v31"
 GROUP = "q235_local2_v31"
 D4 = ("cyberops", "healthcare", "finance", "legal")
 PANEL_FREE = {"FLAT": "flat", "ACL": "acl_hardened", "NOJUDGE": "symbolic_only"}
-JUDGED = {"JUDGEONLY": ("llm_judge", "v31_judgeonly"), "FULL": ("agenticcyops", "v31_full")}
+JUDGED = {"JUDGEONLY": ("llm_judge", "v31_judgeonly"), "FULL": ("defer", "v31_full")}
 # (label, group, config, domains, suffix, include_unjudged)
-ARMS = [("v31_full", GROUP, "agenticcyops", D4, "", True),
+ARMS = [("v31_full", GROUP, "defer", D4, "", True),
         ("v31_judgeonly", GROUP, "llm_judge", D4, "", False),
         # leave-one-out at v3.1 (CyberOps); -P3 has no panel
         # (the run tag follows the ablation tag, so these parse as their own groups)
-        *[(f"v31_full_minus_p{i}", f"q235_local2_disabled_P{i}_v31", "agenticcyops", ("cyberops",), "", False)
+        *[(f"v31_full_minus_p{i}", f"q235_local2_disabled_P{i}_v31", "defer", ("cyberops",), "", False)
           for i in (1, 2, 4, 5)],
         # the other two primaries at v3.1 (CyberOps)
-        ("v31_oss120_full", "oss120_local2_v31", "agenticcyops", ("cyberops",), "", True),
+        ("v31_oss120_full", "oss120_local2_v31", "defer", ("cyberops",), "", True),
         ("v31_oss120_judgeonly", "oss120_local2_v31", "llm_judge", ("cyberops",), "", False),
-        ("v31_llama8b_full", "llama8b_local2_v31", "agenticcyops", ("cyberops",), "", True),
+        ("v31_llama8b_full", "llama8b_local2_v31", "defer", ("cyberops",), "", True),
         ("v31_llama8b_judgeonly", "llama8b_local2_v31", "llm_judge", ("cyberops",), "", False)]
 
 
@@ -68,7 +68,7 @@ def build() -> None:
 
 
 def _keep(domain: str) -> set[tuple[str, str]]:
-    return {tuple(t.split("_")[1:3]) for t in trials("q235_div4", domain, "agenticcyops")
+    return {tuple(t.split("_")[1:3]) for t in trials("q235_div4", domain, "defer")
             if "_benign_" not in t}
 
 

@@ -51,7 +51,7 @@ def test_parse_vote_handles_prose_and_garbage():
 
 
 def test_validator_error_is_a_logged_error_vote(tmp_path, monkeypatch):
-    logger = ExperimentLogger(eval_name="t_val", domain="cyberops", config="agenticcyops",
+    logger = ExperimentLogger(eval_name="t_val", domain="cyberops", config="defer",
                               model="stub", logs_dir=str(tmp_path))
     logger.set_trial("ap1", 1, 1)
     cv = ConsensusValidator(config_name="default_consensus", logger=logger)
@@ -90,7 +90,7 @@ def test_every_agent_class_constructs_for_real(provider, monkeypatch):
     monkeypatch.setenv("ANTHROPIC_API_KEY", "test-key")
     monkeypatch.setenv("PRIMARY_TEMPERATURE", "0.7")
     for cls in (MonitorAgent, AnalyzeAgent, AdminAgent, ReportAgent):
-        kw = dict(domain="cyberops", config="agenticcyops", manifest={"allowed_tools": []},
+        kw = dict(domain="cyberops", config="defer", manifest={"allowed_tools": []},
                   tool_schemas=[], all_tool_schemas=[], logger=None)
         if provider == "anthropic":
             kw["llm_provider"] = "anthropic"

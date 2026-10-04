@@ -60,7 +60,7 @@ def logged_scores(call, events: list[dict]) -> dict | None:
     return None
 
 
-def evaluate(group: str = "q235_div4", config: str = "agenticcyops", mode: str = "permissive",
+def evaluate(group: str = "q235_div4", config: str = "defer", mode: str = "permissive",
              domains=DOMAINS, suffix: str = "") -> dict:
     from analysis.reported import hoists_live
     gate = AutoGates(mode=mode)
@@ -117,7 +117,7 @@ def _incident(domain: str, trial_id: str) -> dict:
 
 
 def simulate(mode: str = "permissive", fixed_scorer: bool = False, group: str = "q235_div4",
-             config: str = "agenticcyops", domains=DOMAINS, embedding_model=None) -> dict:
+             config: str = "defer", domains=DOMAINS, embedding_model=None) -> dict:
     """Per domain: attack success as run and with the gate (direct), and benign
     proposal decisions the gate would flip.
 

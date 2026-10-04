@@ -5,7 +5,7 @@ Produces:
   1. Multi-page PDF with title, executive summary, charts, cross-group
      comparison, and auto-generated key findings.
   2. enhanced_attack_results.csv — one row per AP per config.
-  3. cross_group_summary.csv — one row per AP per group (agenticcyops only).
+  3. cross_group_summary.csv — one row per AP per group (defer only).
 
 Usage:
     python -m analysis.attack_analytics --domain cyberops --groups A
@@ -46,13 +46,13 @@ plt.rcParams.update({
     "axes.titlesize": 13,
 })
 
-CONFIGS = ["flat", "acl_hardened", "llm_judge", "agenticcyops"]
+CONFIGS = ["flat", "acl_hardened", "llm_judge", "defer"]
 CONFIG_LABELS = {"flat": "Flat MAS", "acl_hardened": "ACL-Hardened",
                  "llm_judge": "LLM Judge (P1+consensus)",
-                 "agenticcyops": "DEFER"}
+                 "defer": "DEFER"}
 CONFIG_COLORS = {"flat": "#e74c3c", "acl_hardened": "#f39c12",
                  "llm_judge": "#9b59b6",
-                 "agenticcyops": "#2ecc71"}
+                 "defer": "#2ecc71"}
 
 HEADER_COLOR = "#2c3e50"
 ACCENT = "#2980b9"
@@ -293,7 +293,7 @@ def _compute_ap_config_stats(rows: list[dict]) -> dict[tuple[str, str], dict]:
     return stats
 
 
-def _compute_variant_asr(rows: list[dict], config: str = "agenticcyops") -> dict[tuple[str, int], float]:
+def _compute_variant_asr(rows: list[dict], config: str = "defer") -> dict[tuple[str, int], float]:
     """Compute ASR per (AP, variant) for a given config.
 
     Returns {(ap, variant): asr_pct}
@@ -360,7 +360,7 @@ def write_enhanced_csv(stats: dict[tuple[str, str], dict], domain: str,
 
 def write_cross_group_csv(group_data: dict[str, list[dict]], domain: str,
                           output_dir: Path):
-    """Write cross_group_summary.csv — one row per AP per group, agenticcyops only."""
+    """Write cross_group_summary.csv — one row per AP per group, defer only."""
     output_dir.mkdir(parents=True, exist_ok=True)
     path = output_dir / "cross_group_summary.csv"
     fieldnames = ["ap", "ap_name", "group", "domain", "trials", "succeeded",
@@ -370,7 +370,7 @@ def write_cross_group_csv(group_data: dict[str, list[dict]], domain: str,
     for grp, rows in sorted(group_data.items()):
         stats = _compute_ap_config_stats(rows)
         for ap in ALL_APS:
-            s = stats.get((ap, "agenticcyops"))
+            s = stats.get((ap, "defer"))
             if s is None:
                 continue
             rows_out.append({
@@ -446,7 +446,7 @@ def _page_executive_summary(pdf, stats: dict[tuple[str, str], dict], domain: str
 
         flat_s = stats.get((ap, "flat"))
         acl_s = stats.get((ap, "acl_hardened"))
-        aco_s = stats.get((ap, "agenticcyops"))
+        aco_s = stats.get((ap, "defer"))
 
         def _fmt(st):
             if not st:
@@ -494,7 +494,7 @@ def _page_executive_summary(pdf, stats: dict[tuple[str, str], dict], domain: str
         # Name column left-align
         table[i, 1].set_text_props(ha="left")
 
-        # Color code agenticcyops ASR column (col 5)
+        # Color code defer ASR column (col 5)
         asr_text = cell_data[i - 1][5]
         try:
             asr_val = float(asr_text.replace("%", ""))
@@ -559,7 +559,7 @@ def _page_defense_effectiveness(pdf, stats: dict[tuple[str, str], dict], domain:
     """
     principle_ap_map: dict[str, list[str]] = defaultdict(list)
     for ap in ALL_APS:
-        s = stats.get((ap, "agenticcyops"))
+        s = stats.get((ap, "defer"))
         if s is None:
             continue
         pp = s["primary_principle"]
@@ -609,8 +609,8 @@ def _page_defense_effectiveness(pdf, stats: dict[tuple[str, str], dict], domain:
 
 
 def _page_variant_analysis(pdf, rows: list[dict], domain: str):
-    """Page 6: Per-variant ASR table for agenticcyops."""
-    variant_asr = _compute_variant_asr(rows, "agenticcyops")
+    """Page 6: Per-variant ASR table for defer."""
+    variant_asr = _compute_variant_asr(rows, "defer")
 
     # Determine max variants
     all_variants = sorted(set(v for (_, v) in variant_asr.keys()))
@@ -701,7 +701,7 @@ def _page_mechanism_breakdown(pdf, stats: dict[tuple[str, str], dict], domain: s
     """Page 7: Enhanced horizontal bar chart of blocking mechanisms."""
     mech_counts: dict[str, int] = defaultdict(int)
     for ap in ALL_APS:
-        s = stats.get((ap, "agenticcyops"))
+        s = stats.get((ap, "defer"))
         if s is None:
             continue
         for m in s["mechanisms_list"]:
@@ -756,7 +756,7 @@ def _page_mechanism_breakdown(pdf, stats: dict[tuple[str, str], dict], domain: s
 
 
 def _page_cross_group(pdf, group_data: dict[str, list[dict]], domain: str):
-    """Page 8: Cross-group comparison of ASR per AP (agenticcyops only)."""
+    """Page 8: Cross-group comparison of ASR per AP (defer only)."""
     groups = sorted(group_data.keys())
     if len(groups) < 2:
         return
@@ -766,7 +766,7 @@ def _page_cross_group(pdf, group_data: dict[str, list[dict]], domain: str):
     for j, grp in enumerate(groups):
         stats = _compute_ap_config_stats(group_data[grp])
         for i, ap in enumerate(ALL_APS):
-            s = stats.get((ap, "agenticcyops"))
+            s = stats.get((ap, "defer"))
             if s and s["asr"] is not None:
                 matrix[i, j] = s["asr"]
 
@@ -811,12 +811,12 @@ def _page_key_findings(pdf, stats: dict[tuple[str, str], dict],
 
     findings = []
 
-    # Gather agenticcyops ASR per AP (measurable APs only)
+    # Gather defer ASR per AP (measurable APs only)
     asr_map: dict[str, float] = {}
     not_measurable_aps: list[str] = []
     no_headroom_aps: list[str] = []
     for ap in ALL_APS:
-        s = stats.get((ap, "agenticcyops"))
+        s = stats.get((ap, "defer"))
         if not s:
             continue
         if s["asr"] is None:
@@ -849,7 +849,7 @@ def _page_key_findings(pdf, stats: dict[tuple[str, str], dict],
     # 3. Most effective defense layer
     principle_block_counts: dict[str, int] = defaultdict(int)
     for ap in ALL_APS:
-        s = stats.get((ap, "agenticcyops"))
+        s = stats.get((ap, "defer"))
         if s:
             for m in s["mechanisms_list"]:
                 p = _mechanism_to_principle(m)
@@ -877,7 +877,7 @@ def _page_key_findings(pdf, stats: dict[tuple[str, str], dict],
         for grp in groups:
             grp_stats = _compute_ap_config_stats(group_data[grp])
             for ap in ALL_APS:
-                s = grp_stats.get((ap, "agenticcyops"))
+                s = grp_stats.get((ap, "defer"))
                 if s and s["asr"] is not None and s["asr"] > 10:
                     findings.append(
                         f"Group {grp} shows {s['asr']:.0f}% ASR on "
@@ -898,8 +898,8 @@ def _page_key_findings(pdf, stats: dict[tuple[str, str], dict],
             memory_writes=("memory_writes", "mean"),
         )
         has = lambda c: c in cgrp.index
-        if has("agenticcyops") and has("flat"):
-            ac = cgrp.loc["agenticcyops"]
+        if has("defer") and has("flat"):
+            ac = cgrp.loc["defer"]
             fl = cgrp.loc["flat"]
             tok_delta = (ac["tokens"] - fl["tokens"]) / fl["tokens"] * 100
             findings.append(
@@ -918,8 +918,8 @@ def _page_key_findings(pdf, stats: dict[tuple[str, str], dict],
             findings.append(
                 f"Defense-in-depth signal: {deny_rate:.1f}% of tool calls denied "
                 f"under DEFER ({ac['tool_denies']:.1f}/{ac['tool_calls']:.1f} per trial)")
-        if has("agenticcyops"):
-            ac = cgrp.loc["agenticcyops"]
+        if has("defer"):
+            ac = cgrp.loc["defer"]
             # Memory ops are exercised only on AP-13/AP-14 (2 APs out of 15).
             # Averaged over the full 30-trial slate the per-trial figure is
             # dilute; re-scale to "per memory-ops-bearing trial" for clarity.
@@ -1009,8 +1009,8 @@ def _page_cost_performance(pdf, cost_rows: list[dict], domain: str):
                  f"{v:,.0f}", ha="center", fontsize=9, fontweight="bold")
     # Annotate delta vs flat
     flat_tok = grp.loc["flat", "tokens"] if "flat" in grp.index else None
-    if flat_tok and "agenticcyops" in grp.index:
-        ac = grp.loc["agenticcyops", "tokens"]
+    if flat_tok and "defer" in grp.index:
+        ac = grp.loc["defer", "tokens"]
         delta_pct = (ac - flat_tok) / flat_tok * 100
         ax1.text(0.02, 0.97,
                  f"DEFER vs Flat: {delta_pct:+.1f}%",
@@ -1087,9 +1087,9 @@ def _page_cost_performance(pdf, cost_rows: list[dict], domain: str):
             f"{r['tool_ms']/1000:,.1f}",
         ])
     # Delta row vs flat
-    if "flat" in grp.index and "agenticcyops" in grp.index:
+    if "flat" in grp.index and "defer" in grp.index:
         f_row = grp.loc["flat"]
-        a_row = grp.loc["agenticcyops"]
+        a_row = grp.loc["defer"]
         def _delta(key, fmt="{:+.1f}%"):
             return fmt.format((a_row[key] - f_row[key]) / f_row[key] * 100)
         rows.append(["-- DEFER vs Flat --", "",
@@ -1290,7 +1290,7 @@ def generate_report(domain: str, groups: list[str], output_dir: Path):
     # --- Summary printout ---
     print(f"\n  --- ASR Summary (DEFER, Group {primary_group}) ---")
     for ap in ALL_APS:
-        s = stats.get((ap, "agenticcyops"))
+        s = stats.get((ap, "defer"))
         if s:
             status = ("N/A" if s["asr"] is None
                       else "BLOCKED" if s["asr"] == 0 else f"{s['asr']}%")

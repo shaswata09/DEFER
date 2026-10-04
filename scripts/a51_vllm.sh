@@ -31,7 +31,7 @@ MODELS_DIR="${MODELS_DIR:-$REPO/models}"
 LOG_DIR="${LOGS_DIR:-$REPO/logs}/vllm"
 PID_DIR="$LOG_DIR/pids"
 mkdir -p "$LOG_DIR" "$PID_DIR"
-CONDA_ENV="${CONDA_ENV:-agenticcyops}"
+CONDA_ENV="${CONDA_ENV:-defer}"
 VLLM_BIN="${VLLM_BIN:-vllm}"
 BIND_HOST="${A51_BIND_HOST:-0.0.0.0}"     # LAN-facing; the API key gates access
 API_KEY="${REMOTE_5090_API_KEY:-}"

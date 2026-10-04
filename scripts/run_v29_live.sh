@@ -28,7 +28,7 @@ done
 note "v2.9 live run start ($G, RUN_TAG=$RUN_TAG)"
 slot=0; pids=()
 for aps in "ap1,ap2,ap3" "ap4,ap5,ap6" "ap7,ap8,ap9" "ap10,ap11,ap12" "ap13,ap14,ap15" "benign"; do
-    SLOT="$slot" scripts/run_attack_paths.sh "$G" cyberops "$aps" agenticcyops 3 \
+    SLOT="$slot" scripts/run_attack_paths.sh "$G" cyberops "$aps" defer 3 \
         > "logs/v29_live_${slot}.log" 2>&1 &
     pids+=($!); slot=$((slot + 1)); sleep 20
 done

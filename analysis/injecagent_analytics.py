@@ -36,10 +36,10 @@ plt.rcParams.update({
 })
 
 CONFIG_COLOR = {"flat": "#e74c3c", "acl_hardened": "#f39c12",
-                "agenticcyops": "#2ecc71"}
+                "defer": "#2ecc71"}
 CONFIG_LABEL = {"flat": "Flat MAS", "acl_hardened": "ACL-Hardened",
-                "agenticcyops": "DEFER (P1-P5)"}
-CONFIG_ORDER = ["flat", "acl_hardened", "agenticcyops"]
+                "defer": "DEFER (P1-P5)"}
+CONFIG_ORDER = ["flat", "acl_hardened", "defer"]
 DOMAIN_ORDER = ["cyberops", "healthcare", "finance", "legal"]
 DOMAIN_LABEL = {d: d.title() for d in DOMAIN_ORDER}
 FAMILY_LABEL = {"dh": "Direct Harm", "ds": "Data Stealing"}
@@ -94,7 +94,7 @@ def page_title(pdf: PdfPages, det: pd.DataFrame, summ: pd.DataFrame) -> None:
             family="monospace", va="top")
 
     # Per-domain defended ASR
-    acy = det[det.config == "agenticcyops"]
+    acy = det[det.config == "defer"]
     d_agg = acy.groupby("domain")["allowed"].agg(["sum", "count"]).reset_index()
     d_agg["asr"] = 100 * d_agg["sum"] / d_agg["count"]
     ax.text(0.06, 0.45, "Defended ASR per domain  (DEFER only)",
@@ -139,11 +139,11 @@ def page_aggregate_bars(pdf: PdfPages, det: pd.DataFrame) -> None:
 
     # Right: per-family, defended only
     ax = axes[1]
-    df = det[det.config == "agenticcyops"].copy()
+    df = det[det.config == "defer"].copy()
     df["fv"] = df["family"] + "-" + df["variant"]
     agg2 = df.groupby("fv")["allowed"].agg(["sum", "count"])
     agg2["asr"] = 100 * agg2["sum"] / agg2["count"]
-    bars = ax.bar(agg2.index, agg2["asr"], color=CONFIG_COLOR["agenticcyops"],
+    bars = ax.bar(agg2.index, agg2["asr"], color=CONFIG_COLOR["defer"],
                   edgecolor="black", width=0.6)
     ax.set_ylim(0, max(agg2["asr"].max() * 1.4, 10))
     ax.set_ylabel("Defended ASR (%)")
@@ -158,7 +158,7 @@ def page_aggregate_bars(pdf: PdfPages, det: pd.DataFrame) -> None:
 
 def page_heatmap(pdf: PdfPages, det: pd.DataFrame) -> None:
     """Defended ASR per (domain × family-variant)."""
-    df = det[det.config == "agenticcyops"].copy()
+    df = det[det.config == "defer"].copy()
     df["fv"] = df["family"] + "-" + df["variant"]
     pivot = (df.groupby(["fv", "domain"])["allowed"]
              .mean()
@@ -178,7 +178,7 @@ def page_heatmap(pdf: PdfPages, det: pd.DataFrame) -> None:
 
 def page_principle_attribution(pdf: PdfPages, det: pd.DataFrame) -> None:
     """Stacked bar: which P-layer blocked each attack family."""
-    df = det[det.config == "agenticcyops"].copy()
+    df = det[det.config == "defer"].copy()
     df["fv"] = df["family"] + "-" + df["variant"]
 
     def primary_principle(mech: str) -> str:
@@ -224,7 +224,7 @@ def page_attack_type_breakdown(pdf: PdfPages, det: pd.DataFrame) -> None:
     grp["asr"] = 100 * grp["sum"] / grp["count"]
     pivot = grp.pivot(index="case_attack_type", columns="config",
                       values="asr").reindex(columns=CONFIG_ORDER)
-    pivot = pivot.sort_values("agenticcyops", ascending=False)
+    pivot = pivot.sort_values("defer", ascending=False)
 
     fig, ax = plt.subplots(figsize=(12, 6))
     x = np.arange(len(pivot))
@@ -293,7 +293,7 @@ def page_methodology(pdf: PdfPages, det: pd.DataFrame) -> None:
         "  acl_hardened   -- network-layer allowlist only; no IA_* tools",
         "                     in domain manifests (explicitly allowed to",
         "                     avoid masking ACL's true coverage).",
-        "  agenticcyops   -- full P1-P5 stack.",
+        "  defer   -- full P1-P5 stack.",
         "",
         "Caveats for paper framing:",
         "  * This is the STATIC InjecAgent score.  The upstream paper's",
@@ -355,7 +355,7 @@ def generate(results_dir: Path, out_dir: Path) -> None:
         return "none"
 
     det["principle"] = det["mechanism"].apply(primary)
-    attr = (det[det.config == "agenticcyops"]
+    attr = (det[det.config == "defer"]
             .groupby(["family", "variant", "principle"]).size()
             .unstack(fill_value=0))
     attr_path = out_dir / "injecagent_principle_attribution.csv"

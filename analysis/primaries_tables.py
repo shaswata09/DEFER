@@ -36,7 +36,7 @@ PRIMARIES_V32 = {"gpt-oss-120b": ("oss120_local2_v32", "rep_oss120"),
 _MODES = {"v29": (PRIMARIES, None, "v2.9"), "v31": (PRIMARIES_V31, "replay_v31", "v3.1"),
           "v32": (PRIMARIES_V32, "replay_rep", "v3.2")}
 PANEL_FREE = {"FLAT": "flat", "ACL": "acl_hardened", "NOJUDGE": "symbolic_only"}
-JUDGED = {"JUDGEONLY": ("llm_judge", "judgeonly"), "FULL": ("agenticcyops", "full")}
+JUDGED = {"JUDGEONLY": ("llm_judge", "judgeonly"), "FULL": ("defer", "full")}
 
 
 def _pct(x: float) -> str:
@@ -49,7 +49,7 @@ def _ci(ts: list[dict]) -> str:
 
 
 def original_variants() -> set[tuple[str, str]]:
-    return {tuple(t.split("_")[1:3]) for t in trials("q235_div4", DOM, "agenticcyops") if "_benign_" not in t}
+    return {tuple(t.split("_")[1:3]) for t in trials("q235_div4", DOM, "defer") if "_benign_" not in t}
 
 
 def as_run(group: str, cfg: str, keep) -> tuple[list[dict], Counter, Counter]:

@@ -53,13 +53,13 @@ from analysis.generate_tables import AP_LABEL, CONFIG_LABEL, _ap_sort, _is_tagge
 from analysis.statistical_tests import MEASURABLE, SYSTEM_CONFIGS, wilson  # noqa: E402
 from config import BASE_DIR, RESULTS_DIR  # noqa: E402
 
-CONFIG_COLOR = {"flat": "#e74c3c", "acl_hardened": "#f39c12", "agenticcyops": "#2ecc71",
+CONFIG_COLOR = {"flat": "#e74c3c", "acl_hardened": "#f39c12", "defer": "#2ecc71",
                 "llm_judge": "#3498db", "symbolic_only": "#9b59b6"}
 HEADER = "#2c3e50"
 ACCENT = "#2980b9"
 GREY = "#7f8c8d"
 LANDSCAPE = (11, 8.5)
-CONFIG_ORDER = ["flat", "acl_hardened", "agenticcyops", "llm_judge", "symbolic_only"]
+CONFIG_ORDER = ["flat", "acl_hardened", "defer", "llm_judge", "symbolic_only"]
 
 # scope notes for the consolidated report: what the numbers do and do not cover
 SCOPE_NOTES = [
@@ -322,7 +322,7 @@ def _charts(result_dir: Path, attack: list[dict], label: str, configs: list[str]
     plt.close(fig)
 
     # blocking mechanisms under the DEFER stack
-    stack = [r for r in attack if r["config"] in ("agenticcyops", "symbolic_only", "llm_judge")]
+    stack = [r for r in attack if r["config"] in ("defer", "symbolic_only", "llm_judge")]
     mechs = Counter((r.get("blocked_by") or "unknown") for r in stack if r["outcome"] == "blocked")
     if mechs:
         labels = [m for m, _ in mechs.most_common()]
@@ -632,7 +632,7 @@ def fig_asb(section):
     data: dict[str, dict[str, float]] = defaultdict(dict)
     llm: dict[str, float] = {}
     for run, sub, cfg, n, llm_asr, def_asr in rows:
-        if cfg != "agenticcyops" or run.endswith("_drift"):
+        if cfg != "defer" or run.endswith("_drift"):
             continue
         panel = run.rsplit("_", 1)[-1]
         data[panel][sub] = _num(def_asr)
@@ -643,7 +643,7 @@ def fig_asb(section):
     subs = sorted({s for p in data.values() for s in p})
     fig, axes = plt.subplots(1, 2, figsize=(12, 5), gridspec_kw={"width_ratios": [1, 1.4]})
     overall = [np.average([data[p].get(s, np.nan) for s in subs],
-                          weights=[_num(r[3]) for r in rows if r[0].endswith("_" + p) and r[2] == "agenticcyops"])
+                          weights=[_num(r[3]) for r in rows if r[0].endswith("_" + p) and r[2] == "defer"])
                for p in panels]
     axes[0].bar(panels, overall, color=ACCENT, edgecolor="white")
     for i, v in enumerate(overall):

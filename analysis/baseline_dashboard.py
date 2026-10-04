@@ -38,9 +38,9 @@ plt.rcParams.update({
     "axes.titlesize": 14,
 })
 
-CONFIGS = ["flat", "acl_hardened", "agenticcyops"]
-CONFIG_LABELS = {"flat": "Flat MAS", "acl_hardened": "ACL-Hardened", "agenticcyops": "DEFER"}
-CONFIG_COLORS = {"flat": "#e74c3c", "acl_hardened": "#f39c12", "agenticcyops": "#2ecc71"}
+CONFIGS = ["flat", "acl_hardened", "defer"]
+CONFIG_LABELS = {"flat": "Flat MAS", "acl_hardened": "ACL-Hardened", "defer": "DEFER"}
+CONFIG_COLORS = {"flat": "#e74c3c", "acl_hardened": "#f39c12", "defer": "#2ecc71"}
 PHASES = ["monitor", "analyze", "admin", "report"]
 
 
@@ -329,7 +329,7 @@ def generate_latency_chart(domain: str, output_dir: Path):
 
 def generate_principle_chart(domain: str, output_dir: Path):
     """P1-P5 activation chart for DEFER config."""
-    events = load_logs(domain, "agenticcyops")
+    events = load_logs(domain, "defer")
     if not events:
         return
 

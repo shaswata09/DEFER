@@ -40,11 +40,11 @@ from config import BASE_DIR
 
 sns.set_theme(style="whitegrid", font_scale=1.0, palette="muted")
 
-CONFIGS = ["flat", "acl_hardened", "agenticcyops"]
+CONFIGS = ["flat", "acl_hardened", "defer"]
 CONFIG_LABELS = {"flat": "Flat MAS", "acl_hardened": "ACL-Hardened",
-                 "agenticcyops": "DEFER"}
+                 "defer": "DEFER"}
 CONFIG_COLORS = {"flat": "#e74c3c", "acl_hardened": "#f39c12",
-                 "agenticcyops": "#2ecc71"}
+                 "defer": "#2ecc71"}
 HEADER_COLOR = "#2c3e50"
 AP_LABELS = {
     "ap1": "AP-1 Tool Redir.", "ap2": "AP-2 Mem Poison", "ap3": "AP-3 Confused Dep.",
@@ -157,8 +157,8 @@ def regenerate(group: str, domain: str, suffix: str = "") -> None:
     plt.savefig(result_dir / "interception_heatmap.png", dpi=150)
     plt.close()
 
-    # ---- Chart 3: mechanism breakdown (agenticcyops) -------------------
-    aco = [r for r in attack if r["Config"] == "agenticcyops"]
+    # ---- Chart 3: mechanism breakdown (defer) -------------------
+    aco = [r for r in attack if r["Config"] == "defer"]
     mechs: dict[str, int] = defaultdict(int)
     refused = 0
     for r in aco:

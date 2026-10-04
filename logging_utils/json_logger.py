@@ -13,7 +13,7 @@ Usage:
 
     logger = ExperimentLogger(
         eval_name="cyberops_eval_attacks_A",
-        config="agenticcyops",
+        config="defer",
         model="Qwen3-235B-A22B-Instruct-2507",
     )
 
@@ -118,7 +118,7 @@ class ExperimentLogger:
         self,
         eval_name: str = "cyberops_eval_attacks_A",
         domain: str = "cyberops",
-        config: str = "agenticcyops",
+        config: str = "defer",
         model: str = "Qwen3-235B-A22B-Instruct-2507",
         logs_dir: Optional[str] = None,
         header: Optional[dict] = None,
@@ -130,7 +130,7 @@ class ExperimentLogger:
                        "{domain}_baseline_{group}" for benign runs.
                        Determines the subdirectory under logs/.
             domain: Domain identifier ("cyberops", "healthcare", "finance", "legal").
-            config: System configuration ("flat", "acl_hardened", "agenticcyops").
+            config: System configuration ("flat", "acl_hardened", "defer").
             model: Primary model used for this run.  Host paths are stripped;
                    only the ``<org>/<name>`` part or an API model id is kept.
             logs_dir: Override base logs directory. Defaults to project logs/.

@@ -7,7 +7,7 @@ Domain-agnostic — loads configs/tools/prompts from domains/{domain}/.
 Config modes:
   "flat":           No enforcement. Agents call anything directly.
   "acl_hardened":   Manifest enforcement (P2-L1) only. No consensus/MMA.
-  "agenticcyops":   Full P1-P5 enforcement.
+  "defer":   Full P1-P5 enforcement.
 """
 
 import copy
@@ -19,7 +19,7 @@ from uuid import uuid4
 import httpx
 from openai import AsyncOpenAI
 
-from config import BASE_DIR
+from config import BASE_DIR, canonical_config
 from logging_utils import ExperimentLogger
 from host.manifest_enforcer import ManifestEnforcer
 from host.handoff import PhaseHandoff
@@ -91,19 +91,19 @@ def _hoist(proposal: dict) -> dict:
 class SOARHost:
     """Central orchestrator for the DEFER testbed."""
 
-    # config label -> flags on the agenticcyops stack (see __init__)
+    # config label -> flags on the defer stack (see __init__)
     _STACK_VARIANTS = {
         "symbolic_only": {},
-        "agenticcyops_noautoapprove": {"gate_mode": "noautoapprove"},
-        "agenticcyops_gate_permissive": {"gate_mode": "permissive"},
+        "defer_noautoapprove": {"gate_mode": "noautoapprove"},
+        "defer_gate_permissive": {"gate_mode": "permissive"},
         "p2_judge": {"p3_deterministic_off": True, "extra_disabled": {"P1", "P4", "P5"}},
-        "agenticcyops_writejudge": {"write_judge": True},
+        "defer_writejudge": {"write_judge": True},
     }
 
     def __init__(
         self,
         domain: str,
-        config: str = "agenticcyops",
+        config: str = "defer",
         llm_url: str = "http://localhost:8000/v1",
         mma_url: str = "http://localhost:9100",
         tool_registry: Optional[ServerRegistry] = None,
@@ -116,21 +116,23 @@ class SOARHost:
         adaptive_consent_path=None,
     ):
         self.domain = domain
-        # ``symbolic_only`` (H10) is the full agenticcyops stack with the L6
+        # ``symbolic_only`` (H10) is the full defer stack with the L6
         # LLM consensus removed: proposals that reach L6 are escalated
-        # instead of judged.  Internally it is the agenticcyops branch with
+        # instead of judged.  Internally it is the defer branch with
         # no consensus validator; the label is kept for logs and results.
+        # (the recorded agenticcyops[_<variant>] names are accepted as defer[_<variant>])
+        config = canonical_config(config)
         self.config_label = config
-        # Configuration variants that run on the agenticcyops stack with one
+        # Configuration variants that run on the defer stack with one
         # setting changed. Each is a flag, not a fork of the decision code, so
         # the deployed configuration's behaviour is untouched.
         #   symbolic_only                 (H10) L6 removed, proposals escalate
-        #   agenticcyops_noautoapprove    (E1)  no deterministic auto-approve
-        #   agenticcyops_gate_permissive  (E16) loose auto-approve gate
+        #   defer_noautoapprove           (E1)  no deterministic auto-approve
+        #   defer_gate_permissive         (E16) loose auto-approve gate
         #   p2_judge                      (E17) P2 + panel only
-        #   agenticcyops_writejudge       (E9)  panel also judges memory writes
+        #   defer_writejudge              (E9)  panel also judges memory writes
         _flags = self._STACK_VARIANTS.get(config, {})
-        self.config = "agenticcyops" if config in self._STACK_VARIANTS else config
+        self.config = "defer" if config in self._STACK_VARIANTS else config
         config = self.config
         self._gate_mode = _flags.get("gate_mode", "default")
         self._p3_deterministic_off = bool(_flags.get("p3_deterministic_off"))
@@ -152,7 +154,7 @@ class SOARHost:
             raise ValueError(f"state_mode must be isolated or persistent, got {state_mode!r}")
         self.state_mode = state_mode
 
-        # Ablation switch -- only meaningful for the agenticcyops config.
+        # Ablation switch -- only meaningful for the defer config.
         # Layer call sites consult ``self._principle_active("Px")`` and
         # short-circuit when the principle is disabled.  Stored uppercase
         # so callers can pass either case.
@@ -168,7 +170,7 @@ class SOARHost:
                 setattr(_agent, "show_all_tools", True)
 
         # E9: stores marked critical in the domain config. Writes to these are
-        # routed to the panel under agenticcyops_writejudge; empty for every
+        # routed to the panel under defer_writejudge; empty for every
         # other configuration, so nothing else changes behaviour.
         self.critical_stores: set = set()
         if self.write_judge:
@@ -185,18 +187,18 @@ class SOARHost:
         self.handoff = PhaseHandoff(logger=logger)
 
         # Layer instantiation
-        #   agenticcyops -> P1 identity + P2 manifest/params/output + P3 full
+        #   defer -> P1 identity + P2 manifest/params/output + P3 full
         #                   verified-execution stack (which wraps consensus)
         #   llm_judge    -> P1 identity only; the new elif branch in
         #                   _process_tool_call calls `self.consensus`
         #                   directly without P2/P3/P4/P5
         #   flat / acl_hardened -> none of the above (no auth_interface)
-        if config in ("agenticcyops", "llm_judge"):
+        if config in ("defer", "llm_judge"):
             self.auth_interface = AuthenticatedInterface(domain=domain, logger=logger)
         else:
             self.auth_interface = None
 
-        if config == "agenticcyops":
+        if config == "defer":
             self.param_validator = ParameterValidator(
                 domain=domain, embedding_model=embedding_model, logger=logger
             )
@@ -267,7 +269,7 @@ class SOARHost:
         # P1-L3: Verify config integrity before each incident (skipped under -P1).
         # v3.1: FULL only; JUDGEONLY is P1 identity plus the panel, and this
         # check aborted its whole incident on config-tamper variants
-        if (self.auth_interface and self.config == "agenticcyops"
+        if (self.auth_interface and self.config == "defer"
                 and self._principle_active("P1")):
             self.auth_interface.reset_replay_cache()
             configs_ok, changed_files = self.auth_interface.verify_config_integrity(
@@ -543,7 +545,7 @@ class SOARHost:
             self.verified_execution.reset_for_trial()
         summary = {"state_mode": self.state_mode, "in_process": True, "mma": None}
         # The store must be cleared for *every* configuration, not just the
-        # defended one. Gating this on ``config == "agenticcyops"`` left the
+        # defended one. Gating this on ``config == "defer"`` left the
         # flat, ACL and judge-only arms sharing one store across trials, so
         # documents planted by earlier variants crowded later ones out of the
         # top-k and memory-channel exposure decayed with variant order (AP-14
@@ -684,7 +686,7 @@ class SOARHost:
     def _principle_active(self, principle: str) -> bool:
         """True iff ``principle`` (e.g. 'P3') is NOT in disabled_principles.
 
-        Only meaningful for the agenticcyops config; the flat / acl_hardened
+        Only meaningful for the defer config; the flat / acl_hardened
         branches never consult this helper.  Used by ablation studies to
         disable specific principles at runtime via the harness's
         ``--disable-principles`` CLI flag.
@@ -780,7 +782,7 @@ class SOARHost:
         ``layer_latency_ms`` (keys P1_L1, P2_L1, P2_L2, P3, P3_L7, exec,
         P1_L2, P2_L3, acl, judge).
 
-        Enforcement pipeline (agenticcyops):
+        Enforcement pipeline (defer):
           1. P1-L1: Component identity verification
           2. P2-L1: Manifest enforcement (tool allowed for this phase?)
           3. P2-L2: Parameter validation (wildcards, criticality, rules, evidence)
@@ -838,7 +840,7 @@ class SOARHost:
                             "reason": self._sanitize_reason(reason)}
 
             if self.consensus is not None:
-                # Build the same proposal shape the agenticcyops P3 path
+                # Build the same proposal shape the defer P3 path
                 # constructs (lines 436-445).  Hoist arguments fields to
                 # the proposal root so validators that read action/target
                 # at top level work uniformly.
@@ -903,7 +905,7 @@ class SOARHost:
                                 interception_step=6,
                         extra=self._args_for_log(tc))
 
-        elif self.config == "agenticcyops":
+        elif self.config == "defer":
             # ── Step 1: P1-L1 — Component identity ──
             if self.auth_interface and self._principle_active("P1"):
                 verified, reason = self.auth_interface.verify_component(tool_id, "tools")
@@ -958,10 +960,10 @@ class SOARHost:
                     return {"status": "denied", "tool_id": tool_id,
                             "reason": self._sanitize_reason(p_reason)}
 
-        # P3: Verified Execution — full multi-layer pipeline (agenticcyops only)
+        # P3: Verified Execution — full multi-layer pipeline (defer only)
         # Fix #1: Force P3 for negative-impact tools regardless of requires_consensus
         _p3_approved_at = None  # Fix L7: reliable variable init (not dir())
-        if (self.config == "agenticcyops" and self.verified_execution
+        if (self.config == "defer" and self.verified_execution
                 and self._principle_active("P3")):
             needs_p3 = self.enforcer.requires_consensus(phase, tool_id)
             if not needs_p3 and hasattr(self.verified_execution, 'intent_chain'):
@@ -1027,7 +1029,7 @@ class SOARHost:
         # What is about to be executed must be exactly what was approved,
         # and the approval must be fresh.  Runs before the tool is called so
         # a mismatch never reaches the tool.
-        if (self.config == "agenticcyops" and self.verified_execution
+        if (self.config == "defer" and self.verified_execution
                 and _p3_approved_at is not None and self._principle_active("P3")):
             _to_execute = tc.to_proposal()
             _to_execute["phase"] = phase
@@ -1075,8 +1077,8 @@ class SOARHost:
         if self.harness_injection:
             response = self._apply_post_execution_fault(phase, tc, response)
 
-        # ── Post-execution checks (agenticcyops only) ──
-        if self.config == "agenticcyops":
+        # ── Post-execution checks (defer only) ──
+        if self.config == "defer":
             # ── Step 6: P1-L2 — Response integrity (schema, timing, replay, signature) ──
             if (self.auth_interface and isinstance(response, dict)
                     and self._principle_active("P1")):
@@ -1168,7 +1170,7 @@ class SOARHost:
 
         flat          -> the store, no checks (``mechanism="none"``)
         acl_hardened  -> manifest ACL, then the store (``acl_network_layer``)
-        agenticcyops  -> MMA gateway with P5 L1-L5
+        defer  -> MMA gateway with P5 L1-L5
         Returns ``{"store", "query", "documents", "status"}`` for the
         agent's context; documents are empty on denial.
         """
@@ -1191,7 +1193,7 @@ class SOARHost:
                 out["reason"] = f"403: {reason}"
                 return out
 
-        bypass = self.config != "agenticcyops"
+        bypass = self.config != "defer"
         incident = context.get("incident") or {}
         # P5-L3 compares the query with the incident (v3.1: before, no context
         # reached the gateway and the relevance check never ran)
@@ -1247,7 +1249,7 @@ class SOARHost:
                                            "phase": phase, "call_id": call_id})
             return out
 
-        mech = self._p5_mechanism(status, body) if self.config == "agenticcyops" else f"store_denied_{status}"
+        mech = self._p5_mechanism(status, body) if self.config == "defer" else f"store_denied_{status}"
         if self.logger:
             self.logger.log_memory_read(agent=f"{phase}_agent", store=store,
                                         auth_decision="deny", mechanism=mech,
@@ -1295,7 +1297,7 @@ class SOARHost:
 
         # Every config writes to the same store through the gateway; flat and
         # acl_hardened bypass P4 / P5 (no gateway defenses in those systems).
-        bypass = self.config != "agenticcyops"
+        bypass = self.config != "defer"
 
         # ── E9: route writes to a critical store through the panel ──
         # Judged before the write, not after: the MMA has no dry-run and no
@@ -1331,7 +1333,7 @@ class SOARHost:
                          "config": self.config_label},
             "auth_token": self._mma_token(phase, store_id),
             # Ablation switches -- MMA bypasses the corresponding check when
-            # set.  Default (full enforcement) for agenticcyops.
+            # set.  Default (full enforcement) for defer.
             "skip_p4": bypass or not self._principle_active("P4"),
             "skip_p5": bypass or not self._principle_active("P5"),
         })

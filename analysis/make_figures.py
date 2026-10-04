@@ -31,7 +31,7 @@ from analysis import figstyle as fs
 from analysis import tiers
 from analysis.statistical_tests import (MEASURABLE, _clusters, _CLUSTER, _EXEC,
                                         cluster_bootstrap, load_trials)
-from config import BASE_DIR
+from config import BASE_DIR, canonical_trial_id
 from analysis.runlogs import run_logs
 
 # DEFER_PANEL=local4 builds every figure under the all-local main panel: the
@@ -72,7 +72,7 @@ CFG_BY_LABEL = {v: k for k, v in fs.CONFIG_LABEL.items()}
 # --------------------------------------------------------------------- #
 # the five configurations of the judgment boundary; targeted arms (permissive
 # gate, judged writes, ...) share the group but carry their own config names
-MAIN_CONFIGS = {"flat", "acl_hardened", "llm_judge", "symbolic_only", "agenticcyops"}
+MAIN_CONFIGS = {"flat", "acl_hardened", "llm_judge", "symbolic_only", "defer"}
 
 
 def dev_attacks(trials: list[dict], group: str = BOUNDARY_GROUP,
@@ -236,7 +236,7 @@ def fig_judgment_boundary(trials: list[dict], outdir: Path) -> tuple[Path, dict]
     for c in cfgs:
         ts = ben.get(c, [])
         by_var = proposal_denials_by_variant(BOUNDARY_GROUP, DEV_DOMAIN, c)
-        if LOCAL4 and c in ("agenticcyops", "llm_judge"):
+        if LOCAL4 and c in ("defer", "llm_judge"):
             by_var = _local4_benign_by_scenario(c)
         units = [(k, float(d), float(p)) for k, (d, p) in by_var.items() if p]
         denied.append(_ratio_bootstrap(units))
@@ -364,7 +364,7 @@ def asb_mechanisms(path: Path) -> list[str]:
     out = []
     with open(path, newline="") as fh:
         for r in csv.DictReader(fh):
-            if r.get("config") != "agenticcyops":
+            if r.get("config") != "defer":
                 continue
             if str(r.get("defense_blocked", "")).strip().lower() == "true":
                 out.append(r.get("defense_mechanism") or "")
@@ -393,7 +393,7 @@ def fig_interception_tiers(trials: list[dict], outdir: Path) -> tuple[Path, dict
         return [t["blocked_by"] for t in trials
                 if t["group"] == BOUNDARY_GROUP and t["domain"] in domains
                 and t["ap"] != "benign" and not t.get("suffix")
-                and t["config"] == "agenticcyops" and t["outcome"] == "blocked"]
+                and t["config"] == "defer" and t["outcome"] == "blocked"]
 
     # ASB: the live run the paper reports (the frozen pipeline, 1,530 trials).
     # Its logged panel rejected every round; under Local4 the rounds it approves
@@ -498,7 +498,7 @@ def fig_ap_heatmap(trials: list[dict], outdir: Path) -> tuple[Path, dict]:
     for ap in ordered:
         c = defaultdict(int)
         for t in dev:
-            if t["ap"] == ap and t["config"] == "agenticcyops" and t["outcome"] == "blocked":
+            if t["ap"] == ap and t["config"] == "defer" and t["outcome"] == "blocked":
                 c[t["blocked_by"]] += 1
         modal[ap] = max(c, key=c.get) if c else None
 
@@ -587,7 +587,7 @@ def fig_paired_variants(trials: list[dict], outdir: Path) -> tuple[Path, dict]:
     fig, ax = plt.subplots(figsize=(fs.WIDTH_1COL, 2.95))
     for i, ap in enumerate(aps):
         for j, var in enumerate(vars_by_ap[ap]):
-            jo, de = verdict(ap, var, "llm_judge"), verdict(ap, var, "agenticcyops")
+            jo, de = verdict(ap, var, "llm_judge"), verdict(ap, var, "defer")
             if jo is None or de is None:
                 continue
             # upper-left triangle = JudgeOnly, lower-right = DEFER
@@ -658,7 +658,7 @@ def fig_ablation(trials: list[dict], outdir: Path) -> tuple[Path, dict]:
 
     def pick(g, suf, benign):
         return [t for t in trials if t["group"] == g and t["domain"] == DEV_DOMAIN
-                and t.get("suffix", "") == suf and t["config"] == "agenticcyops"
+                and t.get("suffix", "") == suf and t["config"] == "defer"
                 and ((t["ap"] == "benign" and t["outcome"] == "benign") if benign
                      else (t["ap"] != "benign" and t.get("outcome") in MEASURABLE))]
 
@@ -725,7 +725,7 @@ def fig_p5_reads(trials: list[dict], outdir: Path) -> tuple[Path, dict]:
     pool = [t for t in trials if t["group"] in (g, gp5) and t["domain"] == DEV_DOMAIN
             and t.get("outcome") in MEASURABLE and t["ap"] in ("ap4", "ap14")]
     arms = [("Flat", "flat", "", g), ("ACL", "acl_hardened", "", g), ("JudgeOnly", "llm_judge", "", g),
-            ("DEFER\nminus P5", "agenticcyops", sp5, gp5), ("DEFER", "agenticcyops", "", g)]
+            ("DEFER\nminus P5", "defer", sp5, gp5), ("DEFER", "defer", "", g)]
     # AP-14 only earns a place if it succeeds somewhere; on this split it never does
     aps = [a for a in ("ap4", "ap14") if any(_EXEC(t) for t in pool if t["ap"] == a)]
 
@@ -887,7 +887,7 @@ def validator_rounds(group: str = DEV_GROUP) -> tuple[list[str], list[dict[str, 
 def _local4_benign_by_scenario(config: str, group: str = BOUNDARY_GROUP) -> dict:
     """Per benign scenario (denied, proposed) under the Local4 replay."""
     from analysis.replay_panels import load_all_votes, load_rounds, outcomes
-    arm = "full" if config == "agenticcyops" else "judgeonly"
+    arm = "full" if config == "defer" else "judgeonly"
     if group == REPORTED_GROUP:           # the reported rounds are kept apart
         arm = f"rep_{arm}"
         rounds = [json.loads(ln) for ln in open(BASE_DIR / "cache" / "replay_rep" / "rounds.jsonl")]
@@ -908,7 +908,7 @@ def _local4_panel_delta(group: str, domain: str) -> int | None:
     if not f.exists():
         return None
     rounds = [r for r in map(json.loads, open(f)) if r["arm"] == "rep_full" and r["domain"] == domain]
-    res = outcomes("rep_full", group, "agenticcyops", (domain,), "", "Local4", load_all_votes(), rounds)
+    res = outcomes("rep_full", group, "defer", (domain,), "", "Local4", load_all_votes(), rounds)
     per = res["domains"][domain].get("benign_trials", {})
     return sum(den - as_run for den, as_run in per.values())
 
@@ -940,7 +940,7 @@ def _logged_rounds(group: str = DEV_GROUP) -> tuple[list[str], list[dict[str, st
     newest: dict[str, str] = {}
     panel: tuple[str, ...] | None = None
     for d in ("cyberops", "finance", "healthcare", "legal"):
-        for f in map(str, run_logs(group, d, "agenticcyops")):
+        for f in map(str, run_logs(group, d, "defer")):
             for ln in open(f, errors="ignore"):
                 if not ln.strip():
                     continue
@@ -1072,7 +1072,7 @@ def fig_channels(trials: list[dict], outdir: Path) -> tuple[Path, dict]:
     x = np.arange(len(chans))
     w = 0.36
     out = {}
-    for k, (lbl, cfg) in enumerate((("Flat", "flat"), ("DEFER", "agenticcyops"))):
+    for k, (lbl, cfg) in enumerate((("Flat", "flat"), ("DEFER", "defer"))):
         vals, expo = [], []
         for c in chans:
             ts = [t for t in pool if t["channel"] == c and t["config"] == cfg]
@@ -1096,7 +1096,7 @@ def fig_channels(trials: list[dict], outdir: Path) -> tuple[Path, dict]:
     # where does the DEFER residual on the tool-response channel come from?
     resid = defaultdict(int)
     for t in pool:
-        if t["channel"] == "tool_response" and t["config"] == "agenticcyops" and _EXEC(t):
+        if t["channel"] == "tool_response" and t["config"] == "defer" and _EXEC(t):
             resid[f"{t['domain']} {t['ap']}"] += 1
     if resid:
         top = max(resid, key=resid.get)
@@ -1166,7 +1166,7 @@ def fig_asb_families(trials: list[dict], outdir: Path) -> tuple[Path, dict]:
     w = 0.26
     out, ns = {}, {}
     for k, (lbl, cfg) in enumerate((("Flat", "flat"), ("ACL", "acl_hardened"),
-                                    ("DEFER", "agenticcyops"))):
+                                    ("DEFER", "defer"))):
         vals = []
         for f in fams:
             rs = [r for r in rows if r["attack_type"] == f and r["config"] == cfg]
@@ -1175,7 +1175,7 @@ def fig_asb_families(trials: list[dict], outdir: Path) -> tuple[Path, dict]:
         ax.bar(x + (k - 1) * w, vals, width=w * 0.9, color=fs.CONFIG_COLOR[lbl],
                label=lbl, zorder=2)
         out[lbl] = {ASB_FAMILY[f]: round(v, 1) for f, v in zip(fams, vals)}
-    emitted = [share([r for r in rows if r["attack_type"] == f and r["config"] == "agenticcyops"],
+    emitted = [share([r for r in rows if r["attack_type"] == f and r["config"] == "defer"],
                      "attack_succeeded_llm") for f in fams]
     ax.plot(x, emitted, linestyle="none", marker="o", markerfacecolor="none",
             markeredgecolor=fs.EMPHASIS, markeredgewidth=1.0, markersize=4.5, zorder=5,
@@ -1191,7 +1191,7 @@ def fig_asb_families(trials: list[dict], outdir: Path) -> tuple[Path, dict]:
     blocked = {f: (100 * (1 - out["DEFER"][ASB_FAMILY[f]] / e) if e else float("nan"))
                for f, e in zip(fams, emitted)}
     # pooled over families: of everything the primary emitted, how much never executed
-    acy = [r for r in rows if r["config"] == "agenticcyops"]
+    acy = [r for r in rows if r["config"] == "defer"]
     n_emit = sum(1 for r in acy if str(r.get("attack_succeeded_llm", "")).lower() == "true")
     n_e2e = sum(1 for r in acy if str(r.get("attack_succeeded_end_to_end", "")).lower() == "true")
     pooled = 100 * (1 - n_e2e / n_emit) if n_emit else float("nan")
@@ -1240,7 +1240,7 @@ def fig_transfer(trials: list[dict], outdir: Path) -> tuple[Path, dict]:
     y = np.arange(len(rows))[::-1]
     out = {}
     for yi, (g, d) in zip(y, rows):
-        for lbl, cfg in (("Flat", "flat"), ("ACL", "acl_hardened"), ("DEFER", "agenticcyops")):
+        for lbl, cfg in (("Flat", "flat"), ("ACL", "acl_hardened"), ("DEFER", "defer")):
             ts = [t for t in trials if t["group"] == g and t["domain"] == d
                   and t["ap"] != "benign" and not t.get("suffix")
                   and t.get("outcome") in MEASURABLE and t["config"] == cfg]
@@ -1255,7 +1255,7 @@ def fig_transfer(trials: list[dict], outdir: Path) -> tuple[Path, dict]:
             out.setdefault(f"{name[g]} / {d}", {})[lbl] = round(100 * p, 1)
         bt = [t for t in trials if t["group"] == g and t["domain"] == d
               and t["ap"] == "benign" and t["outcome"] == "benign"
-              and not t.get("suffix") and t["config"] == "agenticcyops"]
+              and not t.get("suffix") and t["config"] == "defer"]
         if bt:
             q, qlo, qhi = rate_ci(bt, lambda t: float(t.get("collateral_denials") or 0) > 0)
             axb.plot(100 * q, yi, marker="s", markersize=4.2, color=fs.BENIGN_COLOR, zorder=3)
@@ -1312,14 +1312,14 @@ def fig_state_carryover(trials: list[dict], outdir: Path) -> tuple[Path, dict]:
                     e = json.loads(ln)
                 except json.JSONDecodeError:
                     continue
-                tid = e.get("trial_id")
+                tid = canonical_trial_id(e.get("trial_id"))   # matched to trial_id(t)
                 if e.get("ap") == "benign" and tid:
                     ts = e.get("timestamp", "")
                     if tid not in order or ts < order[tid]:
                         order[tid] = ts
 
     ben = [t for t in trials if t["group"] == pers_group and t["ap"] == "benign"
-           and t["outcome"] == "benign" and t["config"] == "agenticcyops"]
+           and t["outcome"] == "benign" and t["config"] == "defer"]
     by_dom: dict[str, list[tuple[str, float]]] = defaultdict(list)
     for t in ben:
         by_dom[t["domain"]].append((order.get(trial_id(t), ""), float(t.get("collateral_denials") or 0)))
@@ -1329,7 +1329,7 @@ def fig_state_carryover(trials: list[dict], outdir: Path) -> tuple[Path, dict]:
     as_run = load_trials(BASE_DIR / "results" / "eval_attacks" / "all_trials.csv")
     iso = [t for t in as_run if t["group"] == iso_group and t["domain"] == DEV_DOMAIN
            and t["ap"] == "benign" and t["outcome"] == "benign"
-           and not t.get("suffix") and t["config"] == "agenticcyops"]
+           and not t.get("suffix") and t["config"] == "defer"]
     iso_mean = float(np.mean([float(t.get("collateral_denials") or 0) for t in iso])) if iso else float("nan")
 
     fig, ax = plt.subplots(figsize=(fs.WIDTH_1COL, 2.4))
@@ -1468,7 +1468,7 @@ def fig_cost(trials: list[dict], outdir: Path) -> tuple[Path, dict]:
     import matplotlib.pyplot as plt
 
     domains = ("cyberops", "finance", "healthcare", "legal")
-    cost = benign_cost_from_logs(BOUNDARY_GROUP, domains, ("agenticcyops",))
+    cost = benign_cost_from_logs(BOUNDARY_GROUP, domains, ("defer",))
     if LOCAL4:
         # the panel bucket on the panel the paper reports: the replay changes
         # only panel decisions, so Local4's benign tool denials minus the live
@@ -1477,10 +1477,10 @@ def fig_cost(trials: list[dict], outdir: Path) -> tuple[Path, dict]:
         for d in domains:
             delta = _local4_panel_delta(BOUNDARY_GROUP, d)
             if delta is not None:
-                bucket = cost[(d, "agenticcyops")]["deny"]
+                bucket = cost[(d, "defer")]["deny"]
                 bucket["P3_llm"] = max(0, bucket["P3_llm"] + delta)
     lat_cfgs = [("Flat", "flat"), ("NoJudge", "symbolic_only"),
-                ("DEFER", "agenticcyops"), ("JudgeOnly", "llm_judge")]
+                ("DEFER", "defer"), ("JudgeOnly", "llm_judge")]
     latc = benign_cost_from_logs(BOUNDARY_GROUP, (DEV_DOMAIN,), [c for _l, c in lat_cfgs])
     scan = scan_proposals(BOUNDARY_GROUP, DEV_DOMAIN, [c for _l, c in lat_cfgs], benign=True)
 
@@ -1493,17 +1493,17 @@ def fig_cost(trials: list[dict], outdir: Path) -> tuple[Path, dict]:
     # is every proposed action (tool calls, memory writes, memory reads).
     x = np.arange(len(domains))
     bottom = np.zeros(len(domains))
-    props = {d: cost[(d, "agenticcyops")]["proposed"] or 1 for d in domains}
+    props = {d: cost[(d, "defer")]["proposed"] or 1 for d in domains}
     a_out = {}
     for key, lbl, col in DENY_BUCKET:
-        vals = np.array([100 * cost[(d, "agenticcyops")]["deny"].get(key, 0) / props[d]
+        vals = np.array([100 * cost[(d, "defer")]["deny"].get(key, 0) / props[d]
                          for d in domains])
         if vals.sum() == 0:
             continue
         axa.bar(x, vals, bottom=bottom, width=0.62, color=col, label=lbl, zorder=2)
         bottom += vals
         a_out[lbl] = {d: round(v, 2) for d, v in zip(domains, vals)}
-    red = np.array([100 * cost[(d, "agenticcyops")]["redact"] / props[d] for d in domains])
+    red = np.array([100 * cost[(d, "defer")]["redact"] / props[d] for d in domains])
     axa.bar(x, red, bottom=bottom, width=0.62, facecolor="none", edgecolor=fs.BENIGN_COLOR,
             hatch="///", linewidth=0.6, label="redactions", zorder=2)
     a_out["redactions"] = {d: round(v, 2) for d, v in zip(domains, red)}
@@ -1636,12 +1636,12 @@ def write_cascade_defs(trials: list[dict], outdir: Path) -> dict:
     data, so they are written here and ``\\input`` by the .tex file.
     """
     cfgs = [CFG_BY_LABEL[c] for c in fs.CONFIG_ORDER]
-    judged = judged_fraction(REPORTED_GROUP, DEV_DOMAIN, cfgs)["agenticcyops"]
+    judged = judged_fraction(REPORTED_GROUP, DEV_DOMAIN, cfgs)["defer"]
     # the v3.1 runs also carry the E2 siblings; count the reported 75 variants only
     keep = {(t["ap"], t["variant"]) for t in dev_attacks(trials, group=DEV_GROUP)
-            if t["config"] == "agenticcyops"}
+            if t["config"] == "defer"}
     blocked = [t["blocked_by"] for t in dev_attacks(trials, group=REPORTED_GROUP)
-               if t["config"] == "agenticcyops" and t["outcome"] == "blocked"
+               if t["config"] == "defer" and t["outcome"] == "blocked"
                and (t["ap"], t["variant"]) in keep]
     shares, n = tier_shares(blocked)
     det = 100 * (1 - shares.get("panel", 0))         # every tier but the panel
@@ -1710,7 +1710,7 @@ def main() -> None:
     # the reported variants: the v3.1 runs also carry the E2 siblings
     ORIGINAL.update((t["domain"], t["ap"], str(t["variant"])) for t in trials
                     if t["group"] == DEV_GROUP and t["ap"] != "benign" and not t.get("suffix")
-                    and t["config"] == "agenticcyops")
+                    and t["config"] == "defer")
     # every v3.1 run (boundary, ablation arms, other primaries) carries them
     trials = [t for t in trials if not carries_siblings(t["group"]) or t["ap"] == "benign"
               or (t["domain"], t["ap"], str(t["variant"])) in ORIGINAL]

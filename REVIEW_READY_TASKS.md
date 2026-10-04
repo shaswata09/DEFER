@@ -16,9 +16,9 @@ The goal is a repository that a reviewer or artifact evaluator can clone and, wi
 ## Phase A. Correctness fixes in the analysis (no decision-code change)
 
 ### A1. One configuration label per arm in the benign cost table (R1)
-`analysis/benign_cost.py` pools the benign runs of `agenticcyops_gate_permissive`, `agenticcyops_noautoapprove`, `p2_judge`, and `agenticcyops_writejudge` into `agenticcyops`, which makes CyberOps DEFER read 27.7 % in T11 instead of the paper's 10.1 %.
-- Key every aggregation on the exact `config` string from the run header, never on a prefix or substring. Grep `analysis/` for `startswith("agenticcyops")`, `"agenticcyops" in`, and similar, and fix each.
-- Add a test `tests/test_config_labels.py` that builds T11 and asserts CyberOps `agenticcyops` = 88/873 (10.1 %) on the committed logs and that each added arm appears as its own row.
+`analysis/benign_cost.py` pools the benign runs of `agenticcyops_gate_permissive`, `agenticcyops_noautoapprove`, `p2_judge`, and `agenticcyops_writejudge` into `defer`, which makes CyberOps DEFER read 27.7 % in T11 instead of the paper's 10.1 %.
+- Key every aggregation on the exact `config` string from the run header, never on a prefix or substring. Grep `analysis/` for `startswith("defer")`, `"defer" in`, and similar, and fix each.
+- Add a test `tests/test_config_labels.py` that builds T11 and asserts CyberOps `defer` = 88/873 (10.1 %) on the committed logs and that each added arm appears as its own row.
 - **Acceptance:** T11 CyberOps DEFER reads 10.1 % with its interval; the four added arms have their own rows.
 
 ### A2. One tier mapping for tables, figures, and the paper (R3)
@@ -39,7 +39,7 @@ The goal is a repository that a reviewer or artifact evaluator can clone and, wi
 ### A3. Commit the E2 sibling trials (R4)
 The 24 sibling variants exist in the payload files (`meta.e2_parent`) but their trials are in no `trials.jsonl` and not in `all_trials.csv`.
 - Find the E2 sweep logs (the run report cites them), parse them with the same parser as every other run, and add the rows to `all_trials.csv` with a new column `sibling_of` (empty for all other rows).
-- Add table T15 "E2 paired siblings": per parent/sibling pair, outcome under `flat` and `agenticcyops`, and first interceptor for both.
+- Add table T15 "E2 paired siblings": per parent/sibling pair, outcome under `flat` and `defer`, and first interceptor for both.
 - **Acceptance:** T15 reproduces flat 84.6 % for parents and for siblings, FULL 0 of 24 siblings executed, interceptor P2.2 → panel for 17 and P4.2 → drift for 7. If the logs cannot be found, **STOP** and say so; the paper cites these numbers and cannot keep them without the rows.
 
 ### A4. Label the tool-exposure mode of every arm (R2, analysis half)
@@ -67,7 +67,7 @@ T8 must show, per (group, domain, config): commit, freeze tag, `git_dirty`, tool
 - Cut tag `defense-freeze-v2.9`. The old configurations must be reproducible from their old tags; do not rewrite history.
 
 ### B2. One clean FULL run with the working scorer
-Run `agenticcyops` at `defense-freeze-v2.9` as group `q235_div4_v29` on the CyberOps development split (75 × 3) and the 20 benign scenarios (× 3), manifest-scoped tools.
+Run `defer` at `defense-freeze-v2.9` as group `q235_div4_v29` on the CyberOps development split (75 × 3) and the 20 benign scenarios (× 3), manifest-scoped tools.
 - Report: share of P3 approvals by the deterministic gate versus the panel, ASR with interval, benign denial rate (T11 definition), median latency, and the score distributions.
 - **STOP** after the run with those five numbers. The paper will report this as the configuration the design describes, next to the permissive-gate arm; do not overwrite any existing row.
 
@@ -140,7 +140,7 @@ paper/figs/          generated figures
 - Build the release from a fresh orphan branch `review-snapshot` containing a single commit of the release tree, so no history, commit messages, or `Co-Authored-By` lines are exposed.
 - Scrub from every file (code, configs, logs, notebooks, PDFs, figure metadata): author and institution names, usernames, emails, hostnames, IPs, absolute paths (`/storage/...`, home directories), GPU server names, API keys, org IDs, and W&B or dashboard URLs. Run a scanner (`gitleaks` for secrets plus a grep list you build from `git log --format='%an %ae'` and `hostname`) and report zero hits.
 - PDF metadata: strip `Author`/`Creator` fields from every generated PDF (`exiftool -all= ` or qpdf).
-- Rename the package and repo from `DEFER` to `defer` everywhere a reviewer can see it (the paper's system is DEFER); keep a one-line note in PROVENANCE.md that configuration names `agenticcyops*` in logs denote FULL.
+- Rename the package and repo from `DEFER` to `defer` everywhere a reviewer can see it (the paper's system is DEFER); keep a one-line note in PROVENANCE.md that configuration names `defer*` in logs denote FULL.
 - Mirror to anonymous.4open.science and to an anonymous Hugging Face dataset (logs, payloads, benign scenarios, cache); report both URLs so the paper's `\codelink` and `\datalink` can be filled.
 
 ### D3. Dataset card and licenses

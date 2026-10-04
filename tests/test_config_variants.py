@@ -1,4 +1,4 @@
-"""E1 / E9 / E16 / E17: configuration variants on the agenticcyops stack.
+"""E1 / E9 / E16 / E17: configuration variants on the defer stack.
 
 Each variant is a flag on the deployed stack, not a fork of the decision code.
 These tests pin two things: the flags reach the right component, and no
@@ -77,16 +77,16 @@ def test_noautoapprove_never_approves():
 
 
 @pytest.mark.parametrize("label,gate,p3off,writejudge,disabled", [
-    ("agenticcyops", "default", False, False, set()),
+    ("defer", "default", False, False, set()),
     ("symbolic_only", "default", False, False, set()),
-    ("agenticcyops_noautoapprove", "noautoapprove", False, False, set()),
-    ("agenticcyops_gate_permissive", "permissive", False, False, set()),
+    ("defer_noautoapprove", "noautoapprove", False, False, set()),
+    ("defer_gate_permissive", "permissive", False, False, set()),
     ("p2_judge", "default", True, False, {"P1", "P4", "P5"}),
-    ("agenticcyops_writejudge", "default", False, True, set()),
+    ("defer_writejudge", "default", False, True, set()),
 ])
 def test_variant_flags_reach_the_stack(label, gate, p3off, writejudge, disabled):
     h = SOARHost(domain="cyberops", config=label, consensus=object())
-    assert h.config == "agenticcyops", "variants run the agenticcyops stack"
+    assert h.config == "defer", "variants run the defer stack"
     assert h.config_label == label, "the label is kept for logs and results"
     assert h.verified_execution.gate_mode == gate
     assert h.verified_execution.p3_deterministic_off is p3off
@@ -96,7 +96,7 @@ def test_variant_flags_reach_the_stack(label, gate, p3off, writejudge, disabled)
 
 def test_deployed_config_is_unchanged():
     """The whole point: adding variants must not move the deployed config."""
-    h = SOARHost(domain="cyberops", config="agenticcyops", consensus=object())
+    h = SOARHost(domain="cyberops", config="defer", consensus=object())
     assert h.verified_execution.gate_mode == "default"
     assert h.verified_execution.p3_deterministic_off is False
     assert h.write_judge is False
@@ -105,8 +105,8 @@ def test_deployed_config_is_unchanged():
 
 def test_variants_are_registered_with_the_harness():
     from attacks.harness import CONFIGS, _PANEL_CONFIGS, _STACK_CONFIGS
-    for label in ("agenticcyops_noautoapprove", "agenticcyops_gate_permissive",
-                  "p2_judge", "agenticcyops_writejudge"):
+    for label in ("defer_noautoapprove", "defer_gate_permissive",
+                  "p2_judge", "defer_writejudge"):
         assert label in CONFIGS
         assert label in _STACK_CONFIGS
         assert label in _PANEL_CONFIGS, "every variant needs the validator panel"
@@ -115,10 +115,10 @@ def test_variants_are_registered_with_the_harness():
 def test_writejudge_loads_critical_stores_only_for_its_own_config():
     """E9: the critical-store set is empty for every other configuration, so
     the deployed write path is untouched."""
-    wj = SOARHost(domain="cyberops", config="agenticcyops_writejudge", consensus=object())
+    wj = SOARHost(domain="cyberops", config="defer_writejudge", consensus=object())
     assert wj.write_judge is True
     assert wj.critical_stores, "writejudge must load the marked stores"
-    base = SOARHost(domain="cyberops", config="agenticcyops", consensus=object())
+    base = SOARHost(domain="cyberops", config="defer", consensus=object())
     assert base.write_judge is False
     assert base.critical_stores == set()
 
@@ -134,3 +134,18 @@ def test_every_domain_marks_critical_stores(domain):
     crit = {c["id"] for c in cfg["collections"] if c.get("critical")}
     assert crit, f"{domain}: no critical stores marked"
     assert crit <= ids
+
+
+@pytest.mark.parametrize("recorded,label", [
+    ("agenticcyops", "defer"),
+    ("agenticcyops_writejudge", "defer_writejudge"),
+    ("agenticcyops_gate_permissive", "defer_gate_permissive"),
+])
+def test_recorded_names_run_as_defer(recorded, label):
+    """The runs recorded the full stack as ``agenticcyops``; the host and the
+    analysis read that name (and its variants) as ``defer``."""
+    from analysis.runlogs import canonical_config
+    assert canonical_config(recorded) == label
+    assert canonical_config("llm_judge") == "llm_judge"
+    h = SOARHost(domain="cyberops", config=recorded, consensus=object())
+    assert h.config == "defer" and h.config_label == label

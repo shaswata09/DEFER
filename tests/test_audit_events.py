@@ -50,7 +50,7 @@ def _run(config, tmp_path):
         return [json.loads(l) for l in f if l.strip()]
 
 
-@pytest.mark.parametrize("config", ["flat", "acl_hardened", "agenticcyops"])
+@pytest.mark.parametrize("config", ["flat", "acl_hardened", "defer"])
 def test_tool_proposed_precedes_tool_call_with_arguments(config, tmp_path):
     events = _run(config, tmp_path)
     proposed = [e for e in events if e["action"] == "tool_proposed"]
@@ -67,7 +67,7 @@ def test_tool_proposed_precedes_tool_call_with_arguments(config, tmp_path):
     assert events.index(proposed[0]) < events.index(calls[0])
 
 
-@pytest.mark.parametrize("config", ["flat", "acl_hardened", "agenticcyops"])
+@pytest.mark.parametrize("config", ["flat", "acl_hardened", "defer"])
 def test_memory_write_proposed_precedes_memory_write(config, tmp_path):
     events = _run(config, tmp_path)
     proposed = [e for e in events if e["action"] == "memory_write_proposed"]
@@ -76,7 +76,7 @@ def test_memory_write_proposed_precedes_memory_write(config, tmp_path):
     assert proposed[0]["call_id"].startswith("admin:mem_write:")
     assert proposed[0]["content_len"] == len(WRITE["content"])
     writes = [e for e in events if e["action"] == "memory_write"]
-    if config == "agenticcyops":
+    if config == "defer":
         # MMA is unreachable offline: the proposal is still on record.
         return
     assert len(writes) == 1 and writes[0]["call_id"] == proposed[0]["call_id"]

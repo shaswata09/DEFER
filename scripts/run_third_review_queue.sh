@@ -3,9 +3,9 @@
 # Third-review queue: waits for the running E2 sweep, then runs the
 # configuration-variant arms in priority order.
 #
-#   E16 agenticcyops_gate_permissive   what deterministic approval costs (W1/Q1)
+#   E16 defer_gate_permissive   what deterministic approval costs (W1/Q1)
 #   E17 p2_judge                       P2 + panel, isolating the rest (W2/Q4)
-#   E1  agenticcyops_noautoapprove     judge-everything-after-rules (concern 1)
+#   E1  defer_noautoapprove     judge-everything-after-rules (concern 1)
 #
 # Each arm is the development split (CyberOps, all APs, 3 trials) plus the 20
 # CyberOps benign scenarios x 3 -- 285 incidents per arm. All three run
@@ -44,7 +44,7 @@ date -Iseconds > logs/third_review_start.txt
 
 # ---- 3. run the three arms concurrently ----
 slot=0; pids=()
-for cfg in agenticcyops_gate_permissive p2_judge agenticcyops_noautoapprove; do
+for cfg in defer_gate_permissive p2_judge defer_noautoapprove; do
     for aps in all benign; do
         note "start ${cfg} cyberops ${aps} (slot ${slot})"
         SLOT="$slot" TRIALS=3 \

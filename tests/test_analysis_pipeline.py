@@ -31,7 +31,7 @@ def _trials(cfg, per_variant_exec, n_trials=3, ap="ap1"):
 
 def test_cluster_bootstrap_and_paired_diff():
     flat = _trials("flat", [3, 3, 2, 3, 3])
-    aco = _trials("agenticcyops", [0, 0, 1, 0, 0])
+    aco = _trials("defer", [0, 0, 1, 0, 0])
     ind = lambda t: t["outcome"] == "executed"
     key = lambda t: t["variant"]
     p, lo, hi = cluster_bootstrap(flat, ind, key, B=500, seed=1)
@@ -46,7 +46,7 @@ def test_cluster_bootstrap_and_paired_diff():
 def test_compute_stats_has_holm_per_family():
     trials = []
     for ap in ("ap1", "ap2"):
-        trials += _trials("flat", [3, 3, 3], ap=ap) + _trials("acl_hardened", [2, 1, 3], ap=ap) + _trials("agenticcyops", [0, 0, 0], ap=ap)
+        trials += _trials("flat", [3, 3, 3], ap=ap) + _trials("acl_hardened", [2, 1, 3], ap=ap) + _trials("defer", [0, 0, 0], ap=ap)
     rows = compute_stats(trials, B=300, seed=2)
     scopes = {(r["domain"], r["ap"]) for r in rows}
     assert ("all", "all") in scopes and ("cyberops", "ap1") in scopes
@@ -60,7 +60,7 @@ def test_compute_stats_pools_attack_paths_over_domains():
     (domain, ap, variant) clusters distinct."""
     trials = []
     for dom in ("cyberops", "finance"):
-        for cfg, execs in (("flat", [3, 3, 3]), ("acl_hardened", [1, 1, 1]), ("agenticcyops", [0, 0, 0])):
+        for cfg, execs in (("flat", [3, 3, 3]), ("acl_hardened", [1, 1, 1]), ("defer", [0, 0, 0])):
             for t in _trials(cfg, execs):
                 trials.append({**t, "domain": dom})
     rows = compute_stats(trials, B=200, seed=3)
@@ -85,21 +85,21 @@ def test_parse_logs_roundtrip_and_tables(tmp_path):
     logs = tmp_path / "logs"
     res = tmp_path / "results"
     rows = []
-    for cfg, execs in (("flat", 1), ("acl_hardened", 1), ("agenticcyops", 0)):
+    for cfg, execs in (("flat", 1), ("acl_hardened", 1), ("defer", 0)):
         r = [{"ap": "ap1", "variant": 1, "trial": t, "outcome": "executed" if t <= execs else "blocked",
               "blocked_by": "" if t <= execs else "P2_manifest_enforcement", "collateral_denials": 0,
               "task_completed": True, "latency_s": 12.5, "primary_tokens": 900, "validator_tokens": 300, "seed": t,
               "exposed": t != 3, "channel": "tool_response"}
              for t in (1, 2, 3)]
         r.append({"ap": "benign", "variant": 1, "trial": 1, "outcome": "benign", "blocked_by": "",
-                  "collateral_denials": 1 if cfg == "agenticcyops" else 0, "task_completed": True,
+                  "collateral_denials": 1 if cfg == "defer" else 0, "task_completed": True,
                   "latency_s": 9.0, "primary_tokens": 800, "validator_tokens": 100, "seed": 1})
         _write_log(logs / "cyberops_eval_attacks_g1", cfg, r)
-    _write_log(logs / "cyberops_eval_attacks_g1_disabled_P3", "agenticcyops",
+    _write_log(logs / "cyberops_eval_attacks_g1_disabled_P3", "defer",
                [{"ap": "ap1", "variant": 1, "trial": 1, "outcome": "executed", "blocked_by": "", "collateral_denials": 0,
                  "task_completed": True, "latency_s": 1, "primary_tokens": 1, "validator_tokens": 0, "seed": 1}])
     # a run-tagged directory (E1b persistent) whose header still says group g1
-    _write_log(logs / "cyberops_eval_attacks_g1_persistent", "agenticcyops",
+    _write_log(logs / "cyberops_eval_attacks_g1_persistent", "defer",
                [{"ap": "benign", "variant": 1, "trial": 1, "outcome": "benign", "blocked_by": "", "collateral_denials": 2,
                  "task_completed": False, "latency_s": 1, "primary_tokens": 1, "validator_tokens": 0, "seed": 1}])
     runs = discover_runs(logs)

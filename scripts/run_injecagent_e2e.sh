@@ -14,14 +14,14 @@
 #   ./scripts/run_injecagent_e2e.sh                         # Interactive
 #   ./scripts/run_injecagent_e2e.sh A                       # Group A, full defaults
 #   ./scripts/run_injecagent_e2e.sh D cyberops 6            # Group D, single domain
-#   ./scripts/run_injecagent_e2e.sh A all 6 agenticcyops    # One config only
+#   ./scripts/run_injecagent_e2e.sh A all 6 defer    # One config only
 #   ./scripts/run_injecagent_e2e.sh A all 6 all 10          # First 10 cases (smoke)
 #
 # Positional args:
 #   $1 GROUP      (A-F)
 #   $2 DOMAIN     (all / cyberops / healthcare / finance / legal)
 #   $3 TRIALS     (default 6)
-#   $4 CONFIG     (all / flat / acl_hardened / agenticcyops)
+#   $4 CONFIG     (all / flat / acl_hardened / defer)
 #   $5 CASE_LIMIT (blank = full 50)
 # ============================================================
 
@@ -39,10 +39,10 @@ if [ -f ".env" ]; then
     set +a
 fi
 
-CONDA_ENV="agenticcyops"
+CONDA_ENV="defer"
 
 ALL_DOMAINS=("cyberops" "healthcare" "finance" "legal")
-ALL_CONFIGS=("flat" "acl_hardened" "agenticcyops")
+ALL_CONFIGS=("flat" "acl_hardened" "defer")
 ALL_GROUPS=("A" "B" "C" "D" "E" "F" "G" "H" "I" "J")
 
 # ---- Group matrix (matches run_attack_paths.sh) ----
@@ -87,7 +87,7 @@ if [ -z "$1" ]; then
     read -p "  Group [A-F]: " GROUP
     read -p "  Domain(s)  [all / cyberops / healthcare / finance / legal]: " DOMAIN
     read -p "  Trials per case (default 6): " TRIALS
-    read -p "  Configs [all / flat / acl_hardened / agenticcyops]: " CONFIG
+    read -p "  Configs [all / flat / acl_hardened / defer]: " CONFIG
     read -p "  Case limit [default 50 = full representative subset]: " CASE_LIMIT
     [ -z "$DOMAIN" ] && DOMAIN="all"
     [ -z "$TRIALS" ] && TRIALS="6"

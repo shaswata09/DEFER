@@ -55,7 +55,7 @@ CASES_PATH = HERE / "representative_cases.json"
 RESULTS_DIR = BASE_DIR / "results" / "injecagent"
 
 DEFAULT_DOMAINS = ["cyberops", "healthcare", "finance", "legal"]
-DEFAULT_CONFIGS = ["flat", "acl_hardened", "agenticcyops"]
+DEFAULT_CONFIGS = ["flat", "acl_hardened", "defer"]
 
 
 def load_cases(path: Path = CASES_PATH) -> list[dict]:
@@ -78,7 +78,7 @@ async def apply_defense(case: dict, llm_action: Optional[str],
                          attacker_phase: str = "admin") -> dict:
     """Run the LLM-proposed action through the defense pipeline.
 
-    Uses ``evaluate_with_consensus`` so the agenticcyops pipeline can
+    Uses ``evaluate_with_consensus`` so the defer pipeline can
     escalate to P3-L6 LLM consensus when all symbolic layers pass.
     """
     if llm_action is None:

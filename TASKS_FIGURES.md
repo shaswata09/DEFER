@@ -59,7 +59,7 @@ Takeaway: never judging is the safest and the least usable; judging everything i
 
 ### F2. Who stops the attack: first interception by tier  (single column)
 Stacked horizontal bars, one per evidence source: `Development`, `Transfer (3 domains)`, `ASB replay (405 actions)`, `ASB live (1,606)`. Segments: rule-based, similarity-threshold, LLM panel, in tier colors, labeled with percentages. n printed at the right end of each bar.
-Data: `all_trials.csv` (blocked trials under `agenticcyops`, `blocked_by` mapped to tiers with the same mapping as `generate_tables.py`); `results/asb/e2e_validator_group_q235_div4_div4` and `results_legacy_v1/asb/*` (`defense_mechanism`).
+Data: `all_trials.csv` (blocked trials under `defer`, `blocked_by` mapped to tiers with the same mapping as `generate_tables.py`); `results/asb/e2e_validator_group_q235_div4_div4` and `results_legacy_v1/asb/*` (`defense_mechanism`).
 Takeaway: deterministic checks decide three quarters of the interceptions on policy and structure attacks, and about a third on semantic third-party attacks.
 
 ### F3. Per-attack-path heatmap  (double column)

@@ -56,7 +56,7 @@ if [ -f ".env" ]; then
     set +a
 fi
 
-CONDA_ENV="agenticcyops"
+CONDA_ENV="defer"
 
 # Use the env's interpreter directly when present (conda run sometimes
 # silently picks /usr/bin/python3 on this box)
@@ -193,7 +193,7 @@ resolve_ablation() {
     local tok="$1"
     case "$tok" in
         P1|P2|P3|P4|P5)
-            echo "agenticcyops $tok"
+            echo "defer $tok"
             ;;
         single_P1|single_P2|single_P3|single_P4|single_P5)
             local keep="${tok#single_}"
@@ -203,7 +203,7 @@ resolve_ablation() {
                     disabled="${disabled}${disabled:+,}${p}"
                 fi
             done
-            echo "agenticcyops $disabled"
+            echo "defer $disabled"
             ;;
         llm_judge)
             echo "llm_judge "

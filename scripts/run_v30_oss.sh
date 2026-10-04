@@ -18,8 +18,8 @@ run() { local slot="$1" aps="$2" cfg="$3" ben="${4:-}"
     } > "logs/v30_oss_s${slot}.log" 2>&1; }
 note "gpt-oss phase start"
 pids=()
-run 0 "$H1" agenticcyops benign & pids+=($!); sleep 12
-run 1 "$H2" agenticcyops &        pids+=($!); sleep 12
+run 0 "$H1" defer benign & pids+=($!); sleep 12
+run 1 "$H2" defer &        pids+=($!); sleep 12
 run 2 "$H1" llm_judge benign &    pids+=($!); sleep 12
 run 3 "$H2" llm_judge &           pids+=($!)
 for p in "${pids[@]}"; do wait "$p"; done

@@ -33,7 +33,7 @@ snapshot() {
 
     local total=0
     echo "-- E5.5 q235_div4 main (target 300/config, T=3) --"
-    for cfg in flat acl_hardened symbolic_only agenticcyops llm_judge; do
+    for cfg in flat acl_hardened symbolic_only defer llm_judge; do
         local n=0
         for d in cyberops finance healthcare legal; do
             local c; c=$(ntrials "logs/${d}_eval_attacks_q235_div4" "${cfg}_*.jsonl")

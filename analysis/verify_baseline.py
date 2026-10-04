@@ -2,10 +2,10 @@
 Quick baseline verification. Run after each benign E2E test.
 
 Usage:
-    python -m analysis.verify_baseline --domain cyberops --config agenticcyops
+    python -m analysis.verify_baseline --domain cyberops --config defer
     python -m analysis.verify_baseline --domain cyberops --config all
     python -m analysis.verify_baseline --domain all --config all
-    python -m analysis.verify_baseline --domain cyberops --config agenticcyops --group B
+    python -m analysis.verify_baseline --domain cyberops --config defer --group B
 
 Output: CLI table showing pass/fail per check.
 """
@@ -18,7 +18,7 @@ from config import BASE_DIR
 from analysis.runlogs import config_files
 
 
-CONFIGS = ["flat", "acl_hardened", "agenticcyops"]
+CONFIGS = ["flat", "acl_hardened", "defer"]
 DOMAINS = ["cyberops", "healthcare", "finance", "legal"]
 
 
@@ -216,7 +216,7 @@ def verify_config(domain: str, config: str, group: str = "A") -> dict:
         checks["acl_enforcement_active"] = True
         checks["no_non_acl_denials"] = len(denied) == len(acl_denials)
 
-    elif config == "agenticcyops":
+    elif config == "defer":
         # --- Principle-level sub-checks ---
         checks.update(_p1_checks(events))
         checks.update(_p2_checks(events))
@@ -265,7 +265,7 @@ def verify_config(domain: str, config: str, group: str = "A") -> dict:
 
     # Overall — critical checks for pass/fail
     critical = ["all_4_phases_active", "tool_calls_made"]
-    if config == "agenticcyops":
+    if config == "defer":
         critical.extend([
             "p2_active",
             "p2_l1_manifest",
@@ -326,7 +326,7 @@ _PRINCIPLE_LAYOUT = {
 
 
 def _principle_activity_section(checks: dict) -> str:
-    """Build the PRINCIPLE ACTIVITY block for agenticcyops configs."""
+    """Build the PRINCIPLE ACTIVITY block for defer configs."""
     lines = []
     for principle, subs in _PRINCIPLE_LAYOUT.items():
         parts = []
@@ -353,8 +353,8 @@ def print_report(results: list[dict]):
         print(f"\n{r['domain']} / {r['config']}: {status}")
         print("-" * 40)
 
-        # Principle activity section for agenticcyops
-        if r["config"] == "agenticcyops" and r["checks"].get("logs_exist"):
+        # Principle activity section for defer
+        if r["config"] == "defer" and r["checks"].get("logs_exist"):
             print("\n  PRINCIPLE ACTIVITY")
             print(_principle_activity_section(r["checks"]))
             # FP summary

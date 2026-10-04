@@ -34,7 +34,7 @@ from typing import Any
 
 from typing import Optional
 
-from config import BASE_DIR
+from config import BASE_DIR, canonical_config
 from host.authenticated_interface import AuthenticatedInterface
 from host.parameter_validator import ParameterValidator
 from host.output_classifier import OutputClassifier
@@ -79,7 +79,7 @@ class DefensePipeline:
                              tool is unknown (which we don't let happen)
     * ``acl_hardened``   -- only network-layer ACL; allows tools that are
                              in a phase's allowed list
-    * ``agenticcyops``   -- full P1-P5 stack (AuthenticatedInterface,
+    * ``defer``          -- full P1-P5 stack (AuthenticatedInterface,
                              ParameterValidator, OutputClassifier,
                              OperationalContextChecker, AccessIsolation)
     """
@@ -88,9 +88,10 @@ class DefensePipeline:
                  embedding_model=None,
                  consensus_config_name: Optional[str] = None):
         self.domain = domain
+        config = canonical_config(config)     # recorded agenticcyops -> defer
         self.config = config
 
-        if config == "agenticcyops":
+        if config == "defer":
             self.auth = AuthenticatedInterface(domain=domain)
             # Register every IA_* tool into the auth component registry
             # in memory only -- never written to disk.  This is the
@@ -119,12 +120,12 @@ class DefensePipeline:
         # ACL-hardened uses the phase manifest as a network-layer allowlist
         self.enforcer = ManifestEnforcer(domain=domain)
 
-        # P3-L6 LLM consensus is only meaningful for the agenticcyops
+        # P3-L6 LLM consensus is only meaningful for the defer
         # config and only when a profile name is provided (e.g. by the
         # live e2e runner).  Stays None otherwise -- evaluate() remains
         # purely symbolic.
         self.consensus: Optional[ConsensusValidator] = None
-        if config == "agenticcyops" and consensus_config_name:
+        if config == "defer" and consensus_config_name:
             self.consensus = ConsensusValidator(
                 config_name=consensus_config_name)
 
@@ -351,8 +352,8 @@ if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("--domain", default="cyberops",
                     choices=["cyberops", "healthcare", "finance", "legal"])
-    ap.add_argument("--config", default="agenticcyops",
-                    choices=["flat", "acl_hardened", "agenticcyops"])
+    ap.add_argument("--config", default="defer", type=canonical_config,
+                    choices=["flat", "acl_hardened", "defer"])
     ap.add_argument("--family", default="dh", choices=["dh", "ds"])
     ap.add_argument("--variant", default="base", choices=["base", "enhanced"])
     ap.add_argument("--limit", type=int, default=3)

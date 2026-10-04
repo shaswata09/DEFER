@@ -7,11 +7,11 @@
 #
 # Usage:
 #   ./scripts/run_attack_paths.sh                              # Interactive
-#   ./scripts/run_attack_paths.sh A cyberops ap1 agenticcyops 1    # Quick test
+#   ./scripts/run_attack_paths.sh A cyberops ap1 defer 1    # Quick test
 #   ./scripts/run_attack_paths.sh A cyberops all all 6             # Full Eval A
 #   ./scripts/run_attack_paths.sh A healthcare all all 10          # Eval F healthcare
 #   ./scripts/run_attack_paths.sh C all benign all 1               # Baseline all domains
-#   ./scripts/run_attack_paths.sh F cyberops ap1 agenticcyops 1    # Claude primary test
+#   ./scripts/run_attack_paths.sh F cyberops ap1 defer 1    # Claude primary test
 # ============================================================
 
 set -eE
@@ -27,13 +27,13 @@ if [ -f ".env" ]; then
     set +a
 fi
 
-CONDA_ENV="agenticcyops"
+CONDA_ENV="defer"
 # Tool / MMA ports are no longer global; they are computed per
 # (GROUP, domain) inside run_domain() so parallel groups don't collide.
 PIDS=()
 
 ALL_DOMAINS=("cyberops" "healthcare" "finance" "legal")
-ALL_CONFIGS=("flat" "acl_hardened" "agenticcyops")
+ALL_CONFIGS=("flat" "acl_hardened" "defer")
 
 # ---- Group definitions ----
 declare -A GP_PRIMARY GP_PROVIDER GP_PORTS GP_CONSENSUS GP_DESC GP_API_KEY_ENV GP_EXTRA_BODY
@@ -254,13 +254,13 @@ if [ -z "$1" ]; then
 
     # Configs (production trio only -- ablations live in scripts/run_ablations.sh)
     echo ""
-    echo "  Configs: 1) flat  2) acl_hardened  3) agenticcyops  4) all"
+    echo "  Configs: 1) flat  2) acl_hardened  3) defer  4) all"
     read -p "  Select (e.g. 3, or 4 for all): " cfg_choices
     SELECTED_CONFIGS=()
     for c in $cfg_choices; do
         case "$c" in
             1) SELECTED_CONFIGS+=("flat") ;; 2) SELECTED_CONFIGS+=("acl_hardened") ;;
-            3) SELECTED_CONFIGS+=("agenticcyops") ;;
+            3) SELECTED_CONFIGS+=("defer") ;;
             4) SELECTED_CONFIGS=("${ALL_CONFIGS[@]}"); break ;;
         esac
     done
@@ -426,7 +426,7 @@ run_domain() {
     for config in "${SELECTED_CONFIGS[@]}"; do
         echo "--- ${config} ---"
 
-        # Forward ablation flag if set (only meaningful for agenticcyops).
+        # Forward ablation flag if set (only meaningful for defer).
         local _disable_args=()
         if [ -n "$DISABLE_PRINCIPLES" ]; then
             _disable_args=(--disable-principles "$DISABLE_PRINCIPLES")
@@ -500,9 +500,9 @@ import numpy as np
 from matplotlib.backends.backend_pdf import PdfPages
 
 sns.set_theme(style='whitegrid', font_scale=1.0, palette='muted')
-CONFIGS = ['flat', 'acl_hardened', 'agenticcyops']
-CONFIG_LABELS = {'flat': 'Flat MAS', 'acl_hardened': 'ACL-Hardened', 'agenticcyops': 'DEFER'}
-CONFIG_COLORS = {'flat': '#e74c3c', 'acl_hardened': '#f39c12', 'agenticcyops': '#2ecc71'}
+CONFIGS = ['flat', 'acl_hardened', 'defer']
+CONFIG_LABELS = {'flat': 'Flat MAS', 'acl_hardened': 'ACL-Hardened', 'defer': 'DEFER'}
+CONFIG_COLORS = {'flat': '#e74c3c', 'acl_hardened': '#f39c12', 'defer': '#2ecc71'}
 HEADER_COLOR = '#2c3e50'
 
 log_dir = Path('${log_dir}')
@@ -613,8 +613,8 @@ plt.savefig(result_dir / 'interception_heatmap.png', dpi=150)
 plt.close()
 print(f'Saved: {result_dir}/interception_heatmap.png')
 
-# ---- Chart 3: Mechanism breakdown (agenticcyops only) ----
-aco_trials = [t for t in attack_trials if t.get('config')=='agenticcyops']
+# ---- Chart 3: Mechanism breakdown (defer only) ----
+aco_trials = [t for t in attack_trials if t.get('config')=='defer']
 if aco_trials:
     mechs = defaultdict(int)
     for t in aco_trials:

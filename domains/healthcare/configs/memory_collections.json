@@ -35,5 +35,5 @@
       "name": "insurance_policies"
     }
   ],
-  "_critical_note": "E9: stores marked critical are the ones the memory-poisoning attack paths (AP-2/AP-4/AP-13) most often target in this domain; writes to them are routed to the panel under agenticcyops_writejudge."
+  "_critical_note": "E9: stores marked critical are the ones the memory-poisoning attack paths (AP-2/AP-4/AP-13) most often target in this domain; writes to them are routed to the panel under defer_writejudge."
 }

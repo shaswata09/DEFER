@@ -59,8 +59,8 @@ def build() -> dict:
     V, R = load_all_votes(), load_rounds()
     out: dict = {}
 
-    full = outcomes("full", "q235_div4", "agenticcyops", D4, "", MAIN, V, R["full"])
-    full_je = outcomes("full", "q235_div4", "agenticcyops", D4, "", MAIN, V, R["full"], judge_everything=True)
+    full = outcomes("full", "q235_div4", "defer", D4, "", MAIN, V, R["full"])
+    full_je = outcomes("full", "q235_div4", "defer", D4, "", MAIN, V, R["full"], judge_everything=True)
     judge = outcomes("judgeonly", "q235_div4", "llm_judge", ("cyberops",), "", MAIN, V, R["judgeonly"])
     A = lambda res, doms=D4: [t for d in doms for t in res["domains"].get(d, {}).get("attack", [])]
     ben = lambda res, doms=D4: Counter(sum((Counter(res["domains"][d]["benign"]) for d in doms if d in res["domains"]), Counter()))
@@ -82,9 +82,9 @@ def build() -> dict:
     out["development"] = dev
 
     # ---- ablations on the variants shared by every arm
-    abl = {i: outcomes(f"full_minus_p{i}", "q235_div4", "agenticcyops", ("cyberops",), f"_disabled_P{i}",
+    abl = {i: outcomes(f"full_minus_p{i}", "q235_div4", "defer", ("cyberops",), f"_disabled_P{i}",
                        MAIN, V, R[f"full_minus_p{i}"]) for i in (1, 2, 4, 5)}
-    p3 = _as_run("q235_div4", "agenticcyops", ("cyberops",), "_disabled_P3")
+    p3 = _as_run("q235_div4", "defer", ("cyberops",), "_disabled_P3")
     arms = {"FULL": A(full, ("cyberops",)), **{f"minus P{i}": A(r, ("cyberops",)) for i, r in abl.items()},
             "minus P3": p3}
     key = lambda t: (t["ap"], t["variant"])
@@ -109,13 +109,13 @@ def build() -> dict:
     out["all_domains_full"] = _ci(A(full))[0]
     prim = {}
     for arm, g in (("scout", "scout_div4"), ("mistral", "mistral_div3p"), ("llama8b", "llama8b_div4")):
-        r = outcomes(arm, g, "agenticcyops", ("cyberops", "finance"), "", MAIN, V, R[arm])
+        r = outcomes(arm, g, "defer", ("cyberops", "finance"), "", MAIN, V, R[arm])
         b = ben(r, ("cyberops",))
         prim[arm] = {"full_cyberops": _ci(A(r, ("cyberops",)))[0], "full_finance": _ci(A(r, ("finance",)))[0],
                      "benign_denied_cyberops": _pct(b["denied"] / b["proposed"])}
     q = [t for t in A(full, ("cyberops", "finance"))]
     pooled = q + [t for arm, g in (("scout", "scout_div4"), ("mistral", "mistral_div3p"), ("llama8b", "llama8b_div4"))
-                  for t in A(outcomes(arm, g, "agenticcyops", ("cyberops", "finance"), "", MAIN, V, R[arm]))]
+                  for t in A(outcomes(arm, g, "defer", ("cyberops", "finance"), "", MAIN, V, R[arm]))]
     prim["pooled_full"] = _ci(pooled)[0]
     out["primaries"] = prim
 
@@ -189,7 +189,7 @@ def build() -> dict:
     out["asb"] = asb
     lin = {}
     for panel in ("Local4", "Div3L", "Lin3", "Single"):
-        r = outcomes("full", "q235_div4", "agenticcyops", D4, "", panel, V, R["full"])
+        r = outcomes("full", "q235_div4", "defer", D4, "", panel, V, R["full"])
         lin[panel] = {"dev": _ci(A(r, ("cyberops",)))[0], "transfer": _ci(A(r, TR))[0]}
     out["lineage"] = lin
 
@@ -198,7 +198,7 @@ def build() -> dict:
     orig = defaultdict(set)
     for t in A(full):
         orig[(t["domain"], t["ap"])].add(t["variant"])
-    e2 = outcomes("e2", "q235_div4_e2", "agenticcyops", D4, "", MAIN, V, R["e2"])
+    e2 = outcomes("e2", "q235_div4_e2", "defer", D4, "", MAIN, V, R["e2"])
     sib = [t for t in A(e2) if t["variant"] not in orig[(t["domain"], t["ap"])]]
     by_var = defaultdict(list)
     for t in sib:
@@ -245,26 +245,26 @@ def write_local4_trials(path=None) -> int:
                 r = json.loads(ln)
                 R.setdefault(r["arm"], []).append(r)
     _prim_arm = {"gpt-oss-120b": "rep_oss120", "Llama-3.1-8B": "rep_llama8b"}
-    arms = [("rep_full", REPORTED, "agenticcyops", D4, ""),
+    arms = [("rep_full", REPORTED, "defer", D4, ""),
             ("rep_judgeonly", REPORTED, "llm_judge", D4, ""),
-            *[(f"rep_full_minus_p{i}", ABLATION[i], "agenticcyops", ("cyberops",), "") for i in (1, 2, 4, 5)],
+            *[(f"rep_full_minus_p{i}", ABLATION[i], "defer", ("cyberops",), "") for i in (1, 2, 4, 5)],
             *[(f"{_prim_arm[m]}_{a}", g, cfg, ("cyberops",), "") for m, g in PRIMARIES.items()
-              for a, cfg in (("full", "agenticcyops"), ("judgeonly", "llm_judge"))],
-            ("full", "q235_div4", "agenticcyops", D4, ""),
-            ("v31_full", "q235_local2_v31", "agenticcyops", D4, ""),
+              for a, cfg in (("full", "defer"), ("judgeonly", "llm_judge"))],
+            ("full", "q235_div4", "defer", D4, ""),
+            ("v31_full", "q235_local2_v31", "defer", D4, ""),
             ("v31_judgeonly", "q235_local2_v31", "llm_judge", D4, ""),
-            *[(f"v31_full_minus_p{i}", f"q235_local2_disabled_P{i}_v31", "agenticcyops", ("cyberops",), "")
+            *[(f"v31_full_minus_p{i}", f"q235_local2_disabled_P{i}_v31", "defer", ("cyberops",), "")
               for i in (1, 2, 4, 5)],
             *[(f"v31_{m}_{a}", f"{m}_local2_v31", cfg, ("cyberops",), "")
-              for m in ("oss120", "llama8b") for a, cfg in (("full", "agenticcyops"), ("judgeonly", "llm_judge"))],
+              for m in ("oss120", "llama8b") for a, cfg in (("full", "defer"), ("judgeonly", "llm_judge"))],
             ("judgeonly", "q235_div4", "llm_judge", ("cyberops",), ""),
-            *[(f"full_minus_p{i}", "q235_div4", "agenticcyops", ("cyberops",), f"_disabled_P{i}") for i in (1, 2, 4, 5)],
-            ("scout", "scout_div4", "agenticcyops", ("cyberops", "finance"), ""),
-            ("mistral", "mistral_div3p", "agenticcyops", ("cyberops", "finance"), ""),
-            ("llama8b", "llama8b_div4", "agenticcyops", ("cyberops", "finance"), ""),
-            ("e2", "q235_div4_e2", "agenticcyops", D4, ""),
+            *[(f"full_minus_p{i}", "q235_div4", "defer", ("cyberops",), f"_disabled_P{i}") for i in (1, 2, 4, 5)],
+            ("scout", "scout_div4", "defer", ("cyberops", "finance"), ""),
+            ("mistral", "mistral_div3p", "defer", ("cyberops", "finance"), ""),
+            ("llama8b", "llama8b_div4", "defer", ("cyberops", "finance"), ""),
+            ("e2", "q235_div4_e2", "defer", D4, ""),
             *[(f"{m}_{a}", f"{m}_local2_v29", cfg, ("cyberops",), "")
-              for m in ("oss120", "llama8b") for a, cfg in (("full", "agenticcyops"), ("judgeonly", "llm_judge"))]]
+              for m in ("oss120", "llama8b") for a, cfg in (("full", "defer"), ("judgeonly", "llm_judge"))]]
     new, ben = {}, {}
     for arm, g, cfg, doms, suf in arms:
         if not R.get(arm):

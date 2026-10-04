@@ -14,13 +14,13 @@
 #   ./scripts/run_asb_e2e.sh                          # Interactive
 #   ./scripts/run_asb_e2e.sh A                        # Group A, full defaults
 #   ./scripts/run_asb_e2e.sh A all 5 all 3            # Full sweep, 3 (task,attacker)/agent
-#   ./scripts/run_asb_e2e.sh A DPI 1 agenticcyops 1   # Tiny smoke
+#   ./scripts/run_asb_e2e.sh A DPI 1 defer 1   # Tiny smoke
 #
 # Positional args:
 #   $1 GROUP      (A-F)
 #   $2 ATTACKS    (all / DPI / IPI / MP / PoT / comma-list)   default: all
 #   $3 TRIALS     (per case)                                  default: 5
-#   $4 CONFIG     (all / flat / acl_hardened / agenticcyops)  default: all
+#   $4 CONFIG     (all / flat / acl_hardened / defer)  default: all
 #   $5 PER_AGENT  (case multiplier; total = ~per_agent x 85)  default: 3
 #
 # Per-agent expansion:
@@ -44,7 +44,7 @@ if [ -f ".env" ]; then
     set +a
 fi
 
-CONDA_ENV="agenticcyops"
+CONDA_ENV="defer"
 
 # `conda run -n <env> python3` sometimes silently falls back to /usr/bin/python3
 # on this box -- prefer the env's interpreter directly when it exists.
@@ -57,7 +57,7 @@ for cand in \
 done
 
 ALL_ATTACKS=("DPI" "IPI" "MP" "POT")
-ALL_CONFIGS=("flat" "acl_hardened" "agenticcyops")
+ALL_CONFIGS=("flat" "acl_hardened" "defer")
 ALL_GROUPS=("A" "B" "C" "D" "E" "F" "G" "H" "I" "J")
 
 # ---- Group matrix (matches scripts/run_injecagent_e2e.sh) ----
@@ -107,7 +107,7 @@ if [ -z "$1" ]; then
     read -p "  Group [A-F]: " GROUP
     read -p "  Attacks    [all / DPI / IPI / MP / PoT / comma-list] (default all): " ATTACKS
     read -p "  Trials per case (default 5): " TRIALS
-    read -p "  Configs    [all / flat / acl_hardened / agenticcyops] (default all): " CONFIG
+    read -p "  Configs    [all / flat / acl_hardened / defer] (default all): " CONFIG
     read -p "  Per-agent  [case multiplier, default 3 -> 255 cases total]: " PER_AGENT
     [ -z "$ATTACKS" ]   && ATTACKS="all"
     [ -z "$TRIALS" ]    && TRIALS="5"

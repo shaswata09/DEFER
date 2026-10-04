@@ -18,7 +18,7 @@ GROUP = "q235_div4"
 def test_cyberops_full_benign_denial_is_the_reported_value():
     """CyberOps DEFER benign cost as run: 103 of 873 proposals denied or
     escalated, 11.8 % (88 denied + 15 bulk-action escalations)."""
-    assert proposal_denials(GROUP, "cyberops", "agenticcyops") == (103, 873)
+    assert proposal_denials(GROUP, "cyberops", "defer") == (103, 873)
 
 
 def test_t11_prints_the_reported_value_with_its_interval():
@@ -39,9 +39,9 @@ def test_each_added_arm_is_its_own_row(label, group, cfg):
 def test_file_prefix_never_selects_another_arm():
     """``agenticcyops_*.jsonl`` also names every agenticcyops_<variant> log.
     Selection must go by the header, so FULL never picks those up."""
-    files = run_logs(GROUP, "cyberops", "agenticcyops")
+    files = run_logs(GROUP, "cyberops", "defer")
     assert files
-    assert {header_config(f) for f in files} == {"agenticcyops"}
+    assert {header_config(f) for f in files} == {"defer"}
     assert not any(f.name.startswith("agenticcyops_") and not re.match(r"agenticcyops_\d{8}_", f.name)
                    for f in files)
 

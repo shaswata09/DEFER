@@ -1,7 +1,7 @@
 #!/bin/bash
 # ============================================================
 # DEFER — Full Environment Setup
-# Run: conda activate agenticcyops && ./install.sh
+# Run: conda activate defer && ./install.sh
 # ============================================================
 
 set -e

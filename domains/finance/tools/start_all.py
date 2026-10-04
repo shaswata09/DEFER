@@ -16,7 +16,7 @@ async def main():
                               "assigns base_port, base_port+1, ...")
     args = parser.parse_args()
 
-    logger = ExperimentLogger(eval_name="tools", domain="finance", config="agenticcyops")
+    logger = ExperimentLogger(eval_name="tools", domain="finance", config="defer")
     registry = ServerRegistry(domain="finance", logger=logger)
     await registry.start_all(base_port=args.base_port)
 

@@ -41,9 +41,9 @@ plt.rcParams.update({
     "axes.titlesize": 13,
 })
 
-CONFIGS = ["flat", "acl_hardened", "agenticcyops"]
-CONFIG_LABELS = {"flat": "Flat MAS", "acl_hardened": "ACL-Hardened", "agenticcyops": "DEFER"}
-CONFIG_COLORS = {"flat": "#e74c3c", "acl_hardened": "#f39c12", "agenticcyops": "#2ecc71"}
+CONFIGS = ["flat", "acl_hardened", "defer"]
+CONFIG_LABELS = {"flat": "Flat MAS", "acl_hardened": "ACL-Hardened", "defer": "DEFER"}
+CONFIG_COLORS = {"flat": "#e74c3c", "acl_hardened": "#f39c12", "defer": "#2ecc71"}
 PHASES = ["monitor", "analyze", "admin", "report"]
 
 HEADER_COLOR = "#2c3e50"
@@ -250,7 +250,7 @@ def page_metrics_table(pdf, rows: list[dict], domain: str):
     # Key insight box
     if rows:
         flat_tokens = next((r["tokens"] for r in rows if r["config"] == "flat"), 0)
-        aco_tokens = next((r["tokens"] for r in rows if r["config"] == "agenticcyops"), 0)
+        aco_tokens = next((r["tokens"] for r in rows if r["config"] == "defer"), 0)
         if flat_tokens > 0:
             reduction = round((1 - aco_tokens / flat_tokens) * 100)
             ax.text(0.5, 0.08, f"DEFER uses {reduction}% fewer tokens than Flat MAS",
@@ -286,7 +286,7 @@ def page_summary(pdf, rows: list[dict], domain: str):
     if rows:
         flat = next((r for r in rows if r["config"] == "flat"), None)
         acl = next((r for r in rows if r["config"] == "acl_hardened"), None)
-        aco = next((r for r in rows if r["config"] == "agenticcyops"), None)
+        aco = next((r for r in rows if r["config"] == "defer"), None)
 
         if flat and aco:
             token_red = round((1 - aco["tokens"] / flat["tokens"]) * 100) if flat["tokens"] else 0

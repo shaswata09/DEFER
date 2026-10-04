@@ -3,7 +3,7 @@
 # Phase-scoped, Host-mediated, consensus-validated, MMA-mediated.
 # 56 verified trust boundaries.
 
-name: agenticcyops
+name: defer
 description: "Full DEFER framework with all 5 defensive principles"
 
 enforcement:

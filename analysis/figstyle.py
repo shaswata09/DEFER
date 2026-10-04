@@ -62,7 +62,7 @@ CONFIG_LABEL = {
     "flat": "Flat",
     "acl_hardened": "ACL",
     "symbolic_only": "NoJudge",
-    "agenticcyops": "DEFER",
+    "defer": "DEFER",
     "llm_judge": "JudgeOnly",
 }
 # left to right: "no judgment" -> "all judgment", DEFER in between

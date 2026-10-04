@@ -80,7 +80,7 @@ ATTACK_FILES = {
     "POT": "pot.json",        # canonical key (uppercase, matches run_e2e.py)
 }
 DEFAULT_ATTACKS = list(ATTACK_FILES)
-DEFAULT_CONFIGS = ["flat", "acl_hardened", "agenticcyops"]
+DEFAULT_CONFIGS = ["flat", "acl_hardened", "defer"]
 
 
 def load_cases(attack_type: str) -> list[dict]:

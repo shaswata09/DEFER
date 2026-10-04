@@ -20,7 +20,7 @@ set -eE
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR/.."
 
-CONDA_ENV="agenticcyops"
+CONDA_ENV="defer"
 MODELS_DIR="$(pwd)/models"
 LOG_DIR="$(pwd)/logs/vllm"
 mkdir -p "$LOG_DIR"
@@ -237,7 +237,7 @@ echo "============================================================"
 echo ""
 echo "  Groups: ${SELECTED_GROUPS[*]}"
 echo "  Domains: ${ALL_DOMAINS[*]}"
-echo "  Configs: flat, acl_hardened, agenticcyops"
+echo "  Configs: flat, acl_hardened, defer"
 echo "  Skip existing: $SKIP_EXISTING"
 echo ""
 

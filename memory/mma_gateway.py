@@ -197,7 +197,7 @@ def create_app(
     logger = ExperimentLogger(
         eval_name="mma_gateway",
         domain=domain,
-        config="agenticcyops",
+        config="defer",
         model="Qwen3-Embedding-8B",
     )
 
