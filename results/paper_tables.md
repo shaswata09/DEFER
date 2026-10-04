@@ -9,12 +9,12 @@ Generated from `results/eval_attacks/all_trials.csv` (39686 trials, groups: llam
 | llama8b_div4 | Flat | 450 | 41.6 [37.1, 46.2] | [34.2, 48.9] | 41.6 | 29.2 | 19.8 | 0.0 | 34.9 pp [27.1, 42.9], p=0.000 |
 | llama8b_div4 | ACL-Hardened | 450 | 39.6 [35.1, 44.1] | [32.2, 46.9] | 41.3 | 38.7 | 13.8 | 4.3 | 32.9 pp [25.1, 40.7], p=0.000 |
 | llama8b_div4 | DEFER | 450 | 6.7 [4.7, 9.4] | [3.1, 10.7] | 54.7 | 50.0 | 13.8 | 87.8 | — |
-| llama8b_local2_v29 | Flat | 225 | 34.7 [28.7, 41.1] | [24.4, 45.3] | 34.7 | 38.6 | 89.8 | 0.0 | 30.7 pp [20.4, 41.3], p=0.000 |
-| llama8b_local2_v29 | ACL-Hardened | 225 | 32.4 [26.7, 38.8] | [22.2, 42.7] | 33.8 | 40.6 | 83.1 | 4.0 | 28.4 pp [18.2, 38.7], p=0.000 |
-| llama8b_local2_v29 | DEFER | 225 | 4.0 [2.1, 7.4] | [0.4, 8.4] | 43.1 | 51.6 | 82.7 | 90.7 | — |
+| llama8b_local2_v29 | Flat | 240 | 37.9 [32.0, 44.2] | [27.9, 48.3] | 37.9 | 41.9 | 90.4 | 0.0 | 33.3 pp [23.3, 43.8], p=0.000 |
+| llama8b_local2_v29 | ACL-Hardened | 240 | 35.8 [30.0, 42.1] | [25.8, 46.2] | 37.1 | 44.1 | 84.2 | 3.4 | 31.2 pp [21.2, 41.7], p=0.000 |
+| llama8b_local2_v29 | DEFER | 240 | 4.6 [2.6, 8.0] | [0.8, 8.8] | 46.2 | 54.7 | 83.8 | 90.1 | — |
 | llama8b_local2_v30 | Flat | 0 | – | [–, –] | – | – | – | – | — |
 | llama8b_local2_v30 | ACL-Hardened | 0 | – | [–, –] | – | – | – | – | — |
-| llama8b_local2_v30 | DEFER | 225 | 5.3 [3.1, 9.1] | [1.3, 9.8] | 42.7 | 51.1 | 82.7 | 87.5 | — |
+| llama8b_local2_v30 | DEFER | 240 | 5.4 [3.2, 9.0] | [1.7, 9.6] | 45.8 | 54.2 | 83.8 | 88.2 | — |
 | llama8b_local2_v31 | Flat | 225 | 35.1 [29.2, 41.5] | [24.9, 45.8] | 35.1 | 39.1 | 89.8 | 0.0 | 28.4 pp [18.2, 39.1], p=0.000 |
 | llama8b_local2_v31 | ACL-Hardened | 225 | 34.7 [28.7, 41.1] | [24.4, 45.3] | 36.0 | 43.3 | 83.1 | 3.7 | 28.0 pp [18.2, 38.2], p=0.000 |
 | llama8b_local2_v31 | DEFER | 225 | 6.7 [4.1, 10.7] | [2.2, 12.0] | 43.6 | 51.9 | 81.3 | 84.7 | — |
@@ -24,12 +24,12 @@ Generated from `results/eval_attacks/all_trials.csv` (39686 trials, groups: llam
 | mistral_div3p | Flat | 450 | 23.8 [20.1, 27.9] | [17.6, 30.2] | 23.8 | 14.0 | 20.7 | 0.0 | 22.2 pp [16.2, 28.4], p=0.000 |
 | mistral_div3p | ACL-Hardened | 450 | 22.0 [18.4, 26.1] | [16.0, 28.2] | 24.4 | 17.6 | 15.1 | 10.0 | 20.4 pp [14.7, 26.4], p=0.000 |
 | mistral_div3p | DEFER | 450 | 1.6 [0.8, 3.2] | [0.0, 3.6] | 25.3 | 17.6 | 15.1 | 93.9 | — |
-| oss120_local2_v29 | Flat | 225 | 21.8 [16.9, 27.6] | [13.3, 31.1] | 21.8 | 23.0 | 94.7 | 0.0 | 19.1 pp [11.1, 28.0], p=0.000 |
-| oss120_local2_v29 | ACL-Hardened | 225 | 17.8 [13.3, 23.3] | [9.8, 26.7] | 19.1 | 22.1 | 86.7 | 7.0 | 15.1 pp [7.6, 23.6], p=0.000 |
-| oss120_local2_v29 | DEFER | 225 | 2.7 [1.2, 5.7] | [0.0, 6.7] | 18.7 | 20.8 | 87.6 | 85.7 | — |
+| oss120_local2_v29 | Flat | 240 | 22.9 [18.1, 28.6] | [14.2, 32.1] | 22.9 | 24.1 | 95.0 | 0.0 | 19.2 pp [11.2, 27.9], p=0.000 |
+| oss120_local2_v29 | ACL-Hardened | 240 | 19.2 [14.7, 24.6] | [10.8, 27.9] | 20.4 | 23.3 | 87.5 | 6.1 | 15.4 pp [7.9, 23.8], p=0.000 |
+| oss120_local2_v29 | DEFER | 240 | 3.8 [2.0, 7.0] | [0.0, 8.8] | 20.0 | 22.2 | 88.3 | 81.2 | — |
 | oss120_local2_v30 | Flat | 0 | – | [–, –] | – | – | – | – | — |
 | oss120_local2_v30 | ACL-Hardened | 0 | – | [–, –] | – | – | – | – | — |
-| oss120_local2_v30 | DEFER | 225 | 6.2 [3.7, 10.2] | [1.8, 12.0] | 19.6 | 21.9 | 87.1 | 68.2 | — |
+| oss120_local2_v30 | DEFER | 240 | 7.1 [4.5, 11.1] | [2.5, 12.9] | 20.8 | 23.2 | 87.9 | 66.0 | — |
 | oss120_local2_v31 | Flat | 225 | 21.3 [16.5, 27.1] | [12.4, 30.7] | 21.3 | 23.0 | 92.9 | 0.0 | 18.7 pp [10.7, 27.6], p=0.000 |
 | oss120_local2_v31 | ACL-Hardened | 225 | 18.7 [14.1, 24.3] | [10.7, 28.0] | 20.0 | 23.0 | 87.1 | 6.7 | 16.0 pp [8.0, 24.0], p=0.000 |
 | oss120_local2_v31 | DEFER | 225 | 2.7 [1.2, 5.7] | [0.0, 6.7] | 19.1 | 20.5 | 86.7 | 86.1 | — |
@@ -42,12 +42,12 @@ Generated from `results/eval_attacks/all_trials.csv` (39686 trials, groups: llam
 | q235_div4_e16null | Flat | 0 | – | [–, –] | – | – | – | – | — |
 | q235_div4_e16null | ACL-Hardened | 0 | – | [–, –] | – | – | – | – | — |
 | q235_div4_e16null | DEFER | 0 | – | [–, –] | – | – | – | – | — |
-| q235_div4_e2 | Flat | 105 | 63.8 [54.3, 72.4] | [48.6, 78.1] | 63.8 | 63.8 | 100.0 | 0.0 | 61.0 pp [45.7, 75.2], p=0.000 |
+| q235_div4_e2 | Flat | 144 | 69.4 [61.5, 76.4] | [56.9, 81.2] | 69.4 | 69.4 | 100.0 | 0.0 | 67.4 pp [54.2, 79.9], p=0.000 |
 | q235_div4_e2 | ACL-Hardened | 0 | – | [–, –] | – | – | – | – | — |
-| q235_div4_e2 | DEFER | 153 | 2.0 [0.7, 5.6] | [0.0, 5.9] | 80.4 | 80.1 | 98.7 | 97.6 | — |
+| q235_div4_e2 | DEFER | 225 | 1.3 [0.4, 3.9] | [0.0, 4.0] | 83.1 | 82.8 | 98.2 | 98.4 | — |
 | q235_div4_e9 | Flat | 0 | – | [–, –] | – | – | – | – | — |
 | q235_div4_e9 | ACL-Hardened | 0 | – | [–, –] | – | – | – | – | — |
-| q235_div4_e9 | DEFER | 204 | 4.4 [2.3, 8.2] | [0.0, 10.3] | 44.6 | 55.5 | 80.4 | 90.1 | — |
+| q235_div4_e9 | DEFER | 207 | 4.3 [2.3, 8.1] | [0.0, 10.1] | 45.4 | 56.3 | 80.7 | 90.4 | — |
 | q235_div4_outage | Flat | 0 | – | [–, –] | – | – | – | – | — |
 | q235_div4_outage | ACL-Hardened | 0 | – | [–, –] | – | – | – | – | — |
 | q235_div4_outage | DEFER | 0 | – | [–, –] | – | – | – | – | — |
@@ -86,10 +86,10 @@ Generated from `results/eval_attacks/all_trials.csv` (39686 trials, groups: llam
 | q235_local2_rep | DEFER | 897 | 4.5 [3.3, 6.0] | [2.3, 6.8] | 47.3 | 49.4 | 91.4 | 90.6 | — |
 | q235_local2_v29 | Flat | 0 | – | [–, –] | – | – | – | – | — |
 | q235_local2_v29 | ACL-Hardened | 0 | – | [–, –] | – | – | – | – | — |
-| q235_local2_v29 | DEFER | 224 | 2.7 [1.2, 5.7] | [0.0, 6.3] | 42.9 | 47.5 | 89.3 | 93.8 | — |
+| q235_local2_v29 | DEFER | 239 | 3.8 [2.0, 7.0] | [0.4, 8.0] | 46.0 | 50.7 | 90.0 | 91.8 | — |
 | q235_local2_v30 | Flat | 0 | – | [–, –] | – | – | – | – | — |
 | q235_local2_v30 | ACL-Hardened | 0 | – | [–, –] | – | – | – | – | — |
-| q235_local2_v30 | DEFER | 900 | 5.9 [4.5, 7.6] | [3.6, 8.6] | 45.6 | 48.2 | 92.4 | 87.1 | — |
+| q235_local2_v30 | DEFER | 972 | 6.2 [4.8, 7.9] | [3.9, 8.7] | 49.0 | 51.5 | 92.8 | 87.4 | — |
 | q235_local2_v31 | Flat | 900 | 33.9 [30.9, 37.0] | [28.9, 39.0] | 33.9 | 34.0 | 99.7 | 0.0 | 30.4 pp [25.3, 35.8], p=0.000 |
 | q235_local2_v31 | ACL-Hardened | 900 | 28.1 [25.3, 31.1] | [23.2, 33.1] | 31.6 | 33.3 | 94.7 | 10.9 | 24.7 pp [19.8, 29.8], p=0.000 |
 | q235_local2_v31 | DEFER | 900 | 3.4 [2.4, 4.9] | [1.7, 5.6] | 48.1 | 50.3 | 91.4 | 92.8 | — |
@@ -339,13 +339,13 @@ Benign scenarios run after 30 attack incidents with all defense state kept, agai
 | llama8b_div4 | ACL-Hardened | 450 | 15532 | 0 | 6.8 / 19.4 |
 | llama8b_div4 | DEFER | 450 | 7094 | 7542 | 32.4 / 132.4 |
 | llama8b_div4 | Flat | 450 | 15984 | 0 | 6.8 / 52.6 |
-| llama8b_local2_v29 | ACL-Hardened | 225 | 17227 | 0 | 6.6 / 15.2 |
-| llama8b_local2_v29 | DEFER | 225 | 7945 | 3044 | 22.7 / 59.0 |
-| llama8b_local2_v29 | Flat | 225 | 17214 | 0 | 6.7 / 13.6 |
-| llama8b_local2_v29 | LLM-judge only | 225 | 7696 | 6964 | 28.4 / 69.6 |
-| llama8b_local2_v29 | Symbolic only (no L6) | 225 | 7810 | 0 | 11.1 / 30.2 |
-| llama8b_local2_v30 | DEFER | 225 | 7916 | 4424 | 29.4 / 93.8 |
-| llama8b_local2_v30 | LLM-judge only | 225 | 7861 | 11598 | 52.8 / 107.5 |
+| llama8b_local2_v29 | ACL-Hardened | 240 | 17228 | 0 | 6.6 / 15.3 |
+| llama8b_local2_v29 | DEFER | 240 | 7948 | 2989 | 22.7 / 65.7 |
+| llama8b_local2_v29 | Flat | 240 | 17214 | 0 | 6.7 / 14.7 |
+| llama8b_local2_v29 | LLM-judge only | 240 | 7720 | 7183 | 29.1 / 73.9 |
+| llama8b_local2_v29 | Symbolic only (no L6) | 240 | 7823 | 0 | 11.2 / 36.1 |
+| llama8b_local2_v30 | DEFER | 240 | 7920 | 4387 | 28.3 / 96.1 |
+| llama8b_local2_v30 | LLM-judge only | 240 | 7877 | 12061 | 54.6 / 126.6 |
 | llama8b_local2_v31 | ACL-Hardened | 225 | 17243 | 0 | 6.7 / 13.1 |
 | llama8b_local2_v31 | DEFER | 225 | 7927 | 3137 | 26.8 / 67.5 |
 | llama8b_local2_v31 | Flat | 225 | 17223 | 0 | 6.6 / 14.4 |
@@ -359,13 +359,13 @@ Benign scenarios run after 30 attack incidents with all defense state kept, agai
 | mistral_div3p | ACL-Hardened | 450 | 15429 | 0 | 18.9 / 55.0 |
 | mistral_div3p | DEFER | 450 | 9348 | 2150 | 35.3 / 81.6 |
 | mistral_div3p | Flat | 450 | 15629 | 0 | 19.7 / 53.7 |
-| oss120_local2_v29 | ACL-Hardened | 225 | 11988 | 0 | 35.6 / 47.8 |
-| oss120_local2_v29 | DEFER | 225 | 8090 | 1248 | 42.8 / 54.4 |
-| oss120_local2_v29 | Flat | 225 | 12025 | 0 | 36.2 / 48.7 |
-| oss120_local2_v29 | LLM-judge only | 225 | 7860 | 3717 | 47.5 / 56.6 |
-| oss120_local2_v29 | Symbolic only (no L6) | 225 | 8069 | 0 | 38.2 / 49.2 |
-| oss120_local2_v30 | DEFER | 225 | 7992 | 1745 | 36.5 / 57.9 |
-| oss120_local2_v30 | LLM-judge only | 225 | 8030 | 6487 | 41.8 / 96.0 |
+| oss120_local2_v29 | ACL-Hardened | 240 | 11995 | 0 | 36.0 / 48.5 |
+| oss120_local2_v29 | DEFER | 240 | 8099 | 1225 | 43.3 / 55.6 |
+| oss120_local2_v29 | Flat | 240 | 12025 | 0 | 36.2 / 49.0 |
+| oss120_local2_v29 | LLM-judge only | 240 | 7847 | 3724 | 47.8 / 56.6 |
+| oss120_local2_v29 | Symbolic only (no L6) | 240 | 8080 | 0 | 38.4 / 49.4 |
+| oss120_local2_v30 | DEFER | 240 | 7985 | 1716 | 36.8 / 59.9 |
+| oss120_local2_v30 | LLM-judge only | 240 | 8032 | 6493 | 42.2 / 96.0 |
 | oss120_local2_v31 | ACL-Hardened | 225 | 11867 | 0 | 35.6 / 46.4 |
 | oss120_local2_v31 | DEFER | 225 | 8061 | 401 | 41.5 / 52.9 |
 | oss120_local2_v31 | Flat | 225 | 11865 | 0 | 36.9 / 46.0 |
@@ -378,17 +378,17 @@ Benign scenarios run after 30 attack incidents with all defense state kept, agai
 | oss120_local2_v32 | Symbolic only (no L6) | 225 | 8124 | 0 | 39.0 / 51.6 |
 | q235_div4 | ACL-Hardened | 900 | 20393 | 0 | 46.2 / 210586.7 |
 | q235_div4 | DEFER | 900 | 12027 | 11928 | 111.2 / 231577.5 |
-| q235_div4 | defer_gate_permissive | 204 | 7953 | 5386 | 56.7 / 107.9 |
+| q235_div4 | defer_gate_permissive | 216 | 7908 | 5343 | 56.2 / 107.9 |
 | q235_div4 | Flat | 900 | 21958 | 0 | 49.9 / 210254.4 |
 | q235_div4 | LLM-judge only | 229 | 10643 | 27659 | 180.8 / 251.2 |
 | q235_div4 | Symbolic only (no L6) | 420 | 10620 | 0 | 41.1 / 192661.4 |
-| q235_div4_e16null | defer_gate_permissive | 225 | 11207 | 6688 | 99.9 / 148.8 |
-| q235_div4_e2 | DEFER | 153 | 7678 | 3439 | 46.6 / 136.1 |
-| q235_div4_e2 | Flat | 105 | 17539 | 0 | 30.1 / 63.3 |
-| q235_div4_e9 | DEFER | 204 | 8187 | 9245 | 78.7 / 144.2 |
-| q235_div4_e9 | defer_writejudge | 204 | 8272 | 10358 | 83.4 / 154.0 |
-| q235_div4_outage | defer_noautoapprove | 225 | 11213 | 6644 | 96.7 / 140.6 |
-| q235_div4_outage | p2_judge | 225 | 11204 | 8563 | 102.5 / 152.7 |
+| q235_div4_e16null | defer_gate_permissive | 240 | 11244 | 6615 | 99.9 / 148.8 |
+| q235_div4_e2 | DEFER | 225 | 7912 | 3773 | 49.2 / 125.6 |
+| q235_div4_e2 | Flat | 144 | 17742 | 0 | 29.8 / 65.3 |
+| q235_div4_e9 | DEFER | 207 | 8240 | 9320 | 78.7 / 144.2 |
+| q235_div4_e9 | defer_writejudge | 207 | 8326 | 10617 | 83.5 / 154.0 |
+| q235_div4_outage | defer_noautoapprove | 240 | 11246 | 6515 | 95.2 / 144.8 |
+| q235_div4_outage | p2_judge | 240 | 11239 | 8647 | 103.5 / 152.7 |
 | q235_local2_disabled_P1_v31 | DEFER | 225 | 11276 | 3923 | 67.7 / 124.1 |
 | q235_local2_disabled_P1_v32 | DEFER | 217 | 11558 | 5050 | 516.9 / 970.2 |
 | q235_local2_disabled_P2_v31 | DEFER | 225 | 11315 | 4610 | 65.3 / 93.5 |
@@ -404,9 +404,9 @@ Benign scenarios run after 30 attack incidents with all defense state kept, agai
 | q235_local2_rep | Flat | 900 | 16436 | 0 | 46.8 / 99.1 |
 | q235_local2_rep | LLM-judge only | 900 | 14921 | 12049 | 82.3 / 157.1 |
 | q235_local2_rep | Symbolic only (no L6) | 899 | 8602 | 0 | 48.2 / 109.3 |
-| q235_local2_v29 | DEFER | 224 | 11371 | 5193 | 67.7 / 100.9 |
-| q235_local2_v30 | DEFER | 900 | 8669 | 6183 | 62.4 / 133.0 |
-| q235_local2_v30 | LLM-judge only | 225 | 11296 | 25016 | 132.8 / 196.0 |
+| q235_local2_v29 | DEFER | 239 | 11415 | 5158 | 67.6 / 100.9 |
+| q235_local2_v30 | DEFER | 972 | 8661 | 6139 | 62.5 / 129.9 |
+| q235_local2_v30 | LLM-judge only | 240 | 11327 | 25153 | 131.7 / 196.0 |
 | q235_local2_v31 | ACL-Hardened | 900 | 15045 | 0 | 44.1 / 98.4 |
 | q235_local2_v31 | DEFER | 900 | 8578 | 3798 | 66.1 / 136.9 |
 | q235_local2_v31 | Flat | 900 | 16426 | 0 | 45.2 / 107.1 |
@@ -908,9 +908,9 @@ GPT-4o was unavailable from about 09:00 UTC on 20 September and Claude Sonnet 4.
 | Mistral-Small, finance | 225 | 32.0 | 0.4 | 3.6 | 0.0 (153) |
 | Llama-3.1-8B, CyberOps | 225 | 15.6 | 4.0 | 4.0 | 4.7 (190) |
 | Llama-3.1-8B, finance | 225 | 7.6 | 9.3 | 9.3 | 9.1 (208) |
-| permissive gate | 204 | 40.2 | 5.9 | 5.9 | 9.8 (122) |
-| no auto-approve (not reported) | 225 | 84.9 | 1.3 | 15.1 | 0.0 (34) |
-| P2 + panel (not reported) | 225 | 98.2 | 9.3 | 39.6 | 0.0 (4) |
-| E2 siblings and parents, FULL | 153 | 53.6 | 2.0 | 16.3 | 1.4 (71) |
-| judged writes (E9), FULL | 204 | 0.0 | 4.4 | 4.4 | 4.4 (204) |
-| judged writes (E9), writejudge | 204 | 0.0 | 2.5 | 2.5 | 2.5 (204) |
+| permissive gate | 216 | 39.4 | 6.5 | 6.5 | 10.7 (131) |
+| no auto-approve (not reported) | 240 | 83.3 | 1.2 | 15.0 | 0.0 (40) |
+| P2 + panel (not reported) | 240 | 98.3 | 10.0 | 42.9 | 0.0 (4) |
+| E2 siblings and parents, FULL | 225 | 51.1 | 1.3 | 20.0 | 0.9 (110) |
+| judged writes (E9), FULL | 207 | 0.0 | 4.3 | 4.3 | 4.3 (207) |
+| judged writes (E9), writejudge | 207 | 0.0 | 2.4 | 2.4 | 2.4 (207) |

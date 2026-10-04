@@ -94,7 +94,8 @@ def test_cascade_annotation_is_everything_but_the_panel():
     from analysis.make_figures import REPORTED_GROUP
     rows = list(csv.DictReader(open(ALL_TRIALS)))
     keep = {(t["ap"], t["variant"]) for t in rows if t["group"] == DEV_GROUP
-            and t["domain"] == DEV_DOMAIN and t["ap"] != "benign"}
+            and t["domain"] == DEV_DOMAIN and t["ap"] != "benign"
+            and t["config"] == "defer" and not t.get("suffix")}
     blocked = [t["blocked_by"] for t in rows
                if t["group"] == REPORTED_GROUP and t["domain"] == DEV_DOMAIN
                and t["ap"] != "benign" and not t.get("suffix") and t["config"] == "defer"

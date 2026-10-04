@@ -168,6 +168,13 @@ def parse_run_dir(domain: str, group: str, suffix: str, log_dir: Path | None,
                 config = canonical_config(config)
                 variant_num = int(vid.split("_v")[-1])
                 payload = payloads.get((ap, vid)) or {}
+                if not payload:
+                    # the harness picks variant n as the n-th entry of the
+                    # file; the E2 siblings are appended there under ids
+                    # (ap9_v1e2, ...) that no trial's variant number names
+                    seq = load_payloads(domain, f"{ap}_variants.json")
+                    if 0 < variant_num <= len(seq):
+                        payload = seq[variant_num - 1]
             h = harnesses.setdefault(config, OfflineHarness(config=config, group=group, domain=domain))
             h.set_trial_events(events)
             if ap == "benign":
