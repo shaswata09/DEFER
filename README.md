@@ -1,7 +1,7 @@
 # DEFER: Deterministic-First Enforcement with Residual judgment
 
 Artifact for the paper **"Where Rules End and Judges Begin: Measuring the Judgment
-Boundary in Multi-Agent Systems Security"** (under review; arXiv preprint forthcoming,
+Boundary in Multi-Agent Systems Security"** ([arXiv:2610.07657](https://arxiv.org/abs/2610.07657);
 see [Citation](#citation)). Code: <https://github.com/shaswata09/DEFER>.
 
 LLM multi-agent systems (MAS) invoke tools, share memory, and delegate, and each of
@@ -633,18 +633,20 @@ defenses of LLM agent systems.
 
 ## Citation
 
-If you use DEFER, the testbed, or the results, please cite the paper. The arXiv
-identifier will be added when the preprint is posted.
+If you use DEFER, the testbed, or the results, please cite the paper:
 
 ```bibtex
 @misc{mitra2026defer,
-  title        = {Where Rules End and Judges Begin: Measuring the Judgment Boundary
-                  in Multi-Agent Systems Security},
-  author       = {Mitra, Shaswata and Patel, Raj and Mittal, Sudip and
-                  Rahman, Md Rayhanur and Rahimi, Shahram},
-  year         = {2026},
-  note         = {arXiv preprint (forthcoming)},
-  howpublished = {\url{https://github.com/shaswata09/DEFER}}
+  title         = {Where Rules End and Judges Begin: Measuring the Judgment Boundary
+                   in Multi-Agent Systems Security},
+  author        = {Mitra, Shaswata and Patel, Raj and Neupane, Subash and
+                   Mittal, Sudip and Rahman, Md Rayhanur and Rahimi, Shahram},
+  year          = {2026},
+  eprint        = {2610.07657},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.AI},
+  doi           = {10.48550/arXiv.2610.07657},
+  url           = {https://arxiv.org/abs/2610.07657}
 }
 ```
 
