@@ -539,7 +539,7 @@ logs/              per-trial JSONL logs of every reported run
 results/           generated tables and CSVs
 cache/             rebuilt judge inputs (replay/, v3.0 input: replay_v3/) and cached local
                    judge votes (validators/)
-docs/              review response, figures for this README
+docs/              figures for this README, offline results page (results/index.html)
 ```
 
 ---
@@ -554,12 +554,10 @@ docs/              review response, figures for this README
   for the labeled v3.0 runs, which it does not improve (see above).
   `defense-freeze-v3.1` (v2.9 plus the audit fixes) is the configuration of the reported
   boundary; `defense-freeze-v3.1.1` changes only the scoring oracle.
-  [`REPRODUCE.md`](REPRODUCE.md) lists every tag and diff.
 - **Validator outage.** The original panel (Div4) lost both API validators for part
   of the evaluation. Every panel-dependent result is therefore reported as its
   re-adjudication under Local4, and the as-run values are kept for comparison (paper,
-  Table XXII). [`docs/review_response.md`](docs/review_response.md) documents each
-  analysis.
+  Table XXII).
 - **Dirty-tree runs.** About three fifths of the reported trials come from runs
   launched before the clean-tree guard existed. Their headers record the commit, and
   the decision code at each such commit equals `defense-freeze-v2.2`.
@@ -610,8 +608,6 @@ docs/              review response, figures for this README
   and state carry-over were). In the v3.0 panel input, `UNTRUSTED_KEYS` misses several
   attacker-writable fields (`analyst_notes`, `rationale`, `justification`, ...), part of
   the v3.0 result above.
-- **Implementation lessons.** [`docs/engineering_challenges.md`](docs/engineering_challenges.md)
-  records the engineering problems of the build and the lessons of the code audit.
 - **Log names.** The project was renamed DEFER after the runs. The logs record the
   full stack as `agenticcyops` (and its variants as `agenticcyops_<variant>`) in every
   run header, trial id, and log file name, and in the incident context the judges
