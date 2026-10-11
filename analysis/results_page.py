@@ -101,19 +101,19 @@ def build() -> str:
          f'{mech.get("fidelity", {}).get("all", {}).get("of")} live votes reproduced'],
     ] if mech else []
 
-    figs = [("boundary_domains", "The boundary at v3.1 in four domains, with its cost"),
+    figs = [("boundary_domains", "The boundary in four domains, with its cost"),
             ("boundary_v31", "The boundary at v3.1 beside the earlier runs"),
-            ("judgment_boundary", "The boundary in CyberOps: attack success and legitimate work denied (v3.1)"),
-            ("interception_tiers", "First interception by decision tier (v3.1; ASB live run)"),
-            ("ap_heatmap", "Attack success per attack path (v3.1, CyberOps)"),
-            ("paired_variants", "Paired outcome per variant, JudgeOnly vs DEFER (v3.1)"),
-            ("transfer", "Across domains and primaries (v3.1; Scout and Mistral earlier runs)"),
-            ("channels", "By injection channel (v3.1)"), ("cost", "Where the cost goes (v3.1)"),
-            ("ablation", "Leave-one-out ablation (v3.1)"),
-            ("validator_behavior", "Judge agreement and quorum (v3.1)"),
+            ("judgment_boundary", "The boundary in CyberOps: attack success and legitimate work denied"),
+            ("interception_tiers", "First interception by decision tier (ASB live run)"),
+            ("ap_heatmap", "Attack success per attack path (CyberOps)"),
+            ("paired_variants", "Paired outcome per variant, JudgeOnly vs DEFER"),
+            ("transfer", "Across domains and primaries (Scout and Mistral earlier runs)"),
+            ("channels", "By injection channel"), ("cost", "Where the cost goes"),
+            ("ablation", "Leave-one-out ablation"),
+            ("validator_behavior", "Judge agreement and quorum"),
             ("panel_composition", "Panel composition and lineage (earlier runs)"),
             ("state_carryover", "Persistent state (v3.1)"),
-            ("primaries_boundary_v31", "Three primaries (v3.1)"), ("tamas", "TAMAS"),
+            ("primaries_boundary_v32", "Three primaries"), ("tamas", "TAMAS"),
             ("panel_context_v3", "Judges with more context (v3.0)")]
     gallery = "".join(f'<figure><img loading="lazy" src="../figures/{f}.png" alt="{html.escape(c)}">'
                       f'<figcaption>{html.escape(c)}</figcaption></figure>'

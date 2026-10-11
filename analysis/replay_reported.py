@@ -186,6 +186,8 @@ def tables() -> dict:
     res["ablation"] = ablation(V, R, kv["cyberops"])
     (BASE_DIR / "results" / "reported_boundary.json").write_text(json.dumps(res, indent=1))
     write_md(res)
+    from analysis.replay_v31 import figure_domains   # the paper's four-domain figure
+    figure_domains(res["domains"], name="boundary_domains")
     return res
 
 

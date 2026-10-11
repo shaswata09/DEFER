@@ -198,9 +198,12 @@ def figure(res: dict | None = None):
     return path
 
 
-def figure_domains(res: dict | None = None):
-    """The boundary at v3.1 only, in every domain: attack success (top, 95%
-    intervals) and legitimate tool proposals denied or escalated (bottom)."""
+def figure_domains(res: dict | None = None, name: str = "boundary_domains_v31"):
+    """The boundary in every domain: attack success (top, 95% intervals) and
+    legitimate tool proposals denied or escalated (bottom). ``res`` maps domain
+    -> configuration -> {asr, benign_denied}: the v3.1 runs by default (written
+    as boundary_domains_v31), the reported composition from
+    analysis.replay_reported (written as boundary_domains, the paper's figure)."""
     import re
     import matplotlib
     matplotlib.use("Agg")
@@ -234,9 +237,9 @@ def figure_domains(res: dict | None = None):
         fs.style_axes(axb)
     axes[0, 0].set_ylabel("Attack success (%)")
     axes[1, 0].set_ylabel("Legit. denied (%)")
-    path = BASE_DIR / "docs" / "figures" / "boundary_domains.png"
+    path = BASE_DIR / "docs" / "figures" / f"{name}.png"
     fig.savefig(path, dpi=200, bbox_inches="tight")
-    fig.savefig(BASE_DIR / "paper" / "figs" / "boundary_domains.pdf", bbox_inches="tight")
+    fig.savefig(BASE_DIR / "paper" / "figs" / f"{name}.pdf", bbox_inches="tight")
     plt.close(fig)
     return path
 
