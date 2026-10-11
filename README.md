@@ -28,14 +28,23 @@ It contains:
 
 ![Overview](docs/figures/overview.png)
 
-*Attacker content enters through five channels on two surfaces (left). DEFER settles
-what it can with 27 deterministic checks and sends only the undecided proposals, about a
-third, to a panel of four open-weight judges (center). Right: the share of attempted
-attacks each configuration stops. In the security-operations domain the same judges
-alone stop 18% and DEFER 68% (attack success 35.6% with no checks, 28.9% with the judges
-alone, 12.2% with DEFER); on the 255 Agent Security Bench cases access control stops none
-of the injected actions the agent emits and DEFER 94% (attack success 28.8%, 30.0%,
-1.8%). 8 to 28% of legitimate actions are denied across the four domains.*
+**Reading the overview.** Attacker content enters through five channels on two surfaces
+(left). DEFER settles what it can with 27 deterministic checks and sends only the
+undecided proposals, about a third, to a panel of four open-weight judges (center). The
+right panel holds **two charts on two different benchmarks**; both show the share of
+*attempted* attacks that each configuration stops:
+
+| Chart | Benchmark | Judges alone | DEFER | Attack success: no checks → DEFER |
+|---|---|---|---|---|
+| top | our suite, security-operations domain (75 variants × 3 trials) | 18% (14 of 79) | **68%** (58 of 85) | 35.6% → 12.2% (judges alone: 28.9%) |
+| bottom | Agent Security Bench (255 third-party cases × 2 trials) | — (access control: 0%) | **94%** (154 of 163) | 28.8% → 1.8% (access control: 30.0%) |
+
+Across the four domains, DEFER denies 8 to 28% of legitimate actions.
+
+> **arXiv v1 shows 95% and 2.2% for the top chart.** Those numbers come from the runs before
+> the second code audit. The README and the updated paper report the corrected runs (68%,
+> 12.2%); see [provenance](#provenance-and-known-limitations). The Agent Security Bench
+> numbers come from the earlier runs in both versions.
 
 ---
 
