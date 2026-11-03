@@ -1,0 +1,328 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DEFER Judgment Boundary</title>
+<meta name="description" content="Companion page to “Where Rules End and Judges Begin: Measuring the Judgment Boundary in Multi-Agent Systems Security”: problem, defense, experiments, results, findings and the dataset.">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<nav class="top" aria-label="Sections">
+  <div class="in">
+    <span class="brand">DEFER</span>
+    <a href="#problem">Problem</a>
+    <a href="#defer">Defense</a>
+    <a href="#testbed">Testbed</a>
+    <a href="#results">Results explorer</a>
+    <a href="#experiments">Experiments</a>
+    <a href="#findings">Findings</a>
+    <a href="#dataset">Dataset</a>
+    <a href="#reproduce">Reproduce</a>
+  </div>
+</nav>
+
+<header class="hero" id="top">
+  <div class="in">
+    <div class="kicker">Companion to the paper</div>
+    <h1>Where Rules End and Judges Begin</h1>
+    <p class="sub">Measuring the judgment boundary in multi-agent systems security: how much of the decision to allow an agent's action can deterministic checks make, and how much needs an LLM judge?</p>
+    <div class="links">
+      <a class="btn" href="https://arxiv.org/abs/2610.07657">Paper (arXiv:2610.07657)</a>
+      <a class="btn" href="https://github.com/shaswata09/DEFER">Code</a>
+      <a class="btn" id="hf-link" href="#dataset">Dataset</a>
+      <a class="btn dim" href="#reproduce">Cite</a>
+    </div>
+    <div class="tiles" id="tiles" aria-live="polite"></div>
+    <p class="note" style="margin-top:10px">Reported runs: Qwen3-235B primary, four domains, 75 attack variants per domain × 3 trials; JudgeOnly and DEFER judged by the four-judge open-weight panel Local4 (3 of 4), re-adjudicated offline from the logged inputs. Every number on this page is computed in the browser from the per-trial outcomes in the dataset.</p>
+  </div>
+</header>
+
+<main>
+
+<!-- ============================================================ PROBLEM -->
+<section id="problem">
+  <h2>1 · Problem</h2>
+  <h3>Pipelines that compose MAS defenses leave the final verdict to an LLM judge. How much of that verdict actually requires judgment?</h3>
+  <p class="lead">LLM-based multi-agent systems invoke tools, share memory and delegate tasks, and each interaction may carry adversarial content. Existing defenses are designed and evaluated one attack class or channel at a time. When they are combined, the decision is commonly delegated to a judge, which requires no policy engineering and can reason about intent, but is costly, hard to audit, and can be attacked through the very content it reads.</p>
+  <p>We organize established defenses into five principles over the two surfaces through which untrusted content enters a MAS, implement them as a cascade that denies what it can deterministically and defers the rest to a judge panel, and measure where the boundary between rules and judges lies.</p>
+
+  <div class="cols">
+    <div>
+      <h4>Where untrusted content enters</h4>
+      <p>Two surfaces: the <b>tool-orchestration surface</b> (every agent-to-tool call and every message between agents passes through the host) and the <b>memory-management surface</b> (every read and write to a shared store passes through a memory gateway). Five channels carry attacker content onto them.</p>
+      <div class="tw"><table id="tbl-channels" class="compact"></table></div>
+    </div>
+    <div>
+      <h4>Threat model</h4>
+      <p><b>T1, content attacker</b>: controls data reaching agents through C1–C3, such as a crafted log line, a poisoned sandbox verdict or a planted memory record. Cannot modify code, configuration, weights or the network.</p>
+      <p><b>T2, compromised agent</b>: additionally controls what one agent emits, its handoffs (C4) and its proposal rationales (C5). AP-15 adds infrastructure faults.</p>
+      <p>The attacker knows the system's purpose and tool names but not the defense rules, and does not adapt to feedback. A defense-aware, adaptive attacker is out of scope, so the results are an upper bound on the deterministic tier's security.</p>
+      <p class="note">Goals: (G1) no tool call outside the calling phase's manifest executes; (G2) no state-changing action executes unless the incident's evidence supports it; (G3) no poisoned or fabricated record persists in a shared store; (G4) no agent receives memory content outside its clearance.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ DEFENSE -->
+<section id="defer">
+  <h2>2 · Defense</h2>
+  <h3>DEFER: DEterministic-First Enforcement with Residual judgment</h3>
+  <p>Twenty-eight checks in cascade order. Every check fails closed: a denial stops the remaining calls in that phase and surfaces the proposal for human review, and a validator error counts as a rejection. Only consequential proposals that no rule decides reach the panel. The mechanisms are adopted versions of published defenses; the contribution is the ordering and the measurement.</p>
+
+  <div class="principles" id="principles"></div>
+
+  <h4>The cascade</h4>
+  <div class="diagram" id="cascade" role="img" aria-label="Cascade diagram: a tool call passes P1, P2 and, if consequential, the deterministic P3 checks before the LLM panel; writes pass the P4 filter; reads pass P5."></div>
+  <div class="legend" id="tier-legend"></div>
+
+  <h4>All 28 checks</h4>
+  <div class="controls ui">
+    <label>Principle <select id="chk-p"><option value="">All</option><option>P1</option><option>P2</option><option>P3</option><option>P4</option><option>P5</option></select></label>
+    <label>Type <select id="chk-t"><option value="">All</option><option value="I">I · content-independent rule</option><option value="C">C · content-dependent rule</option><option value="E">E · similarity threshold</option><option value="L">L · LLM judgment</option><option value="S">S · keeps state</option></select></label>
+    <label>Search <input type="search" id="chk-q" placeholder="e.g. replay, cosine"></label>
+  </div>
+  <div class="tw"><table id="tbl-checks"></table></div>
+  <p class="note">Thresholds as frozen for the reported runs (paper, Table “All checks”). Types: I content-independent rule (never reads what a proposal says, so rewording cannot pass it), C content-dependent rule, E similarity threshold over embeddings, L LLM judgment; S marks a check that keeps state across incidents.</p>
+</section>
+
+<!-- ============================================================ TESTBED -->
+<section id="testbed">
+  <h2>3 · Testbed and method</h2>
+  <h3>A host-mediated, four-phase MAS in four domains</h3>
+  <p>Monitor triages an incoming incident, Analyze investigates it with tools and prior incidents, Admin proposes actions that P3 verifies, and Report writes an after-action record to memory. A domain is defined entirely by declarative configuration (tool registry and stubs, phase manifests, parameter rules, memory schemas, access policy, sensitive-content patterns, seed data); the enforcement code is identical in all four. Thresholds, pattern lists and the judges' prompt were set while configuring <b>CyberOps</b> and tuned on none of the others, so healthcare, finance and legal show how the same defense behaves on content it was not tuned for.</p>
+
+  <h4>Domains</h4>
+  <div class="tabs" id="dom-tabs" role="tablist"></div>
+  <div class="panel" id="dom-panel"></div>
+
+  <div class="cols">
+    <div>
+      <h4>Configurations</h4>
+      <div class="tw"><table id="tbl-configs" class="compact"></table></div>
+      <p class="note">Four arms probe the boundary directly: <i>judge everything after rules</i>, a <i>permissive gate</i>, <i>rule-evading siblings</i> (variants rewritten to satisfy the rule that stopped them), and <i>judged writes</i>.</p>
+    </div>
+    <div>
+      <h4>Oracle and metrics</h4>
+      <p>One oracle scores every configuration from the logs. Each variant declares its harmful effects (a tool executed with matching arguments, a canary persisted, delivered unsanitized or sent outbound, an ordered chain, an approved proposal carrying a canary, a read the phase is not entitled to); it never asks whether a particular defense fired. A trial is <span class="chip out-not_attempted">not attempted</span>, <span class="chip out-blocked">blocked</span> or <span class="chip out-executed">executed</span>.</p>
+      <p><b>ASR</b> = executed / total. <b>Attempt rate</b> = (blocked + executed) / total. <b>Block | attempt</b> = blocked / attempted. <b>Benign denied</b> = denied / proposed tool calls in benign incidents. <b>First interception</b>: the check that first denied a matching proposal, and its tier. Intervals are 95% cluster-bootstrap over variants.</p>
+      <h4>Models</h4>
+      <p>Primary agents: Qwen3-235B-A22B-Instruct in all four domains; gpt-oss-120b and Llama-3.1-8B through every configuration in CyberOps (temperature 0.7, logged seed). Judges: <b>Local4</b>, Mistral-Small-3.2-24B, Gemma-4-31B-it, gpt-oss-120b and Llama-4-Scout, four lineages chosen before any result was seen, quorum 3 of 4; a model never judges its own proposals.</p>
+    </div>
+  </div>
+
+  <h4>Attack paths</h4>
+  <p>The 35 inventory vectors are grouped into 15 attack paths by shared objective and injection point. Each has five hand-written variants per domain (AP-4 seven, AP-15 three): 75 per domain, 300 in total. Every adversarial string carries an attacker-chosen canary so that its effects can be traced mechanically; attack descriptions live in a metadata block no model sees. Browse every variant in the <a href="#dataset">dataset</a>.</p>
+  <div class="tw"><table id="tbl-aps"></table></div>
+  <details>
+    <summary>The 35-vector inventory (expected check and attack paths)</summary>
+    <div class="tw"><table id="tbl-inventory" class="compact"></table></div>
+  </details>
+  <p>Benign companions: 35 scenarios (20 in CyberOps, five in each other domain) exercise the same tools, stores and consequential actions as the attacks, including legitimate containment of genuinely malicious activity.</p>
+</section>
+
+<!-- ============================================================ RESULTS -->
+<section id="results">
+  <h2>4 · Results explorer</h2>
+  <h3>Where do rules end and judges begin?</h3>
+  <p>All charts below are drawn from the per-trial outcomes of the reported runs. Change the domain or attack path to recompute them; hover any mark for its counts.</p>
+
+  <div class="controls ui">
+    <label>Domain <select id="r-domain"></select></label>
+    <label>Attack path <select id="r-ap"><option value="">All 15</option></select></label>
+    <label>Channel <select id="r-ch"><option value="">All</option></select></label>
+    <label>Attacker tier <select id="r-tier"><option value="">Both</option><option value="T1">T1 content</option><option value="T2">T2 compromised agent</option></select></label>
+    <span class="note" id="r-n" style="align-self:center"></span>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <h4>The judgment boundary</h4>
+      <p class="cap">Attack success with 95% cluster-bootstrap intervals (bars) and legitimate tool proposals denied (◇, right axis), from never judging to judging everything.</p>
+      <div class="chart" id="c-boundary"></div>
+      <div class="legend" id="l-boundary"></div>
+    </div>
+    <div class="card">
+      <h4>Outcome of every attack trial</h4>
+      <p class="cap">Not attempted (the model did not take the bait), blocked, or executed. Block | attempt isolates the defense from model susceptibility.</p>
+      <div class="chart" id="c-outcomes"></div>
+      <div class="legend" id="l-outcomes"></div>
+    </div>
+  </div>
+
+  <div class="tw"><table id="tbl-summary"></table></div>
+  <p class="note" id="summary-note"></p>
+
+  <div class="grid2" style="margin-top:18px">
+    <div class="card">
+      <h4>Who intercepts first under DEFER</h4>
+      <p class="cap">Blocked attempts by the tier of the check that first denied them. Deterministic tiers in blue, the tunable similarity tier in purple, the judges in orange.</p>
+      <div class="chart" id="c-tiers"></div>
+      <div class="legend" id="l-tiers"></div>
+    </div>
+    <div class="card">
+      <h4>By injection channel</h4>
+      <p class="cap">Attack success per channel under Flat, JudgeOnly and DEFER.</p>
+      <div class="chart" id="c-channels"></div>
+      <div class="legend" id="l-channels"></div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:18px">
+    <h4>Attack success by attack path</h4>
+    <p class="cap">Percent of trials executed per path and configuration (white 0%, vermilion 100%). Hover a DEFER cell for the checks that intercepted first.</p>
+    <div class="chart" id="c-heat"></div>
+  </div>
+
+  <div class="grid2" style="margin-top:18px">
+    <div class="card">
+      <h4>What each principle contributes (CyberOps)</h4>
+      <p class="cap">DEFER and the five leave-one-out arms on the same 75 variants; ◇ legitimate proposals denied.</p>
+      <div class="chart" id="c-ablation"></div>
+    </div>
+    <div class="card">
+      <h4>Across primary models (CyberOps)</h4>
+      <p class="cap">The same boundary for three primaries; each primary's panel drops its own model.</p>
+      <div class="chart" id="c-primaries"></div>
+      <div class="legend" id="l-primaries"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ EXPERIMENTS -->
+<section id="experiments">
+  <h2>5 · Executed experiments</h2>
+  <h3>Every experiment behind the paper</h3>
+  <p>The in-house evaluation comprises 34,056 trials (6,993 in the runs after the second audit), plus 1,530 Agent Security Bench trials, 1,800 TAMAS crew executions, 5,100 defense-only panel replays and a 661-round benign-proposal replay per panel. Every judge input was logged, so every panel decision can be re-adjudicated offline.</p>
+  <div class="tw"><table id="tbl-experiments"></table></div>
+
+  <h4>Third-party attacks</h4>
+  <div class="tw"><table id="tbl-thirdparty"></table></div>
+
+  <h4>Figures from the paper</h4>
+  <p class="note">Rendered by <code>make figures</code> from the same logs and cached votes. Click a figure to enlarge.</p>
+  <div class="gallery" id="gallery"></div>
+</section>
+
+<!-- ============================================================ FINDINGS -->
+<section id="findings">
+  <h2>6 · Findings</h2>
+  <h3>The boundary has a clear shape</h3>
+  <p class="lead">Rules decide attacks that must violate a statable property, judges decide attacks that misstate only intent, and plausible fabricated records evade both.</p>
+  <ol class="lessons">
+    <li><div><b>State the policy, and put the judges last.</b> With the same four judges, the rules take attack success from <span data-k="co.JUDGEONLY"></span> to <span data-k="co.FULL"></span> in CyberOps, and judging everything the rules pass changes no outcome. Where a policy or a ledger can state what an attack must break, the judges mainly release legitimate work no rule can clear (about 46 points of it in CyberOps); where an attack stays within policy, as most third-party attacks do, they carry the defense.</div></li>
+    <li><div><b>Approve by classifying the action, not by scoring its context.</b> Deterministic approval is safe when a consequentiality table lets non-consequential calls through; no attack used that path. Approval by a risk score is anti-selective: a gate keyed on scope and proportionality approves 84% of the attack proposals it sees but only 36% of legitimate ones, because attacks are small, reversible and targeted, and the scores come from evidence the attacker shapes.</div></li>
+    <li><div><b>Rule evasion is a hand-off, not a bypass.</b> Rewriting the 24 variants that the evidence-similarity rules stopped so that they satisfy those rules moved the decision to the judges, who with the remaining rules held 19 of 24. The adversary's real target is the judge.</div></li>
+    <li><div><b>Judges need diversity and do not transfer.</b> A same-lineage panel of three was 3.5 times weaker than its single member, and one judge approved 67% of attack proposals. The panel that approves 96.3% of legitimate proposals in CyberOps, where its prompt was written, approves 36.8% in legal: the central limit of the approach is judgment, not the deterministic tier.</div></li>
+    <li><div><b>Plausible writes defeat rules and judges alike.</b> A fabricated legal precedent passes every write check, and judges approve it in 5 of the 8 judged writes. Inspection cannot catch a record that is wrong but plausible; provenance of what tools return is the remaining lever.</div></li>
+    <li><div><b>Let state expire.</b> Replay detection keyed on an action's shape and ledgers that never expire deny 88% of routine consequential work over twenty incidents; a one-incident window removes most of these denials, and stateful defenses need evaluation in persistent mode too.</div></li>
+    <li><div><b>Log what the judges see.</b> Logging every judge input makes any panel re-evaluable offline, which is how panels were compared on identical decisions and how every number here is reproduced without a GPU.</div></li>
+  </ol>
+
+  <h4>Scope and limitations</h4>
+  <div class="cols">
+    <p><b>Static attacks.</b> The boundary is measured under static attacks; an adaptive attacker is outside the problem statement, so the numbers are an upper bound on the deterministic tier's security. The rule-evading siblings are the one rewording probe. <b>Replay.</b> Panel results are re-adjudicated decisions; a changed decision cannot regenerate the proposals that would have followed, though a live calibration agrees within a point.</p>
+    <p><b>Baselines.</b> No external defense such as Progent or CaMeL was run on the suite, and frontier judges ran only in the judged-write arm. <b>Coverage and realism.</b> Tools are stubs, memory is synthetic, and the four domains share one skeleton; 35 benign scenarios bound every cost estimate; each attack path has at most 21 trials per configuration and domain, so per-path differences are descriptive.</p>
+  </div>
+</section>
+
+<!-- ============================================================ DATASET -->
+<section id="dataset">
+  <h2>7 · Dataset</h2>
+  <h3>Attack suite, benign scenarios and per-trial outcomes</h3>
+  <p>The released dataset contains the 300 attack variants (plus the 24 rule-evading siblings) and 35 benign scenarios exactly as the harness delivers them, the per-trial outcomes of every reported run, the raw per-trial logs, and every cached judge vote. Payloads are prompt-injection strings, poisoned records and forged tool responses that target the stub environment and carry canary values; they contain no working exploit against any real product.</p>
+  <p id="hf-line" class="note"></p>
+
+  <div class="tabs" id="ds-tabs" role="tablist">
+    <button class="on" data-t="attacks">Attack variants</button>
+    <button data-t="benign">Benign scenarios</button>
+    <button data-t="trials">Trial outcomes</button>
+    <button data-t="files">Files</button>
+  </div>
+
+  <div id="ds-attacks">
+    <div class="controls ui">
+      <label>Set <select id="a-set"><option value="reported">Reported (300)</option><option value="sibling">Rule-evading siblings (24)</option><option value="">All</option></select></label>
+      <label>Domain <select id="a-domain"></select></label>
+      <label>Attack path <select id="a-ap"><option value="">All</option></select></label>
+      <label>Channel <select id="a-ch"><option value="">All</option></select></label>
+      <label>Search <input type="search" id="a-q" placeholder="name, text, canary"></label>
+      <span class="note" id="a-n" style="align-self:center"></span>
+    </div>
+    <div class="browser">
+      <div class="list" id="a-list"></div>
+      <div class="detail" id="a-detail"></div>
+    </div>
+  </div>
+
+  <div id="ds-benign" hidden>
+    <div class="controls ui">
+      <label>Domain <select id="b-domain"></select></label>
+      <label>Search <input type="search" id="b-q" placeholder="name, category, text"></label>
+      <span class="note" id="b-n" style="align-self:center"></span>
+    </div>
+    <div class="browser">
+      <div class="list" id="b-list"></div>
+      <div class="detail" id="b-detail"></div>
+    </div>
+  </div>
+
+  <div id="ds-trials" hidden>
+    <div class="controls ui">
+      <label>Run <select id="t-run"></select></label>
+      <label>Domain <select id="t-domain"></select></label>
+      <label>Configuration <select id="t-cfg"></select></label>
+      <label>Attack path <select id="t-ap"><option value="">All</option></select></label>
+      <label>Outcome <select id="t-out"><option value="">All</option><option value="executed">executed</option><option value="blocked">blocked</option><option value="not_attempted">not attempted</option></select></label>
+      <button class="plain" id="t-csv" type="button">Download filtered CSV</button>
+    </div>
+    <div class="pager ui"><span class="note" id="t-n"></span><span><button class="plain" id="t-prev" type="button">‹ Prev</button> <button class="plain" id="t-next" type="button">Next ›</button></span></div>
+    <div class="tw"><table id="tbl-trials" class="compact"></table></div>
+  </div>
+
+  <div id="ds-files" hidden>
+    <div class="tw"><table id="tbl-files"></table></div>
+  </div>
+</section>
+
+<!-- ============================================================ REPRODUCE -->
+<section id="reproduce">
+  <h2>8 · Reproduce and cite</h2>
+  <div class="cols">
+    <div>
+      <h4>Regenerate every table and figure</h4>
+      <p>No GPU and no API are needed: tables and figures are rebuilt from the logs and the cached judge votes.</p>
+      <pre class="bib">git clone https://github.com/shaswata09/DEFER
+cd DEFER &amp;&amp; ./install.sh
+make reported      # the reported boundary, ablation, judged fractions
+make figures       # every paper figure
+make test          # the test suite
+python -m ui.build_data --check   # this page's data</pre>
+      <p class="note">Running new trials requires the vLLM-served models listed in the paper's serving appendix; the README's reproduction guide lists wall-clock time and cost per experiment.</p>
+    </div>
+    <div>
+      <h4>Citation</h4>
+<pre class="bib">@article{mitra2026rules,
+  title   = {Where Rules End and Judges Begin: Measuring the
+             Judgment Boundary in Multi-Agent Systems Security},
+  author  = {Mitra, Shaswata and Patel, Raj and Neupane, Subash and
+             Mittal, Sudip and Rahman, Md Rayhanur and Rahimi, Shahram},
+  journal = {arXiv preprint arXiv:2610.07657},
+  year    = {2026}
+}</pre>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer><div class="in" id="foot">DEFER companion page. Data built from the repository's committed logs and cached votes. Code MIT-licensed.</div></footer>
+
+<div class="lightbox" id="lightbox"><img alt=""></div>
+
+<script src="data/defer-data.js"></script>
+<script src="data/catalog.js"></script>
+<script src="charts.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

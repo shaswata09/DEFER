@@ -6,7 +6,7 @@ PY ?= python
 DEFER_PANEL ?= local4
 export DEFER_PANEL
 
-.PHONY: paper-tables paper-reports parse stats tables reports asb-reports figures readme-figures replay-tables replay-v3 replay-v31 v31-mechanisms b2 primaries-tables primaries-v31 primaries-v32 reported tamas-tables test freeze-check check-payloads
+.PHONY: paper-tables paper-reports parse stats tables reports asb-reports figures readme-figures replay-tables replay-v3 replay-v31 v31-mechanisms b2 primaries-tables primaries-v31 primaries-v32 reported tamas-tables test freeze-check check-payloads ui hf-dataset
 
 paper-tables: parse stats tables
 
@@ -98,6 +98,15 @@ reported:
 
 tamas-tables:
 	$(PY) -m analysis.tamas_tables > /dev/null
+
+# The companion page (ui/index.html): per-trial data, checked against
+# results/reported_boundary.json, and the figure previews it shows.
+ui:
+	$(PY) -m ui.build_data --check
+
+# Stage the Hugging Face dataset in dist/hf_dataset (push: HF_REPO=<user>/<name>).
+hf-dataset:
+	$(PY) -m scripts.build_hf_dataset $(if $(HF_REPO),--push $(HF_REPO))
 
 check-payloads:
 	$(PY) -m attacks.payload_schema --validate-all
