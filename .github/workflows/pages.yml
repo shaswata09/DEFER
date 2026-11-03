@@ -1,0 +1,40 @@
+# Publish the companion page (ui/) to GitHub Pages. The page is static and
+# its data are committed (make ui), so deploying is a copy of the folder.
+name: pages
+
+on:
+  push:
+    branches: [main]
+    paths: ["ui/**", ".github/workflows/pages.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: ui
+      - name: Page files only
+        run: |
+          mkdir site
+          cp -r ui/index.html ui/style.css ui/charts.js ui/app.js ui/data ui/figures site/
+          touch site/.nojekyll
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+      - id: deployment
+        uses: actions/deploy-pages@v4

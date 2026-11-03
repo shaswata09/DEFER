@@ -217,6 +217,7 @@ __pycache__/
 
 # ChromaDB persistent storage
 data/
+!ui/data/
 
 # Model weights (keep scripts, utils, and tests)
 models/*
