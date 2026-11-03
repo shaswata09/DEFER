@@ -3,6 +3,8 @@
 Artifact for the paper **"Where Rules End and Judges Begin: Measuring the Judgment
 Boundary in Multi-Agent Systems Security"** ([arXiv:2610.07657](https://arxiv.org/abs/2610.07657);
 see [Citation](#citation)). Code: <https://github.com/shaswata09/DEFER>.
+Interactive page (problem, defense, results explorer, findings, dataset previewer):
+<https://shaswata09.github.io/DEFER/>. Dataset: <https://huggingface.co/datasets/shaswatamitra/DEFER>.
 
 LLM multi-agent systems (MAS) invoke tools, share memory, and delegate, and each of
 those interactions can carry attacker-controlled content. Pipelines that combine
@@ -248,7 +250,9 @@ under JUDGEONLY); (c) tokens per incident.*
 
 ### Robustness of the reported results
 
-A browsable view of all results and figures is [`docs/results/index.html`](docs/results/index.html)
+An interactive view of the results, with every rate recomputed from the per-trial
+outcomes, is at <https://shaswata09.github.io/DEFER/> (source: [`ui/`](ui/), `make ui`). A static
+view of all results and figures is [`docs/results/index.html`](docs/results/index.html)
 (open it locally; it needs no network). From [`results/v31_extras.md`](results/v31_extras.md)
 (`make reported`; logs and cached votes only):
 
@@ -585,6 +589,7 @@ results/           generated tables and CSVs
 cache/             rebuilt judge inputs (replay/, v3.0 input: replay_v3/, v3.1: replay_v31/,
                    reported: replay_rep/) and cached local judge votes (validators/)
 docs/              figures for this README, offline results page (results/index.html)
+ui/                interactive page served at https://shaswata09.github.io/DEFER/ (make ui)
 ```
 
 ---
